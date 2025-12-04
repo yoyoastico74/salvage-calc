@@ -206,7 +206,7 @@ recalcul();
 (async function loadAPI() {
     try {
         if (!window.API_KEY) return;
-        let r = await fetch("https://api.uexcorp.space/v2/items_prices", {
+        let r = await fetch("https://salvage-uex-proxy.<ton-compte>.workers.dev")
             headers: {"Authorization": "Bearer " + window.API_KEY}
         });
         let data = await r.json();
@@ -222,3 +222,4 @@ recalcul();
 
 </body>
 </html>
+
