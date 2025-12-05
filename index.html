@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V5.2 -->
+<!-- Version : V5.2.1 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -1377,7 +1377,7 @@ body.theme-light {
 
 <script>
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V5.2";
+const APP_VERSION = "V5.2.1";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -1406,7 +1406,7 @@ const i18n = {
     labelScuReclaimer: "SCU de salvage traitées – Reclaimer (peut vendre en RMC ou produire du CMAT ~15 %)",
     tagLight: "Vaisseaux légers : hull scraping → RMC uniquement",
     tagReclaimer: "Reclaimer : hull + structural salvage → RMC + CMAT (~15% → CMAT)",
-    smallNote: "Pour chaque SCU saisie :\n- Light ships : seul le RMC varie (pas de CMAT)\n- Reclaimer : comparaison RMC vs CMAT.\n\n⚠️ Les taux de conversion (RMC / CMAT) et la rentabilité peuvent varier selon l'épave et les mises à jour. Les valeurs sont basées sur des observations en 4.3.2 / 4.4, avec un rendement Reclaimer d'environ 15 % pour la production de CMAT.",
+    smallNote: "Pour chaque SCU saisie:\n- Light ships : seul le RMC varie (pas de CMAT)\n- Reclaimer : comparaison RMC vs CMAT.\n\nImportant : en jeu, le Reclaimer g\u00e9n\u00e8re des caisses de Construction Salvage qui doivent être raffin\u00e9es pour devenir des Construction Materials. On ne peut pas vendre directement le Construction Salvage ; ce calcul suppose que tu passes par la raffinerie.\n\n⚠️ Les taux de conversion (RMC / CMAT) et la rentabilit\u00e9 peuvent varier selon l'épave et les mises à jour. Les valeurs sont bas\u00e9es sur des observations en 4.3.2 / 4.4, avec un rendement Reclaimer d'environ 15 % pour la production de CMAT.",
     apiFetching: "Récupération des prix UEX…",
     apiErrorPrefix: "Erreur API : ",
     apiUpdated: (rmcName, cmatName) => `Prix mis à jour (RMC: ${rmcName} / CMAT: ${cmatName}).`,
@@ -1480,7 +1480,7 @@ const i18n = {
     labelScuReclaimer: "Processed salvage SCU – Reclaimer (can sell as RMC or produce CMAT ~15%)",
     tagLight: "Light salvage ships: hull scraping → RMC only",
     tagReclaimer: "Reclaimer: hull + structural salvage → RMC + CMAT (~15% → CMAT)",
-    smallNote: "For each SCU value:\n- Light ships: only RMC changes (no CMAT)\n- Reclaimer: compares RMC vs CMAT.\n\n⚠️ Conversion rates (RMC / CMAT) and profitability can vary depending on the wreck and game updates. Values are based on observations in 4.3.2 / 4.4, using a Reclaimer CMAT yield of about 15%.",
+    smallNote: "For each SCU value:\n- Light ships: only RMC changes (no CMAT)\n- Reclaimer: compares RMC vs CMAT.\n\nImportant: in-game, the Reclaimer produces Construction Salvage crates that must be refined into Construction Materials. You cannot sell Construction Salvage directly; this calculator assumes you run it through a refinery.\n\n⚠️ Conversion rates (RMC / CMAT) and profitability can vary depending on the wreck and game updates. Values are based on observations in 4.3.2 / 4.4, using a Reclaimer CMAT yield of about 15%.",
     apiFetching: "Fetching UEX prices…",
     apiErrorPrefix: "API error: ",
     apiUpdated: (rmcName, cmatName) => `Prices updated (RMC: ${rmcName} / CMAT: ${cmatName}).`,
