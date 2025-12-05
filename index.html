@@ -11,408 +11,328 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: "Segoe UI", system-ui, sans-serif;
+      font-family: "Segoe UI", sans-serif;
       color: #eee;
       background: #000 url("background.jpg") no-repeat center center fixed;
       background-size: cover;
     }
 
-    .overlay {
-      min-height: 100vh;
-      background: linear-gradient(
-        to bottom right,
-        rgba(0, 0, 0, 0.85),
-        rgba(10, 10, 10, 0.9)
-      );
-      padding: 30px 10px;
-    }
-
     .container {
-      max-width: 1180px;
-      margin: 0 auto;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 25px 30px;
+      background: rgba(0, 0, 0, 0.75);
       border: 2px solid #ffb000;
-      border-radius: 10px;
-      padding: 25px 30px 30px;
-      background: radial-gradient(
-          circle at top left,
-          rgba(255, 176, 0, 0.08),
-          transparent 60%
-        ),
-        rgba(5, 5, 5, 0.9);
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+      border-radius: 12px;
+      backdrop-filter: blur(6px);
     }
 
     h1 {
+      margin: 0 0 20px;
       text-align: center;
+      color: #ffb000;
+      font-size: 32px;
       text-transform: uppercase;
       letter-spacing: 2px;
-      color: #ffb000;
-      font-size: 30px;
-      margin-top: 0;
-      margin-bottom: 5px;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: #ffa733;
-      margin-bottom: 25px;
-      font-size: 14px;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: 1.1fr 1fr;
+      grid-template-columns: 1.1fr 0.9fr;
       gap: 25px;
     }
 
-    @media (max-width: 900px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
     .box {
-      padding: 20px;
-      border-radius: 8px;
-      background: rgba(15, 15, 15, 0.96);
+      padding: 18px 20px;
+      background: rgba(15, 15, 15, 0.9);
+      border-radius: 10px;
       border: 1px solid #ffb000;
     }
 
-    .box h2 {
-      margin-top: 0;
+    .title {
+      font-weight: bold;
+      font-size: 22px;
+      margin-bottom: 10px;
       color: #ffb000;
-      font-size: 18px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
     }
 
     label {
       display: block;
-      margin-top: 12px;
+      margin: 10px 0 4px;
       font-weight: 600;
       font-size: 14px;
     }
 
     input[type="number"] {
       width: 100%;
-      padding: 9px 10px;
-      margin-top: 4px;
+      padding: 8px 10px;
       border-radius: 6px;
       border: 2px solid #ffb000;
-      background: #181818;
+      background: #222;
       color: #fff;
-      font-size: 17px;
+      font-size: 16px;
       outline: none;
     }
 
-    input[type="number"]:focus {
-      border-color: #ff8800;
-      box-shadow: 0 0 0 1px rgba(255, 136, 0, 0.4);
+    /* On enlève les flèches + / - des nombres */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
     }
 
-    .hint {
-      font-size: 11px;
-      opacity: 0.7;
-      margin-top: 3px;
+    small {
+      display: block;
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 2px;
     }
 
-    .result-block {
+    .result {
+      margin-top: 10px;
+      padding: 10px 12px;
       background: #222;
-      border-radius: 8px;
-      border-left: 4px solid #ff8800;
-      padding: 12px 14px;
-      margin-top: 12px;
+      border-radius: 6px;
+      border-left: 4px solid #ff8000;
+      white-space: pre-line;
       font-size: 14px;
-      line-height: 1.4;
     }
 
-    .result-block h3 {
-      margin: 0 0 6px 0;
-      color: #ffb000;
-      font-size: 15px;
-    }
-
-    .line {
-      display: flex;
-      justify-content: space-between;
-      margin: 2px 0;
-    }
-
-    .line span:first-child {
-      opacity: 0.85;
-    }
-
-    .verdict {
+    .refine-flag {
       margin-top: 8px;
-      padding: 6px 8px;
-      border-radius: 5px;
-      font-weight: 600;
-      font-size: 13px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 14px;
     }
 
-    .verdict.good {
-      background: rgba(0, 140, 60, 0.2);
-      border: 1px solid #19c56d;
-      color: #4dff9c;
+    .refine-bad {
+      background: rgba(120, 0, 0, 0.9);
+      border: 1px solid #ff4040;
+      color: #ffd0d0;
     }
 
-    .verdict.bad {
-      background: rgba(160, 30, 30, 0.25);
-      border: 1px solid #ff5555;
-      color: #ff9b9b;
+    .refine-good {
+      background: rgba(0, 90, 0, 0.9);
+      border: 1px solid #40ff40;
+      color: #d8ffd8;
     }
 
-    .verdict.neutral {
-      background: rgba(110, 110, 110, 0.25);
-      border: 1px solid #bbbbbb;
-      color: #ffffff;
-    }
-
-    .api-status {
-      margin-top: 14px;
+    .uex-status {
+      margin-top: 10px;
       font-size: 12px;
-      opacity: 0.75;
+      color: #ffd27f;
     }
 
-    .api-status.error {
-      color: #ff8080;
-    }
-
-    .api-status.ok {
-      color: #7dff9b;
-    }
-
-    .legend {
-      margin-top: 15px;
+    .chips {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
       font-size: 12px;
-      opacity: 0.75;
+    }
+
+    .chip {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid #ffb000;
+      background: rgba(40, 40, 40, 0.95);
+    }
+
+    @media (max-width: 960px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-<div class="overlay">
   <div class="container">
-    <h1>Salvage 4.4 – Calcul CMAT</h1>
-    <div class="subtitle">
-      Estime tes gains en <b>Construction Salvage</b> / <b>Construction Material</b> brut vs raffiné.
-    </div>
+    <h1>SALVAGE 4.4 – CALCUL CMAT</h1>
 
     <div class="grid">
       <!-- COLONNE GAUCHE : ENTRÉES -->
       <div class="box">
-        <h2>Entrées</h2>
+        <div class="title">Entrées</div>
 
-        <label for="prixBrut">Prix Construction Salvage (aUEC / SCU)</label>
-        <input id="prixBrut" type="number" value="1500" step="1" />
-        <div class="hint">Prix de 1 SCU de <b>Construction Salvage</b> (brut). Auto depuis UEX si possible.</div>
+        <label>Prix Construction Salvage (aUEC / SCU)</label>
+        <input id="prixSalvage" type="number" value="1500" />
+        <small>Prix de 1 SCU de <b>Construction Salvage</b> (brut) – recopie UEX à la main.</small>
 
-        <label for="prixRaffine">Prix Construction Material (aUEC / SCU)</label>
-        <input id="prixRaffine" type="number" value="1500" step="1" />
-        <div class="hint">Prix de 1 SCU de <b>Construction Material</b> raffiné (CMAT).</div>
+        <label>Prix Construction Material – CMAT (aUEC / SCU)</label>
+        <input id="prixCMAT" type="number" value="1500" />
+        <small>Prix de 1 SCU de <b>Construction Material</b> (raffiné) – mis à jour auto via UEX si possible.</small>
 
-        <label for="scuLight">SCU de Construction Salvage – Salvation / Vulture / Fortune</label>
-        <input id="scuLight" type="number" value="1550" step="1" />
-        <div class="hint">Ex : 10 caisses de 16 SCU → 160 (tu ajustes selon ton run).</div>
+        <label>SCU de Construction Salvage – Salvation / Vulture / Fortune</label>
+        <input id="scuLight" type="number" value="1550" />
+        <small>Ex : 10 caisses de 16 SCU ≈ 160, ajuste selon ton run.</small>
 
-        <label for="scuReclaimer">SCU de Construction Salvage – Reclaimer</label>
-        <input id="scuReclaimer" type="number" value="240" step="1" />
-        <div class="hint">Ex : 20 caisses de 16 SCU → 320, etc.</div>
+        <label>SCU de Construction Salvage – Reclaimer</label>
+        <input id="scuReclaimer" type="number" value="240" />
+        <small>Ex : 20 caisses de 16 SCU ≈ 320, adapte à ta vraie cargaison.</small>
 
-        <div class="legend">
-          <b>Rendements utilisés (approx) :</b><br />
-          – Salvation / Vulture / Fortune : ~<b>30 %</b> de conversion Salvage → CMAT<br />
-          – Reclaimer : ~<b>15 %</b> (beaucoup de pertes / compaction).
+        <div class="chips">
+          <div class="chip">Salvation / Vulture / Fortune : rendement ~30 %</div>
+          <div class="chip">Reclaimer : rendement ~15 %</div>
+          <div class="chip">Les calculs se mettent à jour automatiquement.</div>
         </div>
 
-        <div id="apiStatus" class="api-status">
+        <div id="uexStatus" class="uex-status">
           Tentative de récupération des prix CMAT via UEX…
         </div>
       </div>
 
       <!-- COLONNE DROITE : RÉSULTATS -->
       <div class="box">
-        <h2>Résultats estimés</h2>
+        <div class="title">Résultats estimés</div>
 
-        <div id="resultLight" class="result-block">
-          <h3>Salvation / Vulture / Fortune (rendement ~30 %)</h3>
-          <div class="line">
-            <span>SCU Salvage :</span>
-            <span id="lightScuText">–</span>
-          </div>
-          <div class="line">
-            <span>SCU CMAT après raffinage :</span>
-            <span id="lightCmatText">–</span>
-          </div>
-          <div class="line">
-            <span>Valeur brute :</span>
-            <span id="lightBrutText">–</span>
-          </div>
-          <div class="line">
-            <span>Valeur raffinée :</span>
-            <span id="lightRafText">–</span>
-          </div>
-          <div id="lightVerdict" class="verdict neutral">
-            En attente de calcul…
-          </div>
-        </div>
+        <div id="resultLight" class="result"></div>
+        <div id="flagLight" class="refine-flag"></div>
 
-        <div id="resultReclaimer" class="result-block">
-          <h3>Reclaimer (rendement ~15 %)</h3>
-          <div class="line">
-            <span>SCU Salvage :</span>
-            <span id="recScuText">–</span>
-          </div>
-          <div class="line">
-            <span>SCU CMAT après raffinage :</span>
-            <span id="recCmatText">–</span>
-          </div>
-          <div class="line">
-            <span>Valeur brute :</span>
-            <span id="recBrutText">–</span>
-          </div>
-          <div class="line">
-            <span>Valeur raffinée :</span>
-            <span id="recRafText">–</span>
-          </div>
-          <div id="recVerdict" class="verdict neutral">
-            En attente de calcul…
-          </div>
-        </div>
+        <div id="resultReclaimer" class="result" style="margin-top: 15px;"></div>
+        <div id="flagReclaimer" class="refine-flag"></div>
       </div>
     </div>
   </div>
-</div>
 
-<script>
-  // 👉 URL de ton Worker Cloudflare
-  const WORKER_URL =
-    "https://salvage-uex-proxy.yoyoastico74.workers.dev/";
+  <script>
+    // Rendements Salvage approximatifs
+    const rendementLight = 0.30; // Salvation / Vulture / Fortune
+    const rendementReclaimer = 0.15; // Reclaimer
 
-  const prixBrutInput = document.getElementById("prixBrut");
-  const prixRaffineInput = document.getElementById("prixRaffine");
-  const scuLightInput = document.getElementById("scuLight");
-  const scuReclaimerInput = document.getElementById("scuReclaimer");
+    const prixSalvageInput = document.getElementById("prixSalvage");
+    const prixCMATInput = document.getElementById("prixCMAT");
+    const scuLightInput = document.getElementById("scuLight");
+    const scuReclaimerInput = document.getElementById("scuReclaimer");
 
-  const lightScuText = document.getElementById("lightScuText");
-  const lightCmatText = document.getElementById("lightCmatText");
-  const lightBrutText = document.getElementById("lightBrutText");
-  const lightRafText = document.getElementById("lightRafText");
-  const lightVerdict = document.getElementById("lightVerdict");
+    const resultLight = document.getElementById("resultLight");
+    const resultReclaimer = document.getElementById("resultReclaimer");
+    const flagLight = document.getElementById("flagLight");
+    const flagReclaimer = document.getElementById("flagReclaimer");
+    const uexStatus = document.getElementById("uexStatus");
 
-  const recScuText = document.getElementById("recScuText");
-  const recCmatText = document.getElementById("recCmatText");
-  const recBrutText = document.getElementById("recBrutText");
-  const recRafText = document.getElementById("recRafText");
-  const recVerdict = document.getElementById("recVerdict");
-
-  const apiStatusEl = document.getElementById("apiStatus");
-
-  function fmt(n) {
-    return Number(n).toLocaleString("fr-FR");
-  }
-
-  function setVerdict(el, diff) {
-    el.classList.remove("good", "bad", "neutral");
-
-    if (diff > 0) {
-      el.classList.add("good");
-      el.textContent =
-        "✅ Raffiner est plus rentable : +" + fmt(diff) + " aUEC par run.";
-    } else if (diff < 0) {
-      el.classList.add("bad");
-      el.textContent =
-        "❌ Mieux vaut vendre BRUT : raffiner ferait perdre ~" +
-        fmt(Math.abs(diff)) +
-        " aUEC.";
-    } else {
-      el.classList.add("neutral");
-      el.textContent = "Raffiner ou non : quasi identique.";
+    function formatAUEC(value) {
+      return value.toLocaleString("fr-FR", {
+        maximumFractionDigits: 0,
+      });
     }
-  }
 
-  function recalcul() {
-    const prixBrut = Number(prixBrutInput.value) || 0;
-    const prixRaf = Number(prixRaffineInput.value) || 0;
+    function recompute() {
+      const prixSalvage = Number(prixSalvageInput.value) || 0;
+      const prixCMAT = Number(prixCMATInput.value) || 0;
+      const scuLight = Number(scuLightInput.value) || 0;
+      const scuReclaimer = Number(scuReclaimerInput.value) || 0;
 
-    const scuLight = Number(scuLightInput.value) || 0;
-    const scuRec = Number(scuReclaimerInput.value) || 0;
+      // Salvation / Vulture / Fortune
+      const salvLightBrut = scuLight * prixSalvage;
+      const cmatLight = scuLight * rendementLight;
+      const salvLightRaf = cmatLight * prixCMAT;
 
-    // Rendements
-    const rendementLight = 0.30;
-    const rendementRec = 0.15;
+      resultLight.textContent =
+        `Salvation / Vulture / Fortune (rendement ~${Math.round(
+          rendementLight * 100,
+        )} %) :\n\n` +
+        `SCU Salvage : ${scuLight} SCU\n` +
+        `SCU CMAT après raffinage : ${cmatLight.toFixed(1)} SCU\n\n` +
+        `Valeur BRUT : ${formatAUEC(salvLightBrut)} aUEC\n` +
+        `Valeur RAFFINÉ : ${formatAUEC(salvLightRaf)} aUEC`;
 
-    // LIGHT (Salvation / Vulture / Fortune)
-    const lightCmat = scuLight * rendementLight;
-    const lightBrut = scuLight * prixBrut;
-    const lightRaf = lightCmat * prixRaf;
-    const diffLight = lightRaf - lightBrut;
-
-    lightScuText.textContent = fmt(scuLight) + " SCU";
-    lightCmatText.textContent = fmt(lightCmat) + " SCU";
-    lightBrutText.textContent = fmt(lightBrut) + " aUEC";
-    lightRafText.textContent = fmt(lightRaf) + " aUEC";
-    setVerdict(lightVerdict, diffLight);
-
-    // RECLAIMER
-    const recCmat = scuRec * rendementRec;
-    const recBrut = scuRec * prixBrut;
-    const recRaf = recCmat * prixRaf;
-    const diffRec = recRaf - recBrut;
-
-    recScuText.textContent = fmt(scuRec) + " SCU";
-    recCmatText.textContent = fmt(recCmat) + " SCU";
-    recBrutText.textContent = fmt(recBrut) + " aUEC";
-    recRafText.textContent = fmt(recRaf) + " aUEC";
-    setVerdict(recVerdict, diffRec);
-  }
-
-  async function majPrixDepuisWorker() {
-    try {
-      apiStatusEl.textContent =
-        "Récupération des prix CMAT en cours (UEX via Worker)…";
-      apiStatusEl.classList.remove("error");
-      apiStatusEl.classList.add("ok");
-
-      const res = await fetch(WORKER_URL);
-      const data = await res.json();
-
-      if (!res.ok || data.status !== "ok") {
-        apiStatusEl.textContent =
-          "Impossible de récupérer les prix via UEX (Worker). Vérifie l’URL ou le Worker.";
-        apiStatusEl.classList.add("error");
-        return;
+      const diffLight = salvLightRaf - salvLightBrut;
+      if (diffLight > 0) {
+        flagLight.className = "refine-flag refine-good";
+        flagLight.textContent =
+          `✅ Salvation / Vulture / Fortune : Raffiner rapporte ~${formatAUEC(
+            diffLight,
+          )} aUEC de plus.`;
+      } else if (diffLight < 0) {
+        flagLight.className = "refine-flag refine-bad";
+        flagLight.textContent =
+          `❌ Salvation / Vulture / Fortune : Mieux vaut VENDRE BRUT (raffinage perd ~${formatAUEC(
+            -diffLight,
+          )} aUEC).`;
+      } else {
+        flagLight.className = "refine-flag";
+        flagLight.textContent =
+          "Salvation / Vulture / Fortune : Brut et raffiné sont équivalents.";
       }
 
-      if (data.priceBrut) {
-        prixBrutInput.value = data.priceBrut;
-      }
-      if (data.priceRaffine) {
-        prixRaffineInput.value = data.priceRaffine;
-      }
+      // Reclaimer
+      const salvRecBrut = scuReclaimer * prixSalvage;
+      const cmatRec = scuReclaimer * rendementReclaimer;
+      const salvRecRaf = cmatRec * prixCMAT;
 
-      apiStatusEl.textContent =
-        "Prix mis à jour automatiquement depuis UEX (via Worker).";
-      apiStatusEl.classList.remove("error");
-      apiStatusEl.classList.add("ok");
+      resultReclaimer.textContent =
+        `Reclaimer (rendement ~${Math.round(
+          rendementReclaimer * 100,
+        )} %) :\n\n` +
+        `SCU Salvage : ${scuReclaimer} SCU\n` +
+        `SCU CMAT après raffinage : ${cmatRec.toFixed(1)} SCU\n\n` +
+        `Valeur BRUT : ${formatAUEC(salvRecBrut)} aUEC\n` +
+        `Valeur RAFFINÉ : ${formatAUEC(salvRecRaf)} aUEC`;
 
-      recalcul();
-    } catch (e) {
-      console.error(e);
-      apiStatusEl.textContent =
-        "Erreur lors de l’appel au Worker UEX : " + e.message;
-      apiStatusEl.classList.add("error");
+      const diffRec = salvRecRaf - salvRecBrut;
+      if (diffRec > 0) {
+        flagReclaimer.className = "refine-flag refine-good";
+        flagReclaimer.textContent =
+          `✅ Reclaimer : Raffiner rapporte ~${formatAUEC(
+            diffRec,
+          )} aUEC de plus.`;
+      } else if (diffRec < 0) {
+        flagReclaimer.className = "refine-flag refine-bad";
+        flagReclaimer.textContent =
+          `❌ Reclaimer : Mieux vaut VENDRE BRUT (raffinage perd ~${formatAUEC(
+            -diffRec,
+          )} aUEC).`;
+      } else {
+        flagReclaimer.className = "refine-flag";
+        flagReclaimer.textContent =
+          "Reclaimer : Brut et raffiné sont équivalents.";
+      }
     }
-  }
 
-  // Bind auto-recalcul
-  prixBrutInput.addEventListener("input", recalcul);
-  prixRaffineInput.addEventListener("input", recalcul);
-  scuLightInput.addEventListener("input", recalcul);
-  scuReclaimerInput.addEventListener("input", recalcul);
+    // Mise à jour automatique dès qu’on tape
+    prixSalvageInput.oninput =
+      prixCMATInput.oninput =
+      scuLightInput.oninput =
+      scuReclaimerInput.oninput =
+        recompute;
 
-  // Init
-  recalcul();
-  majPrixDepuisWorker();
-</script>
+    // 1er calcul à l’ouverture
+    recompute();
+
+    // 🔌 Récupération auto du prix CMAT via ton Worker Cloudflare
+    async function loadCmatFromWorker() {
+      const url =
+        "https://salvage-uex-proxy.yoyoastico74.workers.dev/";
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.status === "ok" && typeof data.price_sell === "number") {
+          prixCMATInput.value = data.price_sell.toFixed(0);
+          uexStatus.textContent =
+            `Prix CMAT auto : ${data.price_sell.toFixed(
+              0,
+            )} aUEC / SCU (terminal ${data.terminal || "?"}, ${
+              data.system || "système inconnu"
+            }).`;
+          recompute();
+        } else {
+          uexStatus.textContent =
+            "Impossible de récupérer les prix via UEX (Worker). Vérifie le Worker ou UEX.";
+        }
+      } catch (err) {
+        uexStatus.textContent =
+          "Erreur de connexion au Worker UEX. Tu peux rentrer le prix CMAT à la main.";
+      }
+    }
+
+    // On lance la récupération au chargement
+    loadCmatFromWorker();
+  </script>
 </body>
 </html>
