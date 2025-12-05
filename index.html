@@ -152,6 +152,18 @@
       color: #ff9090;
     }
 
+    .sellpoints {
+      margin-top: 6px;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #ffdca0;
+    }
+
+    .sellpoints span {
+      font-weight: 600;
+      color: #ffb000;
+    }
+
     /* PANELS RÉSULTATS */
     .results-grid {
       display: grid;
@@ -256,6 +268,12 @@
         <label for="prixCmat">Prix CMAT (aUEC / SCU)</label>
         <input id="prixCmat" type="number" value="0" readonly />
         <div class="hint">CMAT = Construction Materials (issu du Construction Salvage, Reclaimer uniquement).</div>
+
+        <!-- Point de vente bien visible -->
+        <div class="sellpoints">
+          <div><span>Point de vente RMC :</span> <span id="rmcTerminal">—</span></div>
+          <div><span>Point de vente CMAT :</span> <span id="cmatTerminal">—</span></div>
+        </div>
 
         <label for="scuLight">
           SCU de salvage traitées – Salvation / Vulture / Fortune
@@ -363,6 +381,9 @@ const cmatRecDecisionEl = document.getElementById("cmatRecDecision");
 
 const graphMessage  = document.getElementById("graphMessage");
 const chartCanvas   = document.getElementById("cmatChart");
+
+const rmcTerminalEl = document.getElementById("rmcTerminal");
+const cmatTerminalEl = document.getElementById("cmatTerminal");
 
 /* ============================================================
    INITIALISATION SCU À 0
@@ -493,7 +514,13 @@ function renderChart(rmcHist, cmatHist) {
     const src = cEntry || rEntry;
 
     if (src && src.date) {
-      const d = new Date(src.date);
+      // src.date vient de date_added (timestamp int)
+      let d;
+      if (typeof src.date === "number") {
+        d = new Date(src.date * 1000); // timestamp en secondes -> ms
+      } else {
+        d = new Date(src.date);
+      }
       const label = d.toLocaleDateString("fr-FR", {
         day: "2-digit",
         month: "2-digit"
@@ -580,6 +607,10 @@ async function fetchUexPrices() {
 
     prixRmcInput.value  = data.rmc.price  ?? 0;
     prixCmatInput.value = data.cmat.price ?? 0;
+
+    // Point de vente bien visible
+    rmcTerminalEl.textContent  = data.rmc.bestTerminal?.name  ?? "N/A";
+    cmatTerminalEl.textContent = data.cmat.bestTerminal?.name ?? "N/A";
 
     const rmcHist  = data.rmc.history  ?? [];
     const cmatHist = data.cmat.history ?? [];
