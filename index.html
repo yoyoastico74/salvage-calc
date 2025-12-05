@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V4.2 -->
+<!-- Version : V4.3 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -153,8 +153,81 @@
     }
 
     .leaderboard-list li {
-      padding: 3px 0;
+      padding: 6px 0;
       border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 11px;
+    }
+
+    .leaderboard-item-current {
+      background: radial-gradient(circle at left, rgba(0,255,200,0.18), transparent);
+      border-left: 3px solid #24ffd0;
+      padding-left: 6px;
+    }
+
+    .leaderboard-badge {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 6px;
+      margin-right: 4px;
+      border-radius: 999px;
+      background: rgba(0, 255, 200, 0.18);
+      border: 1px solid #24ffd0;
+      color: #c9fff3;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .my-runs-btn {
+      margin-top: 6px;
+      width: 100%;
+      padding: 4px 0;
+      border-radius: 6px;
+      border: 1px solid #315d73;
+      background: #031019;
+      color: #c4f7ff;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .my-runs-btn:hover {
+      border-color: #24ffd0;
+      background: #033023;
+    }
+
+    .my-runs-panel {
+      margin-top: 6px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 228, 255, 0.35);
+      background: rgba(1, 10, 18, 0.9);
+    }
+
+    .my-runs-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #8feaff;
+      margin-bottom: 4px;
+    }
+
+    .my-runs-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 11px;
+      color: #e3f9ff;
+    }
+
+    .my-runs-list li {
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .my-runs-empty {
+      font-size: 11px;
+      color: #9eb5c7;
+      margin-top: 2px;
     }
 
     .leaderboard-empty {
@@ -757,9 +830,17 @@
 
         <div class="leaderboard-panel">
           <div class="leaderboard-title">Leaderboard – Salvage (prototype local)</div>
-          <div class="leaderboard-sub">
+          <div id="leaderboardSub" class="leaderboard-sub">
             Classement basé sur le nombre de runs et les bénéfices théoriques (local au navigateur pour l’instant).
           </div>
+
+          <button id="toggleMyRunsBtn" type="button" class="my-runs-btn">Voir mes runs détaillés</button>
+          <div id="myRunsPanel" class="my-runs-panel" style="display:none;">
+            <div id="myRunsTitle" class="my-runs-title">Mes runs enregistrés</div>
+            <ul id="myRunsList" class="my-runs-list"></ul>
+            <div id="myRunsEmpty" class="my-runs-empty">Aucun run enregistré pour ce profil pour l'instant.</div>
+          </div>
+
           <ul id="leaderboardList" class="leaderboard-list"></ul>
           <div id="leaderboardEmpty" class="leaderboard-empty" style="display:none;">
             Aucun run enregistré pour l'instant.
@@ -827,7 +908,7 @@
 <!-- ======================= SCRIPTS ======================= -->
 <script>
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V4.2";
+const APP_VERSION = "V4.3";
 
 
 /* I18N */
@@ -878,10 +959,14 @@ const i18n = {
       `SCU de salvage utilisées : ${sr} SCU\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
     cmatRecValues: (scuCmat, valCmat) =>
       `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\nValeur si tu vends en CMAT : ${valCmat} aUEC`,
+    cmatRecValues: (scuCmat, valCmat) =>
+      `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\nValeur si tu vends en CMAT : ${valCmat} aUEC`,
     /* Leaderboard & runs */
     leaderboardEmpty: "Aucun run enregistré pour l'instant.",
     leaderboardLine: (nickname, runs, profit, favShip, totalRmc) =>
       `${nickname} – ${runs} runs · ${profit} aUEC théoriques · Ship fav : ${favShip} · Total RMC : ${totalRmc} SCU`,
+    leaderboardYou: "Vous",
+    leaderboardSub: "Leaderboard local : classement basé sur tes runs enregistrés. Les données sont stockées sur ton navigateur uniquement (pour l’instant).",
     labelShipSelect: "Vaisseau utilisé pour ce run",
     saveRunBtn: "Enregistrer ce run dans le leaderboard local",
     saveRunSuccess: "Run enregistré dans ton leaderboard local.",
@@ -891,7 +976,14 @@ const i18n = {
     clearAllRunsBtn: "Reset complet (local)",
     clearMyRunsNoUser: "Aucun profil chargé. Crée ou importe un profil pour supprimer uniquement tes runs.",
     clearMyRunsDone: "Tes runs ont été supprimés du leaderboard local.",
-    clearAllRunsDone: "Leaderboard local entièrement réinitialisé."
+    clearAllRunsDone: "Leaderboard local entièrement réinitialisé.",
+    myRunsBtn: "Voir mes runs détaillés",
+    myRunsTitle: "Mes runs enregistrés",
+    myRunsEmpty: "Aucun run enregistré pour ce profil pour l'instant.",
+    myRunsNoUser: "Crée ou importe un profil pour voir tes runs détaillés.",
+    myRunsLine: (index, ship, profit, rmc, dateStr) =>
+      `#${index} – ${dateStr} – ${ship} · Profit : ${profit} aUEC · RMC : ${rmc} SCU`
+
   },
   en: {
     titleMain: "SALVAGE CALCULATOR 4.4",
@@ -941,6 +1033,8 @@ const i18n = {
     leaderboardEmpty: "No run recorded yet.",
     leaderboardLine: (nickname, runs, profit, favShip, totalRmc) =>
       `${nickname} – ${runs} runs · ${profit} theoretical aUEC · Fav ship: ${favShip} · Total RMC: ${totalRmc} SCU`,
+    leaderboardYou: "You",
+    leaderboardSub: "Local leaderboard: sorted from your saved runs. Data is stored locally in your browser (for now).",
     labelShipSelect: "Ship used for this run",
     saveRunBtn: "Save this run to the local leaderboard",
     saveRunSuccess: "Run saved to your local leaderboard.",
@@ -950,7 +1044,13 @@ const i18n = {
     clearAllRunsBtn: "Reset leaderboard (local)",
     clearMyRunsNoUser: "No profile loaded. Create or import a profile to delete only your runs.",
     clearMyRunsDone: "Your runs have been removed from the local leaderboard.",
-    clearAllRunsDone: "Local leaderboard fully reset."
+    clearAllRunsDone: "Local leaderboard fully reset.",
+    myRunsBtn: "View my detailed runs",
+    myRunsTitle: "My saved runs",
+    myRunsEmpty: "No run recorded yet for this profile.",
+    myRunsNoUser: "Create or import a profile to see your detailed runs.",
+    myRunsLine: (index, ship, profit, rmc, dateStr) =>
+      `#${index} – ${dateStr} – ${ship} · Profit: ${profit} aUEC · RMC: ${rmc} SCU`
   }
 };
 
@@ -998,6 +1098,13 @@ const graphSubEl = document.getElementById("graphSub");
 const langSwitchLabelEl = document.getElementById("langSwitchLabel");
 const langSelectEl = document.getElementById("langSelect");
 const appVersionEl = document.getElementById("appVersion");
+const leaderboardSubEl = document.getElementById("leaderboardSub");
+const toggleMyRunsBtnEl = document.getElementById("toggleMyRunsBtn");
+const myRunsPanelEl = document.getElementById("myRunsPanel");
+const myRunsListEl = document.getElementById("myRunsList");
+const myRunsEmptyEl = document.getElementById("myRunsEmpty");
+const myRunsTitleEl = document.getElementById("myRunsTitle");
+
 
 /* Leaderboard local */
 const leaderboardListEl = document.getElementById("leaderboardList");
@@ -1225,10 +1332,12 @@ function updateLocalLeaderboard(lastRun) {
     }
   });
 
-  const sorted = Object.values(perUser).sort((a, b) => b.totalProfit - a.totalProfit);
+  const sorted = Object.entries(perUser)
+    .map(([uid, u]) => ({ ...u, uid }))
+    .sort((a, b) => b.totalProfit - a.totalProfit);
 
   leaderboardListEl.innerHTML = "";
-  sorted.forEach(u => {
+  sorted.slice(0, 10).forEach(u => {
     let favShip = "N/A";
     let maxCount = 0;
     for (const s in u.ships) {
@@ -1240,11 +1349,14 @@ function updateLocalLeaderboard(lastRun) {
     const li = document.createElement("li");
     const profitStr = format(u.totalProfit);
     const totalRmcStr = format(u.totalRmc);
-    li.innerHTML = t.leaderboardLine(u.nickname, u.runs, profitStr, favShip, totalRmcStr);
 
-    // Surligner l'utilisateur courant
-    if (currentUser && u.nickname === currentUser.nickname) {
-      li.style.fontWeight = "600";
+    const isCurrent = currentUser && u.uid === currentUser.id;
+    const badge = isCurrent ? `<span class="leaderboard-badge">${t.leaderboardYou}</span> ` : "";
+
+    li.innerHTML = badge + t.leaderboardLine(u.nickname, u.runs, profitStr, favShip, totalRmcStr);
+
+    if (isCurrent) {
+      li.classList.add("leaderboard-item-current");
     }
 
     leaderboardListEl.appendChild(li);
@@ -1303,6 +1415,70 @@ function handleSaveRun() {
       saveRunMessageEl.textContent = "";
     }
   }, 4000);
+}
+
+/* Mes runs détaillés */
+function buildMyRunsList() {
+  const t = i18n[currentLang] || i18n.fr;
+  if (!myRunsPanelEl || !myRunsListEl || !myRunsEmptyEl) return;
+
+  if (!currentUser) {
+    myRunsListEl.innerHTML = "";
+    myRunsEmptyEl.style.display = "block";
+    myRunsEmptyEl.textContent = t.myRunsNoUser;
+    return;
+  }
+
+  let stored;
+  try {
+    stored = JSON.parse(localStorage.getItem("salvageCalcRuns") || "[]");
+  } catch (_) {
+    stored = [];
+  }
+
+  const mine = stored
+    .filter(r => r.userId === currentUser.id)
+    .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+  myRunsListEl.innerHTML = "";
+
+  if (!mine.length) {
+    myRunsEmptyEl.style.display = "block";
+    myRunsEmptyEl.textContent = t.myRunsEmpty;
+    return;
+  }
+
+  myRunsEmptyEl.style.display = "none";
+
+  const maxToShow = 20;
+  mine.slice(0, maxToShow).forEach((r, idx) => {
+    const li = document.createElement("li");
+    const profitStr = format(Number(r.profit) || 0);
+    const rmcStr = format(Number(r.rmc) || 0);
+    const d = r.ts ? new Date(r.ts) : null;
+    const dateStr = d
+      ? d.toLocaleString(currentLang === "fr" ? "fr-FR" : "en-US", {
+          day: "2-digit",
+          month: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        })
+      : "-";
+
+    li.textContent = t.myRunsLine(idx + 1, r.ship || "?", profitStr, rmcStr, dateStr);
+    myRunsListEl.appendChild(li);
+  });
+}
+
+function toggleMyRunsPanel() {
+  if (!myRunsPanelEl) return;
+  const isHidden = myRunsPanelEl.style.display === "none" || myRunsPanelEl.style.display === "";
+  if (isHidden) {
+    myRunsPanelEl.style.display = "block";
+    buildMyRunsList();
+  } else {
+    myRunsPanelEl.style.display = "none";
+  }
 }
 
 /* Suppression des runs */
@@ -1379,13 +1555,25 @@ function applyLanguage() {
   clearMyRunsBtnEl.textContent = t.clearMyRunsBtn;
   clearAllRunsBtnEl.textContent = t.clearAllRunsBtn;
 
+  if (leaderboardSubEl) {
+    leaderboardSubEl.textContent = t.leaderboardSub;
+  }
+  if (toggleMyRunsBtnEl) {
+    toggleMyRunsBtnEl.textContent = t.myRunsBtn;
+  }
+  if (myRunsTitleEl) {
+    myRunsTitleEl.textContent = t.myRunsTitle;
+  }
+  if (myRunsEmptyEl) {
+    myRunsEmptyEl.textContent = t.myRunsEmpty;
+  }
+
   if (appVersionEl) {
     appVersionEl.textContent = "Version " + APP_VERSION;
   }
 
   updateAdminUI();
   recalc();
-}
 
 function saveState() {
   const state = {
@@ -1511,6 +1699,10 @@ importProfileBtn.addEventListener("click", handleImportProfile);
 
 if (saveRunBtnEl) {
   saveRunBtnEl.addEventListener("click", handleSaveRun);
+}
+
+if (toggleMyRunsBtnEl) {
+  toggleMyRunsBtnEl.addEventListener("click", toggleMyRunsPanel);
 }
 
 if (clearMyRunsBtnEl) {
