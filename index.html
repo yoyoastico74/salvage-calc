@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V4.7 -->
+<!-- Version : V4.7.1 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -22,10 +22,10 @@
 
   <style>
     :root {
-      --bg: #020710;
-      --overlay: rgba(3, 10, 20, 0.78);
-      --panel-bg: linear-gradient(160deg, #071625, #020912);
-      --panel-soft: linear-gradient(160deg, #04111f, #020810);
+      --bg: #010309;
+      --overlay: rgba(2, 6, 14, 0.9);
+      --panel-bg: linear-gradient(160deg, #020915, #01030a);
+      --panel-soft: linear-gradient(160deg, #020812, #010309);
       --text-main: #e9fbff;
       --text-soft: #c4f7ff;
       --text-muted: #9eb5c7;
@@ -42,10 +42,10 @@
 
     /* Theme variants */
     body.theme-neon {
-      --bg: #020710;
-      --overlay: rgba(3, 10, 20, 0.78);
-      --panel-bg: linear-gradient(160deg, #071625, #020912);
-      --panel-soft: linear-gradient(160deg, #04111f, #020810);
+      --bg: #010309;
+      --overlay: rgba(2, 6, 14, 0.9);
+      --panel-bg: linear-gradient(160deg, #020915, #01030a);
+      --panel-soft: linear-gradient(160deg, #020812, #010309);
       --text-main: #e9fbff;
       --text-soft: #c4f7ff;
       --text-muted: #9eb5c7;
@@ -121,12 +121,15 @@
     .container {
       max-width: 1120px;
       margin: 0 auto;
-      border: 2px solid var(--border-strong);
-      border-radius: 10px;
-      padding: 16px 20px 20px;
-      background: var(--overlay);
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
+      padding: 18px 22px 22px;
+      background:
+        radial-gradient(circle at top, rgba(0, 229, 255, 0.10), transparent 55%),
+        var(--overlay);
       box-shadow: var(--shadow-main);
       position: relative;
+      backdrop-filter: blur(18px) saturate(130%);
     }
 
     h1 {
@@ -166,6 +169,16 @@
       align-items: center;
       gap: 6px;
       color: var(--text-soft);
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.24);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+    }
+
+    body.theme-light .lang-switch,
+    body.theme-light .theme-switch {
+      background: rgba(240, 248, 255, 0.96);
+      border-color: var(--border-soft);
     }
 
     .top-bar label {
@@ -269,11 +282,29 @@
     }
 
     .panel {
-      border-radius: 10px;
-      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      border: 1px solid var(--border-soft);
       background: var(--panel-bg);
       padding: 12px 12px 16px;
-      box-shadow: 0 0 16px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 0 14px rgba(0, 0, 0, 0.7);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, border-color 0.12s ease-out;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border-top: 2px solid rgba(0, 229, 255, 0.28);
+      pointer-events: none;
+    }
+
+    .panel:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 18px rgba(0, 0, 0, 0.85);
+      border-color: var(--border-strong);
     }
 
     body.theme-light .panel {
@@ -571,7 +602,7 @@
       padding: 10px 12px 12px;
       border-radius: 10px;
       border: 1px solid var(--border-strong);
-      background: linear-gradient(160deg, #020b14, #030812);
+      background: linear-gradient(160deg, #010815, #02020c);
       box-shadow: 0 0 18px rgba(0,0,0,0.7);
       font-size: 12px;
       color: var(--text-main);
@@ -874,7 +905,22 @@
       font-size: 11px;
       color: var(--text-muted);
       text-align: right;
-      opacity: 0.9;
+      opacity: 0.95;
+    }
+    .app-version span {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 229, 255, 0.4);
+      background: rgba(0, 0, 0, 0.45);
+      color: var(--text-soft);
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    body.theme-light .app-version span {
+      background: #f3f8ff;
+      border-color: var(--border-soft);
+      color: #163143;
     }
 
     .app-footer-brand {
@@ -1110,7 +1156,7 @@
       </div>
     </div>
 
-    <h1 id="titleMain">SALVAGE CALCULATOR 4.7</h1>
+    <h1 id="titleMain">SALVAGE CALCULATOR 4.7.1</h1>
     <div id="subText" class="sub">
       Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.
     </div>
@@ -1296,7 +1342,7 @@
       </div>
     </div>
 
-    <div id="appVersion" class="app-version"></div>
+    <div id="appVersion" class="app-version"><span></span></div>
     <div class="app-footer-brand">
       Powered by <span>Shog Salvage Tools</span>
     </div>
@@ -1345,14 +1391,14 @@
 
 <script>
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V4.7";
+const APP_VERSION = "V4.7.1";
 
 let currentLang = localStorage.getItem("salvageCalcLang") || "fr";
 let currentTheme = localStorage.getItem("salvageCalcTheme") || "neon";
 
 const i18n = {
   fr: {
-    titleMain: "SALVAGE CALCULATOR 4.7",
+    titleMain: "SALVAGE CALCULATOR 4.7.1",
     subText: "Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.",
     entriesTitle: "Entrées",
     labelPrixRmc: "Prix RMC (aUEC / SCU)",
@@ -1424,7 +1470,7 @@ const i18n = {
     }
   },
   en: {
-    titleMain: "SALVAGE CALCULATOR 4.7",
+    titleMain: "SALVAGE CALCULATOR 4.7.1",
     subText: "Compare the profitability between <b>selling your salvage as RMC</b> or <b>processing it into CMAT (Construction Materials)</b>.",
     entriesTitle: "Inputs",
     labelPrixRmc: "RMC price (aUEC / SCU)",
@@ -2213,7 +2259,8 @@ function applyLanguage() {
   }
 
   if (appVersionEl) {
-    appVersionEl.textContent = "Version " + APP_VERSION;
+    const span = appVersionEl.querySelector("span") || appVersionEl;
+    span.textContent = "Version " + APP_VERSION;
   }
 
   updateAdminUI();
