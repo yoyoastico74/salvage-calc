@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V4.6 -->
+<!-- Version : V4.6.1 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -1110,7 +1110,7 @@
       </div>
     </div>
 
-    <h1 id="titleMain">SALVAGE CALCULATOR 4.4</h1>
+    <h1 id="titleMain">SALVAGE CALCULATOR 4.6.1</h1>
     <div id="subText" class="sub">
       Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.
     </div>
@@ -1345,14 +1345,14 @@
 
 <script>
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V4.6";
+const APP_VERSION = "V4.6.1";
 
 let currentLang = localStorage.getItem("salvageCalcLang") || "fr";
 let currentTheme = localStorage.getItem("salvageCalcTheme") || "neon";
 
 const i18n = {
   fr: {
-    titleMain: "SALVAGE CALCULATOR 4.6",
+    titleMain: "SALVAGE CALCULATOR 4.6.1",
     subText: "Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.",
     entriesTitle: "Entrées",
     labelPrixRmc: "Prix RMC (aUEC / SCU)",
@@ -1390,10 +1390,10 @@ const i18n = {
     rmcRecValues: (sr, rmcVal) => `SCU de salvage utilisées : ${sr} SCU\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
     cmatRecValues: (scuCmat, valCmat) => `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\nValeur si tu vends en CMAT : ${valCmat} aUEC`,
     cmatRecExtra: (scuRec, scuCmat, pctCmat, pctTotal) =>
-      `Sur ${scuRec} SCU Reclaimer, ${scuCmat} SCU partent en CMAT (~${pctCmat}% du salvage Reclaimer, ~${pctTotal}% du total salvage).`,
+      `Sur ${scuRec} SCU du Reclaimer, ${scuCmat} SCU partent en CMAT (~${pctCmat}% du salvage Reclaimer, ~${pctTotal}% du total salvage).`,
     leaderboardEmpty: "Aucun run enregistré pour l'instant.",
     leaderboardLine: (nickname, runs, profit, favShip, totalRmc, isAdmin) =>
-      `${nickname}${isAdmin ? " [ADMIN]" : ""} – ${runs} runs · ${profit} aUEC théoriques · Ship fav : ${favShip} · Total RMC : ${totalRmc} SCU`,
+      `${nickname} – ${runs} runs · ${profit} aUEC théoriques · Ship fav : ${favShip} · Total RMC : ${totalRmc} SCU`,
     leaderboardYou: "Vous",
     leaderboardSub: "Leaderboard local : classement basé sur tes runs enregistrés. Les données sont stockées sur ton navigateur uniquement (pour l’instant).",
     labelShipSelect: "Vaisseau utilisé pour ce run",
@@ -1424,7 +1424,7 @@ const i18n = {
     }
   },
   en: {
-    titleMain: "SALVAGE CALCULATOR 4.6",
+    titleMain: "SALVAGE CALCULATOR 4.6.1",
     subText: "Compare the profitability between <b>selling your salvage as RMC</b> or <b>processing it into CMAT (Construction Materials)</b>.",
     entriesTitle: "Inputs",
     labelPrixRmc: "RMC price (aUEC / SCU)",
@@ -1465,7 +1465,7 @@ const i18n = {
       `Out of ${scuRec} Reclaimer SCU, ${scuCmat} SCU become CMAT (~${pctCmat}% of Reclaimer salvage, ~${pctTotal}% of total salvage).`,
     leaderboardEmpty: "No run recorded yet.",
     leaderboardLine: (nickname, runs, profit, favShip, totalRmc, isAdmin) =>
-      `${nickname}${isAdmin ? " [ADMIN]" : ""} – ${runs} runs · ${profit} theoretical aUEC · Fav ship: ${favShip} · Total RMC: ${totalRmc} SCU`,
+      `${nickname} – ${runs} runs · ${profit} theoretical aUEC · Fav ship: ${favShip} · Total RMC: ${totalRmc} SCU`,
     leaderboardYou: "You",
     leaderboardSub: "Local leaderboard: sorted from your saved runs. Data is stored locally in your browser (for now).",
     labelShipSelect: "Ship used for this run",
@@ -2532,5 +2532,3 @@ window.addEventListener("load", () => {
 </script>
 </body>
 </html>
-
-
