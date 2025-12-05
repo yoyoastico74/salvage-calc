@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V4.7.2 -->
+<!-- Version : V4.7.3 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -268,7 +268,7 @@ body.theme-light {
       padding: 12px 12px 16px;
       box-shadow: 0 0 14px rgba(0, 0, 0, 0.7);
       position: relative;
-      overflow: hidden;
+      overflow: visible;
       transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, border-color 0.12s ease-out;
     }
 
@@ -783,7 +783,7 @@ body.theme-light {
       opacity: 0;
       transform: translateY(-4px);
       max-height: 0;
-      overflow: hidden;
+      overflow: visible;
       transition: opacity 0.18s ease-out, transform 0.18s ease-out, max-height 0.18s ease-out;
     }
 
@@ -1135,7 +1135,7 @@ body.theme-light {
       </div>
     </div>
 
-    <h1 id="titleMain">SALVAGE CALCULATOR 4.7.2</h1>
+    <h1 id="titleMain">SALVAGE CALCULATOR 4.7.3</h1>
     <div id="subText" class="sub">
       Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.
     </div>
@@ -1370,7 +1370,7 @@ body.theme-light {
 
 <script>
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V4.7.2";
+const APP_VERSION = "V4.7.3";
 
 let currentLang = localStorage.getItem("salvageCalcLang") || "fr";
 let currentTheme = localStorage.getItem("salvageCalcTheme") || "neon";
@@ -1378,7 +1378,7 @@ if (currentTheme === "dark") currentTheme = "neon";
 
 const i18n = {
   fr: {
-    titleMain: "SALVAGE CALCULATOR 4.7.2",
+    titleMain: "SALVAGE CALCULATOR 4.7.3",
     subText: "Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.",
     entriesTitle: "Entrées",
     labelPrixRmc: "Prix RMC (aUEC / SCU)",
@@ -1450,7 +1450,7 @@ const i18n = {
     }
   },
   en: {
-    titleMain: "SALVAGE CALCULATOR 4.7.2",
+    titleMain: "SALVAGE CALCULATOR 4.7.3",
     subText: "Compare the profitability between <b>selling your salvage as RMC</b> or <b>processing it into CMAT (Construction Materials)</b>.",
     entriesTitle: "Inputs",
     labelPrixRmc: "RMC price (aUEC / SCU)",
