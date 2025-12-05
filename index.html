@@ -123,7 +123,6 @@
 
     /* LEADERBOARD (prototype local) */
     .leaderboard-panel {
-      margin-top: 14px;
       padding: 10px 12px 12px;
       border-radius: 10px;
       border: 1px solid #00c4ff;
@@ -155,15 +154,6 @@
     .leaderboard-list li {
       padding: 3px 0;
       border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .leaderboard-list li span.name {
-      font-weight: 600;
-      color: #aaf7ff;
-    }
-
-    .leaderboard-list li span.ship {
-      opacity: 0.8;
     }
 
     .leaderboard-empty {
@@ -396,9 +386,28 @@
       margin-top: 4px;
     }
 
+    /* Nouvelle grille bas de page : graph à gauche, leaderboard à droite */
+    .market-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 16px;
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+
+    .market-graph-col {
+      min-width: 0;
+    }
+
     @media (max-width: 900px) {
       .grid-main {
         grid-template-columns: 1fr;
+      }
+      .market-grid {
+        grid-template-columns: 1fr;
+      }
+      .leaderboard-panel {
+        margin-top: 12px;
       }
     }
 
@@ -687,23 +696,28 @@
       </div>
     </div>
 
-    <!-- ======================= SECTION GRAPHIQUE EN BAS ======================= -->
+    <!-- ======================= SECTION GRAPHIQUE + LEADERBOARD EN BAS ======================= -->
     <div class="market-panel">
       <div id="graphTitle" class="graph-title">Analyse du marché – Historique RMC &amp; CMAT</div>
       <div id="graphSub" class="graph-sub">
         Données issues d’UEX via ton Worker. L’axe X montre les dates (JJ/MM) des dernières mises à jour de prix.
       </div>
-      <canvas id="cmatChart" height="120"></canvas>
-      <div id="graphMessage"></div>
 
-      <div class="leaderboard-panel">
-        <div class="leaderboard-title">Leaderboard – Salvage (prototype local)</div>
-        <div class="leaderboard-sub">
-          Classement basé sur le nombre de runs et les bénéfices théoriques (local au navigateur pour l’instant).
+      <div class="market-grid">
+        <div class="market-graph-col">
+          <canvas id="cmatChart" height="120"></canvas>
+          <div id="graphMessage"></div>
         </div>
-        <ul id="leaderboardList" class="leaderboard-list"></ul>
-        <div id="leaderboardEmpty" class="leaderboard-empty" style="display:none;">
-          Aucun run enregistré pour l'instant.
+
+        <div class="leaderboard-panel">
+          <div class="leaderboard-title">Leaderboard – Salvage (prototype local)</div>
+          <div class="leaderboard-sub">
+            Classement basé sur le nombre de runs et les bénéfices théoriques (local au navigateur pour l’instant).
+          </div>
+          <ul id="leaderboardList" class="leaderboard-list"></ul>
+          <div id="leaderboardEmpty" class="leaderboard-empty" style="display:none;">
+            Aucun run enregistré pour l'instant.
+          </div>
         </div>
       </div>
     </div>
@@ -767,7 +781,7 @@ let currentLang = localStorage.getItem("salvageCalcLang") || "fr";
 const i18n = {
   fr: {
     titleMain: "SALVAGE CALCULATOR 4.4",
-    subText: "Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.",
+    subText: "Compare la rentabilité entre <b>vendre ton salvage en RMC</b> or <b>le transformer en CMAT (Construction Materials)</b>.",
     entriesTitle: "Entrées",
     labelPrixRmc: "Prix RMC (aUEC / SCU)",
     hintPrixRmc: "RMC = Recycled Material Composite (issu du hull scraping).",
@@ -1331,7 +1345,6 @@ function recalc() {
   el.addEventListener("input", () => {
     recalc();
     saveState();
-    // plus tard : ici on pourra éventuellement auto-créer un run
   })
 );
 
