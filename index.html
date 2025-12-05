@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V5.1.2 -->
+<!-- Version : V5.2 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -1377,7 +1377,7 @@ body.theme-light {
 
 <script>
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V5.1.2";
+const APP_VERSION = "V5.2";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -1442,7 +1442,6 @@ const i18n = {
     labelShipSelect: "Vaisseau utilisé pour ce run",
     saveRunBtn: "Envoyer ce run au leaderboard en ligne",
     saveRunSuccess: "Run envoyé au leaderboard en ligne.",
-    saveRunError: "Erreur lors de l'envoi au leaderboard en ligne. Vérifie ta connexion ou réessaie plus tard.",
     saveRunNoUser: "Crée ou importe un profil avant d'enregistrer un run.",
     saveRunNoScu: "Merci de saisir au moins une SCU de salvage avant d'enregistrer un run.",
     clearMyRunsBtn: "Supprimer mes runs",
@@ -1517,7 +1516,6 @@ const i18n = {
     labelShipSelect: "Ship used for this run",
     saveRunBtn: "Send this run to the online leaderboard",
     saveRunSuccess: "Run sent to the online leaderboard.",
-    saveRunError: "Error while sending to the online leaderboard. Please check your connection or try again later.",
     saveRunNoUser: "Please create/import a profile before saving a run.",
     saveRunNoScu: "Please enter at least one salvage SCU before saving a run.",
     clearMyRunsBtn: "Delete my runs",
@@ -1952,8 +1950,6 @@ async function pushRunToOnlineLeaderboard(run) {
   }
 }
 
-
-function handleSaveRun()
 function handleSaveRun() {
   const t = i18n[currentLang] || i18n.fr;
 
