@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- Version : V4.5 -->
+<!-- Version : V4.6 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Salvage Calculator 4.4</title>
+  <title>Salvage Calculator 4.6</title>
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
@@ -21,13 +21,90 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
+    :root {
+      --bg: #020710;
+      --overlay: rgba(3, 10, 20, 0.78);
+      --panel-bg: linear-gradient(160deg, #071625, #020912);
+      --panel-soft: linear-gradient(160deg, #04111f, #020810);
+      --text-main: #e9fbff;
+      --text-soft: #c4f7ff;
+      --text-muted: #9eb5c7;
+      --accent: #00e5ff;
+      --accent-strong: #00f7ff;
+      --accent-alt: #24ffd0;
+      --danger: #ff5b7a;
+      --danger-soft: #3a0707;
+      --border-strong: #00c4ff;
+      --border-soft: #395d73;
+      --shadow-main: 0 0 24px rgba(0,0,0,0.8);
+      --card-bg: #050c16;
+    }
+
+    /* Theme variants */
+    body.theme-neon {
+      --bg: #020710;
+      --overlay: rgba(3, 10, 20, 0.78);
+      --panel-bg: linear-gradient(160deg, #071625, #020912);
+      --panel-soft: linear-gradient(160deg, #04111f, #020810);
+      --text-main: #e9fbff;
+      --text-soft: #c4f7ff;
+      --text-muted: #9eb5c7;
+      --accent: #00e5ff;
+      --accent-strong: #00f7ff;
+      --accent-alt: #24ffd0;
+      --danger: #ff5b7a;
+      --danger-soft: #3a0707;
+      --border-strong: #00c4ff;
+      --border-soft: #395d73;
+      --shadow-main: 0 0 24px rgba(0,0,0,0.85);
+      --card-bg: #050c16;
+    }
+
+    body.theme-dark {
+      --bg: #020509;
+      --overlay: rgba(5, 10, 18, 0.9);
+      --panel-bg: linear-gradient(160deg, #050f1c, #02060e);
+      --panel-soft: linear-gradient(160deg, #040b16, #01040a);
+      --text-main: #d8f6ff;
+      --text-soft: #c0dce8;
+      --text-muted: #8697a7;
+      --accent: #00d4f0;
+      --accent-strong: #35f0ff;
+      --accent-alt: #20e0c0;
+      --danger: #ff6b86;
+      --danger-soft: #3a090f;
+      --border-strong: #00b0de;
+      --border-soft: #2f4b61;
+      --shadow-main: 0 0 18px rgba(0,0,0,0.9);
+      --card-bg: #040914;
+    }
+
+    body.theme-light {
+      --bg: #edf5ff;
+      --overlay: rgba(240, 247, 255, 0.98);
+      --panel-bg: linear-gradient(160deg, #ffffff, #e6f2ff);
+      --panel-soft: linear-gradient(160deg, #f6fbff, #e8f3ff);
+      --text-main: #0a1a25;
+      --text-soft: #163143;
+      --text-muted: #5c7588;
+      --accent: #00b7e6;
+      --accent-strong: #0097c9;
+      --accent-alt: #14c4a0;
+      --danger: #d34462;
+      --danger-soft: #ffdde3;
+      --border-strong: #00b0de;
+      --border-soft: #c0d9f0;
+      --shadow-main: 0 0 18px rgba(0, 0, 0, 0.08);
+      --card-bg: #f5f9ff;
+    }
+
     html, body {
       overflow-x: hidden;
       margin: 0;
       padding: 0;
       font-family: "Segoe UI", system-ui, sans-serif;
-      color: #e9fbff;
-      background: #020710 url("background_optimized.jpg") no-repeat center center fixed;
+      color: var(--text-main);
+      background: var(--bg) url("background_optimized.jpg") no-repeat center center fixed;
       background-size: cover;
     }
 
@@ -37,14 +114,18 @@
       padding: 20px 10px 25px;
     }
 
+    body.theme-light .overlay {
+      background: linear-gradient(180deg, rgba(240,247,255,0.98), rgba(228,240,252,0.98));
+    }
+
     .container {
       max-width: 1120px;
       margin: 0 auto;
-      border: 2px solid #00e5ff;
+      border: 2px solid var(--border-strong);
       border-radius: 10px;
       padding: 16px 20px 20px;
-      background: rgba(3,10,20,0.78);
-      box-shadow: 0 0 24px rgba(0,0,0,0.8);
+      background: var(--overlay);
+      box-shadow: var(--shadow-main);
       position: relative;
     }
 
@@ -54,154 +135,131 @@
       font-size: 30px;
       text-transform: uppercase;
       letter-spacing: 2px;
-      color: #00f7ff;
+      color: var(--accent-strong);
       text-shadow: 0 0 8px rgba(0,255,255,0.5);
+    }
+
+    body.theme-light h1 {
+      text-shadow: none;
     }
 
     .sub {
       text-align: center;
       font-size: 13px;
-      color: #8ffcff;
+      color: var(--text-soft);
       margin-bottom: 18px;
     }
 
-    .lang-switch {
+    .top-bar {
       position: absolute;
       top: 12px;
       right: 16px;
+      display: flex;
+      gap: 10px;
       font-size: 12px;
-      color: #bdfcff;
+      align-items: center;
+    }
+
+    .lang-switch,
+    .theme-switch {
       display: flex;
       align-items: center;
       gap: 6px;
+      color: var(--text-soft);
     }
 
-    .lang-switch select {
+    .top-bar label {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .top-bar select {
       background: #021019;
-      border: 1px solid #00e5ff;
+      border: 1px solid var(--accent);
       border-radius: 6px;
       padding: 2px 6px;
-      color: #aaf7ff;
+      color: var(--text-soft);
       font-size: 11px;
       outline: none;
       cursor: pointer;
     }
 
+    body.theme-light .top-bar select {
+      background: #f3f8ff;
+      color: #0b2130;
+    }
+
     .user-box {
       margin: 0 auto 16px;
-      max-width: 480px;
+      max-width: 540px;
       display: flex;
       justify-content: center;
       gap: 8px;
       align-items: center;
       font-size: 12px;
-      color: #c4f7ff;
+      color: var(--text-soft);
       text-align: center;
       flex-wrap: wrap;
     }
 
     .user-box button {
       background: #021019;
-      border: 1px solid #00e5ff;
+      border: 1px solid var(--accent);
       border-radius: 6px;
       padding: 4px 9px;
-      color: #aaf7ff;
+      color: var(--text-soft);
       font-size: 11px;
       cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
     }
 
     .user-box button:hover {
-      border-color: #24ffd0;
+      border-color: var(--accent-alt);
+      background: #033023;
+      transform: translateY(-1px);
     }
 
-    .leaderboard-panel {
-      padding: 10px 12px 12px;
-      border-radius: 10px;
-      border: 1px solid #00c4ff;
-      background: linear-gradient(160deg, #020b14, #030812);
-      box-shadow: 0 0 18px rgba(0,0,0,0.7);
-      font-size: 12px;
-      color: #d8f6ff;
+    body.theme-light .user-box button {
+      background: #ffffff;
+      border-color: var(--accent);
+      color: #103042;
     }
 
-    .leaderboard-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: #00f7ff;
-    }
-
-    .leaderboard-sub {
-      font-size: 11px;
-      color: #9df4ff;
-      margin-bottom: 6px;
-    }
-
-    .leaderboard-list {
-      list-style: none;
-      padding: 0;
-      margin: 6px 0 0;
-    }
-
-    .leaderboard-list li {
-      padding: 6px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      font-size: 11px;
-    }
-
-    .leaderboard-item-current {
-      background: radial-gradient(circle at left, rgba(0,255,200,0.18), transparent);
-      border-left: 3px solid #24ffd0;
-      padding-left: 6px;
-    }
-
-    .leaderboard-badge {
-      display: inline-block;
-      font-size: 10px;
-      padding: 2px 6px;
-      margin-right: 4px;
+    .admin-badge-inline {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 6px;
+      margin-left: 6px;
       border-radius: 999px;
-      background: rgba(0, 255, 200, 0.18);
-      border: 1px solid #24ffd0;
-      color: #c9fff3;
+      border: 1px solid var(--accent-alt);
+      background: rgba(0, 255, 200, 0.12);
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      color: var(--accent-alt);
     }
 
-    .leaderboard-empty {
-      font-size: 11px;
-      color: #9eb5c7;
-      margin-top: 4px;
+    body.theme-light .admin-badge-inline {
+      background: rgba(0, 200, 170, 0.12);
+      color: #0d6b5c;
+      border-color: #14c4a0;
     }
 
-    .leaderboard-actions {
-      margin-top: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .leaderboard-actions button {
-      width: 100%;
-      padding: 4px 0;
+    .info-panel {
+      margin: 10px auto 15px;
+      max-width: 700px;
+      font-size: 13px;
+      color: var(--text-soft);
+      background: rgba(0,20,35,0.35);
+      padding: 10px 14px;
+      border-left: 3px solid var(--accent-alt);
       border-radius: 6px;
-      border: 1px solid #395d73;
-      background: #04141e;
-      color: #c4f7ff;
-      font-size: 11px;
-      cursor: pointer;
     }
 
-    .leaderboard-actions button:hover {
-      border-color: #ff5b7a;
-      background: #2b0b15;
-    }
-
-    .leaderboard-action-msg {
-      margin-top: 4px;
-      font-size: 11px;
-      color: #ffc6c6;
-      min-height: 12px;
+    body.theme-light .info-panel {
+      background: rgba(230,243,255,0.9);
+      border-left-color: var(--accent);
+      color: #173243;
     }
 
     .grid-main {
@@ -212,31 +270,39 @@
 
     .panel {
       border-radius: 10px;
-      border: 1px solid #00c4ff;
-      background: linear-gradient(160deg, #071625, #020912);
+      border: 1px solid var(--border-strong);
+      background: var(--panel-bg);
       padding: 12px 12px 16px;
       box-shadow: 0 0 16px rgba(0, 0, 0, 0.7);
     }
 
+    body.theme-light .panel {
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
     .panel-title {
       font-size: 18px;
-      color: #00f7ff;
+      color: var(--accent-strong);
       margin-bottom: 8px;
       font-weight: 600;
       text-shadow: 0 0 6px rgba(0,255,255,0.5);
     }
 
+    body.theme-light .panel-title {
+      text-shadow: none;
+    }
+
     label {
       display: block;
       margin-top: 8px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      color: #e2fbff;
+      color: var(--text-main);
     }
 
     .hint {
       font-size: 11px;
-      color: #9df4ff;
+      color: var(--text-soft);
       margin-top: 2px;
     }
 
@@ -245,16 +311,22 @@
       margin-top: 4px;
       padding: 8px 10px;
       border-radius: 6px;
-      border: 2px solid #00e5ff;
+      border: 2px solid var(--accent);
       background: #04121c;
-      color: #e9fbff;
+      color: var(--text-main);
       font-size: 14px;
       outline: none;
     }
 
+    body.theme-light input[type="number"] {
+      background: #f5f9ff;
+      border-color: var(--border-soft);
+      color: #0b2130;
+    }
+
     input[type="number"]:focus {
-      border-color: #24ffd0;
-      box-shadow: 0 0 0 2px rgba(36,255,208,0.7);
+      border-color: var(--accent-alt);
+      box-shadow: 0 0 0 2px rgba(36,255,208,0.4);
     }
 
     input[type=number]::-webkit-inner-spin-button,
@@ -262,6 +334,7 @@
       -webkit-appearance: none;
       margin: 0;
     }
+
     input[type=number] {
       -moz-appearance: textfield;
     }
@@ -271,32 +344,47 @@
       margin-top: 4px;
       padding: 6px 10px;
       border-radius: 6px;
-      border: 2px solid #00e5ff;
+      border: 2px solid var(--accent);
       background: #04121c;
-      color: #e9fbff;
+      color: var(--text-main);
       font-size: 13px;
       outline: none;
     }
 
+    body.theme-light .panel select {
+      background: #f5f9ff;
+      border-color: var(--border-soft);
+      color: #0b2130;
+    }
+
     .panel select:focus {
-      border-color: #24ffd0;
-      box-shadow: 0 0 0 2px rgba(36,255,208,0.7);
+      border-color: var(--accent-alt);
+      box-shadow: 0 0 0 2px rgba(36,255,208,0.4);
     }
 
     .save-run-btn {
-      margin-top: 8px;
+      margin-top: 10px;
       width: 100%;
       padding: 7px 0;
       border-radius: 8px;
-      border: 1px solid #24ffd0;
+      border: 1px solid var(--accent-alt);
       background: #033023;
       color: #c4ffe6;
       font-size: 13px;
       cursor: pointer;
+      transition: background 0.15s ease, transform 0.08s ease, box-shadow 0.1s ease;
     }
 
     .save-run-btn:hover {
       background: #04a371;
+      transform: translateY(-1px);
+      box-shadow: 0 0 12px rgba(30,255,200,0.4);
+    }
+
+    body.theme-light .save-run-btn {
+      background: #ffffff;
+      color: #0f3426;
+      border-color: var(--accent-alt);
     }
 
     .tag-row {
@@ -310,42 +398,52 @@
     .tag {
       padding: 4px 8px;
       border-radius: 999px;
-      border: 1px solid #24ffd0;
+      border: 1px solid var(--accent-alt);
       background: rgba(0,40,40,0.9);
       color: #aafff0;
     }
 
     .tag.red {
-      border-color: #ff5b7a;
+      border-color: var(--danger);
       background: rgba(60,0,20,0.9);
       color: #ffc0d0;
+    }
+
+    body.theme-light .tag {
+      background: #e9f6ff;
+      color: #155a4d;
+    }
+    body.theme-light .tag.red {
+      background: #ffe6ee;
+      color: #b7183c;
     }
 
     .small-note {
       margin-top: 7px;
       font-size: 11px;
-      color: #9eb5c7;
+      color: var(--text-muted);
+      white-space: pre-line;
     }
 
     .api-status {
       margin-top: 8px;
       font-size: 11px;
-      color: #aaf7ff;
+      color: var(--text-soft);
     }
     .api-status.error {
-      color: #ff9090;
+      color: var(--danger);
     }
 
     .sellpoints {
       margin-top: 6px;
       font-size: 11px;
       line-height: 1.5;
-      color: #c4f7ff;
+      color: var(--text-soft);
     }
 
     .sellpoints span.label {
       font-weight: 600;
-      color: #24ffd0;
+      color: var(--accent-alt);
     }
 
     .results-grid {
@@ -355,11 +453,16 @@
     }
 
     .result-block {
-      background: #050c16;
+      background: var(--card-bg);
       border-radius: 8px;
       border: 1px solid #1e3142;
       padding: 10px 12px;
       margin-bottom: 10px;
+    }
+
+    body.theme-light .result-block {
+      border-color: #d2e4f5;
+      background: #f5f9ff;
     }
 
     .result-head {
@@ -369,12 +472,22 @@
       color: #c0f7ff;
     }
 
+    body.theme-light .result-head {
+      color: #103243;
+    }
+
     .result-values {
       font-size: 13px;
-      line-height: 1.4;
+      line-height: 1.5;
       white-space: pre-line;
       margin-bottom: 4px;
-      color: #e3f9ff;
+      color: var(--text-main);
+    }
+
+    .result-extra {
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-top: 3px;
     }
 
     .decision {
@@ -390,30 +503,45 @@
       color: #b4ffd7;
     }
     .decision.bad {
-      background: #3a0707;
-      border-left: 4px solid #ff5b7a;
+      background: var(--danger-soft);
+      border-left: 4px solid var(--danger);
       color: #ffb3b3;
+    }
+
+    body.theme-light .decision.good {
+      background: #e2fff4;
+      color: #137a4b;
+      border-left-color: #12c58a;
+    }
+    body.theme-light .decision.bad {
+      background: #ffe5eb;
+      color: #a3243e;
+      border-left-color: #d34462;
     }
 
     .market-panel {
       margin-top: 20px;
       padding: 12px 12px 16px;
       border-radius: 10px;
-      border: 1px solid #00c4ff;
-      background: linear-gradient(160deg, #04111f, #020810);
+      border: 1px solid var(--border-strong);
+      background: var(--panel-soft);
       box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    body.theme-light .market-panel {
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
     }
 
     .graph-title {
       font-size: 16px;
       font-weight: 600;
-      color: #00f7ff;
+      color: var(--accent-strong);
       margin-bottom: 4px;
     }
 
     .graph-sub {
       font-size: 11px;
-      color: #9df4ff;
+      color: var(--text-soft);
       margin-bottom: 8px;
     }
 
@@ -421,6 +549,10 @@
       color: #ffaa88;
       font-size: 12px;
       margin-top: 4px;
+    }
+
+    body.theme-light #graphMessage {
+      color: #b7432e;
     }
 
     .market-grid {
@@ -435,6 +567,327 @@
       min-width: 0;
     }
 
+    .leaderboard-panel {
+      padding: 10px 12px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-strong);
+      background: linear-gradient(160deg, #020b14, #030812);
+      box-shadow: 0 0 18px rgba(0,0,0,0.7);
+      font-size: 12px;
+      color: var(--text-main);
+    }
+
+    body.theme-light .leaderboard-panel {
+      background: linear-gradient(160deg, #f6fbff, #e5f2ff);
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .leaderboard-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 3px;
+    }
+
+    .leaderboard-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent-strong);
+    }
+
+    .leaderboard-badges {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .badge-local-beta {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: rgba(0,0,0,0.2);
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    body.theme-light .badge-local-beta {
+      background: #ffffff;
+      color: #385068;
+    }
+
+    .leaderboard-sub {
+      font-size: 11px;
+      color: var(--text-soft);
+      margin-bottom: 6px;
+    }
+
+    .leaderboard-list {
+      list-style: none;
+      padding: 0;
+      margin: 6px 0 0;
+    }
+
+    .leaderboard-list li {
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 11px;
+    }
+
+    body.theme-light .leaderboard-list li {
+      border-bottom-color: #d3e3f2;
+    }
+
+    .leaderboard-item-current {
+      background: radial-gradient(circle at left, rgba(0,255,200,0.18), transparent);
+      border-left: 3px solid var(--accent-alt);
+      padding-left: 6px;
+    }
+
+    body.theme-light .leaderboard-item-current {
+      background: linear-gradient(90deg, rgba(0,200,170,0.08), transparent);
+    }
+
+    .leaderboard-badge-you {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 6px;
+      margin-right: 4px;
+      border-radius: 999px;
+      background: rgba(0, 255, 200, 0.18);
+      border: 1px solid var(--accent-alt);
+      color: #c9fff3;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    body.theme-light .leaderboard-badge-you {
+      background: rgba(0, 180, 150, 0.16);
+      color: #0b5e4c;
+    }
+
+    .leaderboard-badge-admin {
+      display: inline-block;
+      font-size: 9px;
+      padding: 2px 6px;
+      margin-left: 3px;
+      border-radius: 999px;
+      border: 1px solid var(--accent-alt);
+      background: rgba(0, 255, 200, 0.12);
+      color: var(--accent-alt);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    body.theme-light .leaderboard-badge-admin {
+      background: rgba(0, 180, 150, 0.12);
+      color: #0f6e5b;
+    }
+
+    .leaderboard-empty {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .leaderboard-actions {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .leaderboard-actions button {
+      width: 100%;
+      padding: 4px 0;
+      border-radius: 6px;
+      border: 1px solid var(--border-soft);
+      background: #04141e;
+      color: var(--text-soft);
+      font-size: 11px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
+    }
+
+    .leaderboard-actions button:hover {
+      border-color: var(--danger);
+      background: #2b0b15;
+      transform: translateY(-1px);
+    }
+
+    body.theme-light .leaderboard-actions button {
+      background: #ffffff;
+      border-color: #d3e3f2;
+      color: #163243;
+    }
+    body.theme-light .leaderboard-actions button:hover {
+      border-color: var(--danger);
+      background: #ffe4eb;
+    }
+
+    #clearAllRunsBtn {
+      display: none; /* admin only */
+    }
+
+    .leaderboard-action-msg {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #ffc6c6;
+      min-height: 12px;
+    }
+
+    .my-runs-btn {
+      margin-top: 6px;
+      width: 100%;
+      padding: 4px 0;
+      border-radius: 6px;
+      border: 1px solid var(--border-soft);
+      background: #031019;
+      color: var(--text-soft);
+      font-size: 11px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
+    }
+
+    .my-runs-btn:hover {
+      border-color: var(--accent-alt);
+      background: #033023;
+      transform: translateY(-1px);
+    }
+
+    body.theme-light .my-runs-btn {
+      background: #ffffff;
+      border-color: #d3e3f2;
+      color: #163243;
+    }
+
+    .my-runs-panel {
+      margin-top: 6px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 228, 255, 0.35);
+      background: rgba(1, 10, 18, 0.9);
+      opacity: 0;
+      transform: translateY(-4px);
+      max-height: 0;
+      overflow: hidden;
+      transition: opacity 0.18s ease-out, transform 0.18s ease-out, max-height 0.18s ease-out;
+    }
+
+    .my-runs-panel.open {
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 350px;
+    }
+
+    body.theme-light .my-runs-panel {
+      background: rgba(240, 248, 255, 0.98);
+      border-color: #c0e1ff;
+    }
+
+    .my-runs-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #8feaff;
+      margin-bottom: 4px;
+    }
+
+    body.theme-light .my-runs-title {
+      color: #0f4358;
+    }
+
+    .my-runs-section {
+      margin-bottom: 6px;
+    }
+
+    .my-runs-subtitle {
+      font-size: 11px;
+      font-weight: 600;
+      color: #9fe9ff;
+      margin-bottom: 2px;
+    }
+
+    body.theme-light .my-runs-subtitle {
+      color: #155572;
+    }
+
+    .my-runs-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 130px;
+      overflow-y: auto;
+      font-size: 11px;
+      color: var(--text-main);
+    }
+
+    .my-runs-list li {
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    body.theme-light .my-runs-list li {
+      border-bottom-color: #d3e3f2;
+    }
+
+    .my-runs-empty {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .my-run-mainline {
+      flex: 1;
+    }
+
+    .my-run-sold-toggle {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: #9fe9ff;
+      white-space: nowrap;
+    }
+
+    body.theme-light .my-run-sold-toggle {
+      color: #0f566f;
+    }
+
+    .my-run-sold-toggle input[type="checkbox"] {
+      margin: 0;
+      width: 12px;
+      height: 12px;
+    }
+
+    .my-run-row-sold .my-run-mainline {
+      opacity: 0.8;
+    }
+
+    .app-version {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: right;
+      opacity: 0.9;
+    }
+
+    .app-footer-brand {
+      margin-top: 4px;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .app-footer-brand span {
+      color: var(--accent);
+    }
+
     @media (max-width: 900px) {
       .grid-main {
         grid-template-columns: 1fr;
@@ -444,6 +897,29 @@
       }
       .leaderboard-panel {
         margin-top: 12px;
+      }
+      .top-bar {
+        position: static;
+        justify-content: flex-end;
+        margin-bottom: 6px;
+      }
+      .container {
+        padding: 14px 10px 18px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .market-grid {
+        gap: 12px;
+      }
+      .result-block {
+        font-size: 12px;
+      }
+      .panel-title {
+        font-size: 16px;
+      }
+      h1 {
+        font-size: 24px;
       }
     }
 
@@ -466,11 +942,18 @@
       max-width: 92%;
       background: linear-gradient(160deg, #041425, #020812);
       border-radius: 12px;
-      border: 1px solid #00e5ff;
+      border: 1px solid var(--accent);
       box-shadow: 0 0 24px rgba(0,0,0,0.9);
       padding: 12px 14px 14px;
-      color: #e9fbff;
+      color: var(--text-main);
       font-size: 13px;
+    }
+
+    body.theme-light .modal {
+      background: linear-gradient(160deg, #ffffff, #e6f2ff);
+      border-color: var(--accent);
+      color: #0b2130;
+      box-shadow: 0 0 12px rgba(0,0,0,0.15);
     }
 
     .modal-header {
@@ -483,13 +966,13 @@
     .modal-header h2 {
       margin: 0;
       font-size: 15px;
-      color: #00f7ff;
+      color: var(--accent-strong);
     }
 
     .modal-close-btn {
       background: transparent;
       border: none;
-      color: #aaf7ff;
+      color: var(--text-soft);
       font-size: 18px;
       cursor: pointer;
       line-height: 1;
@@ -504,18 +987,24 @@
     .modal-tabs button {
       flex: 1;
       border-radius: 999px;
-      border: 1px solid #00c4ff;
+      border: 1px solid var(--border-strong);
       background: #03111b;
-      color: #aaf7ff;
+      color: var(--text-soft);
       font-size: 12px;
       padding: 4px 0;
       cursor: pointer;
     }
 
     .modal-tabs button.active {
-      background: #00c4ff;
+      background: var(--accent);
       color: #021019;
       font-weight: 600;
+    }
+
+    body.theme-light .modal-tabs button {
+      background: #f5f9ff;
+      border-color: var(--border-soft);
+      color: #163243;
     }
 
     .modal-section {
@@ -538,16 +1027,23 @@
       margin-top: 4px;
       padding: 6px 8px;
       border-radius: 6px;
-      border: 1px solid #00e5ff;
+      border: 1px solid var(--accent);
       background: #04121c;
-      color: #e9fbff;
+      color: var(--text-main);
       font-size: 12px;
       outline: none;
     }
 
+    body.theme-light .modal input[type="text"],
+    body.theme-light .modal input[type="number"] {
+      background: #f5f9ff;
+      border-color: var(--border-soft);
+      color: #0b2130;
+    }
+
     .modal-small {
       font-size: 11px;
-      color: #9df4ff;
+      color: var(--text-soft);
       margin-top: 2px;
     }
 
@@ -556,148 +1052,75 @@
       width: 100%;
       padding: 6px 0;
       border-radius: 8px;
-      border: 1px solid #24ffd0;
+      border: 1px solid var(--accent-alt);
       background: #033023;
       color: #c4ffe6;
       font-size: 12px;
       cursor: pointer;
     }
 
+    body.theme-light .modal button.action {
+      background: #ffffff;
+      border-color: var(--accent-alt);
+      color: #104533;
+    }
+
     .key-display {
       margin-top: 6px;
       padding: 6px 8px;
       border-radius: 6px;
-      border: 1px dashed #24ffd0;
+      border: 1px dashed var(--accent-alt);
       background: #020e12;
       font-size: 12px;
-      color: #aaf7ff;
+      color: var(--text-soft);
+      white-space: pre-line;
+    }
+
+    body.theme-light .key-display {
+      background: #f3f8ff;
+      color: #134057;
     }
 
     .modal-message {
       margin-top: 6px;
       font-size: 11px;
-      color: #c4f7ff;
+      color: var(--text-soft);
       min-height: 14px;
-    }
-
-    .my-runs-btn {
-      margin-top: 6px;
-      width: 100%;
-      padding: 4px 0;
-      border-radius: 6px;
-      border: 1px solid #315d73;
-      background: #031019;
-      color: #c4f7ff;
-      font-size: 11px;
-      cursor: pointer;
-    }
-
-    .my-runs-btn:hover {
-      border-color: #24ffd0;
-      background: #033023;
-    }
-
-    .my-runs-panel {
-      margin-top: 6px;
-      padding: 6px 8px;
-      border-radius: 8px;
-      border: 1px solid rgba(0, 228, 255, 0.35);
-      background: rgba(1, 10, 18, 0.9);
-    }
-
-    .my-runs-title {
-      font-size: 11px;
-      font-weight: 600;
-      color: #8feaff;
-      margin-bottom: 4px;
-    }
-
-    .my-runs-section {
-      margin-bottom: 6px;
-    }
-
-    .my-runs-subtitle {
-      font-size: 11px;
-      font-weight: 600;
-      color: #9fe9ff;
-      margin-bottom: 2px;
-    }
-
-    .my-runs-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      max-height: 150px;
-      overflow-y: auto;
-      font-size: 11px;
-      color: #e3f9ff;
-    }
-
-    .my-runs-list li {
-      padding: 2px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px;
-    }
-
-    .my-runs-empty {
-      font-size: 11px;
-      color: #9eb5c7;
-      margin-top: 2px;
-    }
-
-    .my-run-mainline {
-      flex: 1;
-    }
-
-    .my-run-sold-toggle {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 10px;
-      color: #9fe9ff;
-      white-space: nowrap;
-    }
-
-    .my-run-sold-toggle input[type="checkbox"] {
-      margin: 0;
-      width: 12px;
-      height: 12px;
-    }
-
-    .app-version {
-      margin-top: 10px;
-      font-size: 11px;
-      color: #7fc8ff;
-      text-align: right;
-      opacity: 0.9;
     }
   </style>
 </head>
-<body>
+<body class="theme-neon">
 <div class="overlay">
   <div class="container">
-    <div class="lang-switch">
-      <span id="langSwitchLabel">Langue :</span>
-      <select id="langSelect">
-        <option value="fr">FR</option>
-        <option value="en">EN</option>
-      </select>
+    <div class="top-bar">
+      <div class="theme-switch">
+        <label for="themeSelect">Thème :</label>
+        <select id="themeSelect">
+          <option value="neon">Neon</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </div>
+      <div class="lang-switch">
+        <span id="langSwitchLabel">Langue :</span>
+        <select id="langSelect">
+          <option value="fr">FR</option>
+          <option value="en">EN</option>
+        </select>
+      </div>
     </div>
 
-    <h1 id="titleMain">SALVAGE CALCULATOR 4.4</h1>
+    <h1 id="titleMain">SALVAGE CALCULATOR 4.6</h1>
     <div id="subText" class="sub">
       Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.
     </div>
 
-    <div class="info-panel" style="margin:10px auto 15px; max-width:600px; font-size:13px; color:#aeeaff; background:rgba(0,20,35,0.35); padding:10px 14px; border-left:3px solid #24ffd0; border-radius:6px;">
+    <div class="info-panel" id="infoPanel">
       <b>Comment utiliser l’outil :</b><br>
       1. Choisis ton vaisseau et entre tes SCU de salvage.<br>
       2. Compare automatiquement la rentabilité RMC vs CMAT.<br>
-      3. Crée/import un profil pour sauvegarder tes runs.<br>
-      4. Le leaderboard est local (pour l’instant), une version communautaire arrive bientôt.
+      3. Crée/import un profil (pseudo + clé) pour sauvegarder tes runs.<br>
+      4. Le leaderboard est encore local, une version communautaire arrive bientôt.
     </div>
 
     <div class="user-box">
@@ -766,8 +1189,8 @@
 
         <div id="smallNote" class="small-note">
           Pour chaque SCU saisie :
-          <br>- Light ships : seul le RMC varie (pas de CMAT)
-          <br>- Reclaimer : comparaison RMC vs CMAT.
+          - Light ships : seul le RMC varie (pas de CMAT)
+          - Reclaimer : comparaison RMC vs CMAT.
         </div>
         <div id="apiStatus" class="api-status">Récupération des prix UEX…</div>
       </div>
@@ -781,6 +1204,7 @@
               Salvation / Vulture / Fortune (RMC uniquement)
             </div>
             <div class="result-values" id="rmcLightValues"></div>
+            <div class="result-extra" id="rmcLightExtra"></div>
             <div class="decision" id="rmcLightDecision"></div>
           </div>
 
@@ -789,6 +1213,7 @@
               Reclaimer (peut choisir RMC ou CMAT)
             </div>
             <div class="result-values" id="rmcRecValues"></div>
+            <div class="result-extra" id="rmcRecExtra"></div>
             <div class="decision" id="rmcRecDecision"></div>
           </div>
         </div>
@@ -801,6 +1226,7 @@
               Salvation / Vulture / Fortune
             </div>
             <div class="result-values" id="cmatLightValues"></div>
+            <div class="result-extra" id="cmatLightExtra"></div>
             <div class="decision" id="cmatLightDecision"></div>
           </div>
 
@@ -809,6 +1235,7 @@
               Reclaimer (15 % de conversion en CMAT)
             </div>
             <div class="result-values" id="cmatRecValues"></div>
+            <div class="result-extra" id="cmatRecExtra"></div>
             <div class="decision" id="cmatRecDecision"></div>
           </div>
         </div>
@@ -828,13 +1255,18 @@
         </div>
 
         <div class="leaderboard-panel">
-          <div class="leaderboard-title">Leaderboard – Salvage (prototype local)</div>
+          <div class="leaderboard-title-row">
+            <div class="leaderboard-title">Leaderboard – Salvage (local)</div>
+            <div class="leaderboard-badges">
+              <span class="badge-local-beta">Local Beta</span>
+            </div>
+          </div>
           <div id="leaderboardSub" class="leaderboard-sub">
             Classement basé sur le nombre de runs et les bénéfices théoriques (local au navigateur pour l’instant).
           </div>
 
           <button id="toggleMyRunsBtn" type="button" class="my-runs-btn">Voir mes runs détaillés</button>
-          <div id="myRunsPanel" class="my-runs-panel" style="display:none;">
+          <div id="myRunsPanel" class="my-runs-panel">
             <div id="myRunsTitle" class="my-runs-title">Mes runs enregistrés</div>
 
             <div class="my-runs-section">
@@ -865,6 +1297,9 @@
     </div>
 
     <div id="appVersion" class="app-version"></div>
+    <div class="app-footer-brand">
+      Powered by <span>Shog Salvage Tools</span>
+    </div>
   </div>
 </div>
 
@@ -910,13 +1345,14 @@
 
 <script>
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V4.5";
+const APP_VERSION = "V4.6";
 
 let currentLang = localStorage.getItem("salvageCalcLang") || "fr";
+let currentTheme = localStorage.getItem("salvageCalcTheme") || "neon";
 
 const i18n = {
   fr: {
-    titleMain: "SALVAGE CALCULATOR 4.4",
+    titleMain: "SALVAGE CALCULATOR 4.6",
     subText: "Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.",
     entriesTitle: "Entrées",
     labelPrixRmc: "Prix RMC (aUEC / SCU)",
@@ -929,7 +1365,7 @@ const i18n = {
     labelScuReclaimer: "SCU de salvage traitées – Reclaimer (peut vendre en RMC ou produire du CMAT ~15 %)",
     tagLight: "Vaisseaux légers : hull scraping → RMC uniquement",
     tagReclaimer: "Reclaimer : hull + structural salvage → RMC + CMAT (~15% → CMAT)",
-    smallNote: "Pour chaque SCU saisie :\\n- Light ships : seul le RMC varie (pas de CMAT)\\n- Reclaimer : comparaison RMC vs CMAT.",
+    smallNote: "Pour chaque SCU saisie :\n- Light ships : seul le RMC varie (pas de CMAT)\n- Reclaimer : comparaison RMC vs CMAT.",
     apiFetching: "Récupération des prix UEX…",
     apiErrorPrefix: "Erreur API : ",
     apiUpdated: (rmcName, cmatName) => `Prix mis à jour (RMC: ${rmcName} / CMAT: ${cmatName}).`,
@@ -944,17 +1380,20 @@ const i18n = {
     graphNoData: "Aucune donnée historique disponible.",
     graphError: "Impossible de charger l'historique.",
     langSwitchLabel: "Langue :",
+    themeLabel: "Thème :",
     lightShipsInfo: "ℹ Les vaisseaux légers (Vulture / Salvation / Fortune) ne produisent que du RMC, pas de CMAT.",
-    lightShipsNoCmatText: "Les vaisseaux légers ne génèrent pas de Construction Materials (CMAT).\\nSeul le Reclaimer (et futurs heavy salvage) peuvent produire du CMAT.",
+    lightShipsNoCmatText: "Les vaisseaux légers ne génèrent pas de Construction Materials (CMAT).\nSeul le Reclaimer (et futurs heavy salvage) peuvent produire du CMAT.",
     loopCmatBetter: diff => `🟢 Loop CMAT (Construction Materials) plus rentable que RMC (+${diff} aUEC).`,
     loopRmcBetter: diff => `🟢 Loop RMC plus rentable que CMAT (+${diff} aUEC).`,
     loopsEqual: "ℹ Les deux loops rapportent la même chose.",
-    rmcLightValues: (sl, rmcVal) => `SCU de salvage utilisées : ${sl} SCU\\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
-    rmcRecValues: (sr, rmcVal) => `SCU de salvage utilisées : ${sr} SCU\\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
-    cmatRecValues: (scuCmat, valCmat) => `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\\nValeur si tu vends en CMAT : ${valCmat} aUEC`,
+    rmcLightValues: (sl, rmcVal) => `SCU de salvage utilisées : ${sl} SCU\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
+    rmcRecValues: (sr, rmcVal) => `SCU de salvage utilisées : ${sr} SCU\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
+    cmatRecValues: (scuCmat, valCmat) => `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\nValeur si tu vends en CMAT : ${valCmat} aUEC`,
+    cmatRecExtra: (scuRec, scuCmat, pctCmat, pctTotal) =>
+      `Sur ${scuRec} SCU Reclaimer, ${scuCmat} SCU partent en CMAT (~${pctCmat}% du salvage Reclaimer, ~${pctTotal}% du total salvage).`,
     leaderboardEmpty: "Aucun run enregistré pour l'instant.",
-    leaderboardLine: (nickname, runs, profit, favShip, totalRmc) =>
-      `${nickname} – ${runs} runs · ${profit} aUEC théoriques · Ship fav : ${favShip} · Total RMC : ${totalRmc} SCU`,
+    leaderboardLine: (nickname, runs, profit, favShip, totalRmc, isAdmin) =>
+      `${nickname}${isAdmin ? " [ADMIN]" : ""} – ${runs} runs · ${profit} aUEC théoriques · Ship fav : ${favShip} · Total RMC : ${totalRmc} SCU`,
     leaderboardYou: "Vous",
     leaderboardSub: "Leaderboard local : classement basé sur tes runs enregistrés. Les données sont stockées sur ton navigateur uniquement (pour l’instant).",
     labelShipSelect: "Vaisseau utilisé pour ce run",
@@ -985,7 +1424,7 @@ const i18n = {
     }
   },
   en: {
-    titleMain: "SALVAGE CALCULATOR 4.4",
+    titleMain: "SALVAGE CALCULATOR 4.6",
     subText: "Compare the profitability between <b>selling your salvage as RMC</b> or <b>processing it into CMAT (Construction Materials)</b>.",
     entriesTitle: "Inputs",
     labelPrixRmc: "RMC price (aUEC / SCU)",
@@ -998,7 +1437,7 @@ const i18n = {
     labelScuReclaimer: "Processed salvage SCU – Reclaimer (can sell as RMC or produce CMAT ~15%)",
     tagLight: "Light salvage ships: hull scraping → RMC only",
     tagReclaimer: "Reclaimer: hull + structural salvage → RMC + CMAT (~15% → CMAT)",
-    smallNote: "For each SCU value:\\n- Light ships: only RMC changes (no CMAT)\\n- Reclaimer: compares RMC vs CMAT.",
+    smallNote: "For each SCU value:\n- Light ships: only RMC changes (no CMAT)\n- Reclaimer: compares RMC vs CMAT.",
     apiFetching: "Fetching UEX prices…",
     apiErrorPrefix: "API error: ",
     apiUpdated: (rmcName, cmatName) => `Prices updated (RMC: ${rmcName} / CMAT: ${cmatName}).`,
@@ -1013,17 +1452,20 @@ const i18n = {
     graphNoData: "No historical data available.",
     graphError: "Unable to load history.",
     langSwitchLabel: "Language:",
+    themeLabel: "Theme:",
     lightShipsInfo: "ℹ Light salvage ships (Vulture / Salvation / Fortune) only produce RMC, not CMAT.",
-    lightShipsNoCmatText: "Light salvage ships do not generate Construction Materials (CMAT).\\nOnly the Reclaimer (and future heavy salvage) can produce CMAT.",
+    lightShipsNoCmatText: "Light salvage ships do not generate Construction Materials (CMAT).\nOnly the Reclaimer (and future heavy salvage) can produce CMAT.",
     loopCmatBetter: diff => `🟢 CMAT loop (Construction Materials) is more profitable than RMC (+${diff} aUEC).`,
     loopRmcBetter: diff => `🟢 RMC loop is more profitable than CMAT (+${diff} aUEC).`,
     loopsEqual: "ℹ Both loops yield the same profit.",
-    rmcLightValues: (sl, rmcVal) => `Salvage SCU used: ${sl} SCU\\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
-    rmcRecValues: (sr, rmcVal) => `Salvage SCU used: ${sr} SCU\\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
-    cmatRecValues: (scuCmat, valCmat) => `Salvage SCU converted to CMAT (15% yield): ${scuCmat} SCU\\nValue if sold as CMAT: ${valCmat} aUEC`,
+    rmcLightValues: (sl, rmcVal) => `Salvage SCU used: ${sl} SCU\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
+    rmcRecValues: (sr, rmcVal) => `Salvage SCU used: ${sr} SCU\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
+    cmatRecValues: (scuCmat, valCmat) => `Salvage SCU converted to CMAT (15% yield): ${scuCmat} SCU\nValue if sold as CMAT: ${valCmat} aUEC`,
+    cmatRecExtra: (scuRec, scuCmat, pctCmat, pctTotal) =>
+      `Out of ${scuRec} Reclaimer SCU, ${scuCmat} SCU become CMAT (~${pctCmat}% of Reclaimer salvage, ~${pctTotal}% of total salvage).`,
     leaderboardEmpty: "No run recorded yet.",
-    leaderboardLine: (nickname, runs, profit, favShip, totalRmc) =>
-      `${nickname} – ${runs} runs · ${profit} theoretical aUEC · Fav ship: ${favShip} · Total RMC: ${totalRmc} SCU`,
+    leaderboardLine: (nickname, runs, profit, favShip, totalRmc, isAdmin) =>
+      `${nickname}${isAdmin ? " [ADMIN]" : ""} – ${runs} runs · ${profit} theoretical aUEC · Fav ship: ${favShip} · Total RMC: ${totalRmc} SCU`,
     leaderboardYou: "You",
     leaderboardSub: "Local leaderboard: sorted from your saved runs. Data is stored locally in your browser (for now).",
     labelShipSelect: "Ship used for this run",
@@ -1061,12 +1503,16 @@ const scuLightInput = document.getElementById("scuLight");
 const scuRecInput   = document.getElementById("scuReclaimer");
 const apiStatusEl   = document.getElementById("apiStatus");
 const rmcLightValuesEl = document.getElementById("rmcLightValues");
+const rmcLightExtraEl = document.getElementById("rmcLightExtra");
 const rmcLightDecisionEl = document.getElementById("rmcLightDecision");
 const rmcRecValuesEl = document.getElementById("rmcRecValues");
+const rmcRecExtraEl = document.getElementById("rmcRecExtra");
 const rmcRecDecisionEl = document.getElementById("rmcRecDecision");
 const cmatLightValuesEl = document.getElementById("cmatLightValues");
+const cmatLightExtraEl = document.getElementById("cmatLightExtra");
 const cmatLightDecisionEl = document.getElementById("cmatLightDecision");
 const cmatRecValuesEl = document.getElementById("cmatRecValues");
+const cmatRecExtraEl = document.getElementById("cmatRecExtra");
 const cmatRecDecisionEl = document.getElementById("cmatRecDecision");
 const graphMessage  = document.getElementById("graphMessage");
 const chartCanvas   = document.getElementById("cmatChart");
@@ -1096,6 +1542,7 @@ const cmatRecHeadEl = document.getElementById("cmatRecHead");
 const graphTitleEl = document.getElementById("graphTitle");
 const graphSubEl = document.getElementById("graphSub");
 const langSwitchLabelEl = document.getElementById("langSwitchLabel");
+const themeSelectEl = document.getElementById("themeSelect");
 const langSelectEl = document.getElementById("langSelect");
 const appVersionEl = document.getElementById("appVersion");
 
@@ -1105,6 +1552,7 @@ const clearMyRunsBtnEl = document.getElementById("clearMyRunsBtn");
 const clearAllRunsBtnEl = document.getElementById("clearAllRunsBtn");
 const leaderboardActionMsgEl = document.getElementById("leaderboardActionMsg");
 const leaderboardSubEl = document.getElementById("leaderboardSub");
+
 const toggleMyRunsBtnEl = document.getElementById("toggleMyRunsBtn");
 const myRunsPanelEl = document.getElementById("myRunsPanel");
 const myRunsActiveListEl = document.getElementById("myRunsActiveList");
@@ -1150,6 +1598,15 @@ function isAdminUser(user) {
 function updateAdminUI() {
   if (!clearAllRunsBtnEl) return;
   clearAllRunsBtnEl.style.display = isAdminUser(currentUser) ? "block" : "none";
+
+  if (userInfoEl && currentUser && isAdminUser(currentUser)) {
+    if (!userInfoEl.querySelector(".admin-badge-inline")) {
+      const badge = document.createElement("span");
+      badge.className = "admin-badge-inline";
+      badge.textContent = "ADMIN";
+      userInfoEl.appendChild(badge);
+    }
+  }
 }
 
 function generateSecret() {
@@ -1186,6 +1643,7 @@ function saveUserProfile(user) {
   updateUserUI();
   updateAdminUI();
   updateLocalLeaderboard();
+  buildMyRunsList();
 }
 
 function updateUserUI() {
@@ -1238,10 +1696,10 @@ function ensureUserProfile() {
     updateAdminUI();
     return;
   }
-  openProfileModal("create");
 }
 
 function handleCreateProfile() {
+  const t = i18n[currentLang] || i18n.fr;
   let nickname = (createNicknameInput.value || "").trim();
   if (!nickname) nickname = "Salvager";
   const secret = generateSecret();
@@ -1250,13 +1708,14 @@ function handleCreateProfile() {
   saveUserProfile(user);
   createdKeyDisplay.style.display = "block";
   createdKeyDisplay.textContent =
-    "Profil créé !\\nPseudo : " + nickname +
-    "\\nClé privée : " + secret +
-    "\\n\\nNote bien cette clé pour récupérer ton profil sur un autre navigateur.";
+    "Profil créé !\nPseudo : " + nickname +
+    "\nClé privée : " + secret +
+    "\n\nNote bien cette clé pour récupérer ton profil sur un autre navigateur.";
   modalMessageEl.textContent = "";
 }
 
 function handleImportProfile() {
+  const t = i18n[currentLang] || i18n.fr;
   const nickname = (importNicknameInput.value || "").trim();
   const secret = (importSecretInput.value || "").trim();
 
@@ -1321,7 +1780,8 @@ function updateLocalLeaderboard() {
         runs: 0,
         totalProfit: 0,
         totalRmc: 0,
-        ships: {}
+        ships: {},
+        isAdmin: r.isAdmin || false
       };
     }
     const u = perUser[uid];
@@ -1330,6 +1790,9 @@ function updateLocalLeaderboard() {
     u.totalRmc += Number(r.rmc) || 0;
     if (r.ship) {
       u.ships[r.ship] = (u.ships[r.ship] || 0) + 1;
+    }
+    if (r.isAdmin) {
+      u.isAdmin = true;
     }
   });
 
@@ -1350,17 +1813,25 @@ function updateLocalLeaderboard() {
     const totalRmcStr = format(u.totalRmc);
 
     const isCurrent = currentUser && u.uid === currentUser.id;
-    const badge = isCurrent
-      ? `<span class="leaderboard-badge">${t.leaderboardYou}</span> `
-      : "";
+    const isAdmin = !!u.isAdmin;
 
-    li.innerHTML = badge + t.leaderboardLine(
+    let html = "";
+    if (isCurrent) {
+      html += `<span class="leaderboard-badge-you">${t.leaderboardYou}</span> `;
+    }
+    html += t.leaderboardLine(
       u.nickname,
       u.runs,
       profitStr,
       favShip,
-      totalRmcStr
+      totalRmcStr,
+      isAdmin
     );
+    if (isAdmin) {
+      html += ' <span class="leaderboard-badge-admin">ADMIN</span>';
+    }
+
+    li.innerHTML = html;
 
     if (isCurrent) {
       li.classList.add("leaderboard-item-current");
@@ -1389,6 +1860,7 @@ function handleSaveRun() {
   }
 
   const ship = shipSelectEl.value || (sr > 0 ? "Reclaimer" : "Vulture");
+  localStorage.setItem("salvageCalcLastShip", ship);
 
   const rmcLightVal = sl * prixRMC;
   const rmcRecVal   = sr * prixRMC;
@@ -1418,6 +1890,8 @@ function handleSaveRun() {
     rmcLightVal: rmcLightVal,
     rmcRecVal: rmcRecVal,
     cmatRecVal: cmatRecVal,
+    cmatScu: cmatRecScu,
+    isAdmin: isAdminUser(currentUser),
     sold: false
   };
 
@@ -1425,13 +1899,19 @@ function handleSaveRun() {
   runs.push(newRun);
   saveRuns(runs);
   updateLocalLeaderboard();
+  buildMyRunsList();
 
   saveRunMessageEl.textContent = t.saveRunSuccess;
+  saveRunMessageEl.style.opacity = "1";
   setTimeout(() => {
-    if (saveRunMessageEl.textContent === t.saveRunSuccess) {
+    saveRunMessageEl.style.transition = "opacity 0.4s ease-out";
+    saveRunMessageEl.style.opacity = "0";
+    setTimeout(() => {
       saveRunMessageEl.textContent = "";
-    }
-  }, 4000);
+      saveRunMessageEl.style.transition = "";
+      saveRunMessageEl.style.opacity = "";
+    }, 400);
+  }, 2500);
 }
 
 function clearMyRuns() {
@@ -1447,6 +1927,7 @@ function clearMyRuns() {
   const filtered = stored.filter(r => r.userId !== currentUser.id);
   saveRuns(filtered);
   updateLocalLeaderboard();
+  buildMyRunsList();
   leaderboardActionMsgEl.textContent = t.clearMyRunsDone;
 }
 
@@ -1455,6 +1936,7 @@ function clearAllRuns() {
   leaderboardActionMsgEl.textContent = "";
   saveRuns([]);
   updateLocalLeaderboard();
+  buildMyRunsList();
   leaderboardActionMsgEl.textContent = t.clearAllRunsDone;
 }
 
@@ -1518,6 +2000,7 @@ function buildMyRunsList() {
       const rmcValStr = rmcValRaw ? format(rmcValRaw) : "";
       const cmatValRaw = r.cmatRecVal || 0;
       const cmatValStr = cmatValRaw ? format(cmatValRaw) : "";
+      const cmatScu = r.cmatScu || 0;
 
       const scuTotalStr = scuTotal != null ? format(scuTotal) : "";
       const scuLightStr = scuTotal != null ? format(scuLight) : "";
@@ -1579,6 +2062,8 @@ function buildMyRunsList() {
     myRunsSoldEmptyEl.style.display = "none";
     sold.slice(0, maxToShow).forEach((r, idx) => {
       const li = document.createElement("li");
+      li.classList.add("my-run-row-sold");
+
       const main = document.createElement("div");
       main.className = "my-run-mainline";
 
@@ -1592,6 +2077,7 @@ function buildMyRunsList() {
       const rmcValStr = rmcValRaw ? format(rmcValRaw) : "";
       const cmatValRaw = r.cmatRecVal || 0;
       const cmatValStr = cmatValRaw ? format(cmatValRaw) : "";
+      const cmatScu = r.cmatScu || 0;
 
       const scuTotalStr = scuTotal != null ? format(scuTotal) : "";
       const scuLightStr = scuTotal != null ? format(scuLight) : "";
@@ -1649,13 +2135,27 @@ function buildMyRunsList() {
 
 function toggleMyRunsPanel() {
   if (!myRunsPanelEl) return;
-  const isHidden = myRunsPanelEl.style.display === "none" || myRunsPanelEl.style.display === "";
-  if (isHidden) {
-    myRunsPanelEl.style.display = "block";
+  const isOpen = myRunsPanelEl.classList.contains("open");
+  if (!isOpen) {
+    myRunsPanelEl.classList.add("open");
     buildMyRunsList();
   } else {
-    myRunsPanelEl.style.display = "none";
+    myRunsPanelEl.classList.remove("open");
   }
+}
+
+function applyTheme() {
+  const body = document.body;
+  body.classList.remove("theme-neon", "theme-dark", "theme-light");
+  if (currentTheme === "dark") {
+    body.classList.add("theme-dark");
+  } else if (currentTheme === "light") {
+    body.classList.add("theme-light");
+  } else {
+    body.classList.add("theme-neon");
+    currentTheme = "neon";
+  }
+  themeSelectEl.value = currentTheme;
 }
 
 function applyLanguage() {
@@ -1687,7 +2187,6 @@ function applyLanguage() {
   langSwitchLabelEl.textContent = t.langSwitchLabel;
   labelShipSelectEl.textContent = t.labelShipSelect;
   leaderboardEmptyEl.textContent = t.leaderboardEmpty;
-
   clearMyRunsBtnEl.textContent = t.clearMyRunsBtn;
   clearAllRunsBtnEl.textContent = t.clearAllRunsBtn;
 
@@ -1719,6 +2218,8 @@ function applyLanguage() {
 
   updateAdminUI();
   recalc();
+  updateLocalLeaderboard();
+  buildMyRunsList();
 }
 
 function saveState() {
@@ -1728,6 +2229,7 @@ function saveState() {
   };
   localStorage.setItem("salvageCalcState", JSON.stringify(state));
   localStorage.setItem("salvageCalcLang", currentLang);
+  localStorage.setItem("salvageCalcTheme", currentTheme);
 }
 
 function updateComparison(rmcValue, cmatValue, rmcDecEl, cmatDecEl) {
@@ -1774,14 +2276,12 @@ function recalc() {
 
   const rmcLightVal = sl * prixRMC;
   rmcLightValuesEl.textContent = t.rmcLightValues(format(sl), format(rmcLightVal));
-  if (sl > 0) {
-    rmcLightDecisionEl.textContent = t.lightShipsInfo;
-  } else {
-    rmcLightDecisionEl.textContent = "";
-  }
+  rmcLightExtraEl.textContent = sl > 0 ? t.lightShipsInfo : "";
+  rmcLightDecisionEl.textContent = "";
   rmcLightDecisionEl.className = "decision";
 
   cmatLightValuesEl.textContent = t.lightShipsNoCmatText;
+  cmatLightExtraEl.textContent = "";
   cmatLightDecisionEl.textContent = "";
   cmatLightDecisionEl.className = "decision";
 
@@ -1794,6 +2294,21 @@ function recalc() {
     format(cmatRecScu),
     format(cmatRecVal)
   );
+
+  const totalScu = sl + sr;
+  const pctCmatReclaimer = sr > 0 ? (cmatRecScu / sr) * 100 : 0;
+  const pctCmatTotal = totalScu > 0 ? (cmatRecScu / totalScu) * 100 : 0;
+
+  if (sr > 0) {
+    cmatRecExtraEl.textContent = t.cmatRecExtra(
+      format(sr),
+      format(cmatRecScu),
+      pctCmatReclaimer.toFixed(1),
+      pctCmatTotal.toFixed(1)
+    );
+  } else {
+    cmatRecExtraEl.textContent = "";
+  }
 
   updateComparison(rmcRecVal, cmatRecVal, rmcRecDecisionEl, cmatRecDecisionEl);
 }
@@ -1809,6 +2324,13 @@ langSelectEl.addEventListener("change", () => {
   currentLang = langSelectEl.value || "fr";
   saveState();
   applyLanguage();
+  myRunsPanelEl.classList.remove("open");
+});
+
+themeSelectEl.addEventListener("change", () => {
+  currentTheme = themeSelectEl.value || "neon";
+  applyTheme();
+  saveState();
 });
 
 if (changeUserBtn) {
@@ -1908,7 +2430,7 @@ function renderChart(rmcHist, cmatHist) {
       plugins: {
         legend: {
           labels: {
-            color: "#e9fbff",
+            color: getComputedStyle(document.body).getPropertyValue("--text-main") || "#e9fbff",
             font: { size: 11 }
           }
         }
@@ -1916,7 +2438,7 @@ function renderChart(rmcHist, cmatHist) {
       scales: {
         x: {
           ticks: {
-            color: "#00f0ff",
+            color: getComputedStyle(document.body).getPropertyValue("--accent-strong") || "#00f0ff",
             maxRotation: 60,
             minRotation: 0,
             autoSkip: true,
@@ -1925,7 +2447,9 @@ function renderChart(rmcHist, cmatHist) {
           grid: { display: false }
         },
         y: {
-          ticks: { color: "#00f0ff" },
+          ticks: {
+            color: getComputedStyle(document.body).getPropertyValue("--accent-strong") || "#00f0ff"
+          },
           grid: { color: "rgba(255,255,255,0.06)" }
         }
       }
@@ -1983,13 +2507,25 @@ window.addEventListener("load", () => {
     }
   } catch (_) {}
 
+  const savedLastShip = localStorage.getItem("salvageCalcLastShip");
+  if (savedLastShip && shipSelectEl.querySelector(`option[value="${savedLastShip}"]`)) {
+    shipSelectEl.value = savedLastShip;
+  }
+
+  currentLang = localStorage.getItem("salvageCalcLang") || currentLang;
+  currentTheme = localStorage.getItem("salvageCalcTheme") || currentTheme;
+
   langSelectEl.value = currentLang;
+  themeSelectEl.value = currentTheme;
+
+  applyTheme();
   ensureUserProfile();
   updateUserUI();
   updateAdminUI();
 
   applyLanguage();
   updateLocalLeaderboard();
+  buildMyRunsList();
 
   fetchUexPrices();
 });
