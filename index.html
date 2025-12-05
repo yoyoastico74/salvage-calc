@@ -89,7 +89,7 @@
       cursor: pointer;
     }
 
-    /* BOX PROFIL UTILISATEUR + LEADERBOARD */
+    /* BOX PROFIL UTILISATEUR */
     .user-box {
       margin: 0 auto 16px;
       max-width: 480px;
@@ -121,6 +121,7 @@
       border-color: #24ffd0;
     }
 
+    /* LEADERBOARD (prototype local) */
     .leaderboard-panel {
       margin-top: 14px;
       padding: 10px 12px 12px;
@@ -368,6 +369,150 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* ===== MODAL PROFIL ===== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 5, 20, 0.78);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: 360px;
+      max-width: 92%;
+      background: linear-gradient(160deg, #041425, #020812);
+      border-radius: 12px;
+      border: 1px solid #00e5ff;
+      box-shadow: 0 0 24px rgba(0,0,0,0.9);
+      padding: 12px 14px 14px;
+      color: #e9fbff;
+      font-size: 13px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 15px;
+      color: #00f7ff;
+    }
+
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: #aaf7ff;
+      font-size: 18px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .modal-tabs button {
+      flex: 1;
+      border-radius: 999px;
+      border: 1px solid #00c4ff;
+      background: #03111b;
+      color: #aaf7ff;
+      font-size: 12px;
+      padding: 4px 0;
+      cursor: pointer;
+    }
+
+    .modal-tabs button.active {
+      background: #00c4ff;
+      color: #021019;
+      font-weight: 600;
+    }
+
+    .modal-section {
+      display: none;
+    }
+    .modal-section.active {
+      display: block;
+    }
+
+    .modal label {
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 6px;
+      display: block;
+    }
+
+    .modal input[type="text"],
+    .modal input[type="number"] {
+      width: 100%;
+      margin-top: 4px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #00e5ff;
+      background: #04121c;
+      color: #e9fbff;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .modal input[type="text"]:focus,
+    .modal input[type="number"]:focus {
+      border-color: #24ffd0;
+      box-shadow: 0 0 0 1px rgba(36,255,208,0.6);
+    }
+
+    .modal-small {
+      font-size: 11px;
+      color: #9df4ff;
+      margin-top: 2px;
+    }
+
+    .modal button.action {
+      margin-top: 8px;
+      width: 100%;
+      padding: 6px 0;
+      border-radius: 8px;
+      border: 1px solid #24ffd0;
+      background: #033023;
+      color: #c4ffe6;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .modal button.action:hover {
+      background: #04a371;
+    }
+
+    .key-display {
+      margin-top: 6px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px dashed #24ffd0;
+      background: #020e12;
+      font-size: 12px;
+      color: #aaf7ff;
+    }
+
+    .modal-message {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #c4f7ff;
+      min-height: 14px;
+    }
   </style>
 </head>
 
@@ -389,9 +534,8 @@
     </div>
     <div class="user-box">
       <span id="userInfo">Profil : —</span>
-      <button id="changeUserBtn" type="button">Changer / Importer</button>
+      <button id="changeUserBtn" type="button">Gérer mon profil</button>
     </div>
-
 
     <!-- ======================= SECTION PRINCIPALE (Entrées + Résultats) ======================= -->
     <div class="grid-main">
@@ -504,21 +648,67 @@
       </div>
       <canvas id="cmatChart" height="120"></canvas>
       <div id="graphMessage"></div>
-    
-    <div class="leaderboard-panel">
-      <div class="leaderboard-title">Leaderboard – Salvage (prototype local/cloud)</div>
-      <div class="leaderboard-sub">
-        Classement basé sur le nombre de runs et les bénéfices théoriques. (Affichage démo tant que le backend n'est pas branché.)
-      </div>
-      <ul id="leaderboardList" class="leaderboard-list"></ul>
-      <div id="leaderboardEmpty" class="leaderboard-empty" style="display:none;">
-        Aucun run enregistré pour l'instant.
+
+      <div class="leaderboard-panel">
+        <div class="leaderboard-title">Leaderboard – Salvage (prototype local)</div>
+        <div class="leaderboard-sub">
+          Classement basé sur le nombre de runs et les bénéfices théoriques (local au navigateur pour l’instant).
+        </div>
+        <ul id="leaderboardList" class="leaderboard-list"></ul>
+        <div id="leaderboardEmpty" class="leaderboard-empty" style="display:none;">
+          Aucun run enregistré pour l'instant.
+        </div>
       </div>
     </div>
-</div>
-
   </div> <!-- Fin container -->
 </div> <!-- Fin overlay -->
+
+<!-- ===== MODAL PROFIL ===== -->
+<div id="profileModal" class="modal-backdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h2>Profil Salvage Calculator</h2>
+      <button id="modalCloseBtn" class="modal-close-btn" type="button">×</button>
+    </div>
+    <div class="modal-tabs">
+      <button id="tabCreateProfile" class="active" type="button">Créer un profil</button>
+      <button id="tabImportProfile" type="button">Importer un profil</button>
+    </div>
+
+    <div id="modalCreateSection" class="modal-section active">
+      <label for="createNickname">Pseudo</label>
+      <input id="createNickname" type="text" placeholder="Ex : Salvager_001" />
+
+      <div class="modal-small">
+        Un profil utilisera ce pseudo et une clé privée générée automatiquement.
+      </div>
+
+      <button id="createProfileBtn" class="action" type="button">
+        Créer le profil
+      </button>
+
+      <div id="createdKeyDisplay" class="key-display" style="display:none;"></div>
+    </div>
+
+    <div id="modalImportSection" class="modal-section">
+      <label for="importNickname">Pseudo</label>
+      <input id="importNickname" type="text" placeholder="Ton pseudo" />
+
+      <label for="importSecret">Clé privée (6 chiffres)</label>
+      <input id="importSecret" type="text" maxlength="6" placeholder="123456" />
+
+      <div class="modal-small">
+        Utilise le pseudo + la clé fournie lors de la création de ton profil.
+      </div>
+
+      <button id="importProfileBtn" class="action" type="button">
+        Importer ce profil
+      </button>
+    </div>
+
+    <div id="modalMessage" class="modal-message"></div>
+  </div>
+</div>
 
 <!-- ======================= SCRIPTS ======================= -->
 <script>
@@ -543,7 +733,7 @@ const i18n = {
     tagLight: "Vaisseaux légers : hull scraping → RMC uniquement",
     tagReclaimer: "Reclaimer : hull + structural salvage → RMC + CMAT (~15% → CMAT)",
     smallNote:
-      "Pour chaque SCU saisie :\\n- Light ships : seul le RMC varie (pas de CMAT)\\n- Reclaimer : comparaison RMC vs CMAT.",
+      "Pour chaque SCU saisie :\n- Light ships : seul le RMC varie (pas de CMAT)\n- Reclaimer : comparaison RMC vs CMAT.",
     apiFetching: "Récupération des prix UEX…",
     apiErrorPrefix: "Erreur API : ",
     apiUpdated: (rmcName, cmatName) =>
@@ -562,16 +752,16 @@ const i18n = {
     lightShipsInfo:
       "ℹ Les vaisseaux légers (Vulture / Salvation / Fortune) ne produisent que du RMC, pas de CMAT.",
     lightShipsNoCmatText:
-      "Les vaisseaux légers ne génèrent pas de Construction Materials (CMAT).\\nSeul le Reclaimer (et futurs heavy salvage) peuvent produire du CMAT.",
+      "Les vaisseaux légers ne génèrent pas de Construction Materials (CMAT).\nSeul le Reclaimer (et futurs heavy salvage) peuvent produire du CMAT.",
     loopCmatBetter: diff => `🟢 Loop CMAT (Construction Materials) plus rentable que RMC (+${diff} aUEC).`,
     loopRmcBetter: diff => `🟢 Loop RMC plus rentable que CMAT (+${diff} aUEC).`,
     loopsEqual: "ℹ Les deux loops rapportent la même chose.",
     rmcLightValues: (sl, rmcVal) =>
-      `SCU de salvage utilisées : ${sl} SCU\\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
+      `SCU de salvage utilisées : ${sl} SCU\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
     rmcRecValues: (sr, rmcVal) =>
-      `SCU de salvage utilisées : ${sr} SCU\\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
+      `SCU de salvage utilisées : ${sr} SCU\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
     cmatRecValues: (scuCmat, valCmat) =>
-      `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\\nValeur si tu vends en CMAT : ${valCmat} aUEC`
+      `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\nValeur si tu vends en CMAT : ${valCmat} aUEC`
   },
   en: {
     titleMain: "SALVAGE CALCULATOR 4.4",
@@ -588,7 +778,7 @@ const i18n = {
     tagLight: "Light salvage ships: hull scraping → RMC only",
     tagReclaimer: "Reclaimer: hull + structural salvage → RMC + CMAT (~15% → CMAT)",
     smallNote:
-      "For each SCU value:\\n- Light ships: only RMC changes (no CMAT)\\n- Reclaimer: compares RMC vs CMAT.",
+      "For each SCU value:\n- Light ships: only RMC changes (no CMAT)\n- Reclaimer: compares RMC vs CMAT.",
     apiFetching: "Fetching UEX prices…",
     apiErrorPrefix: "API error: ",
     apiUpdated: (rmcName, cmatName) =>
@@ -607,16 +797,16 @@ const i18n = {
     lightShipsInfo:
       "ℹ Light salvage ships (Vulture / Salvation / Fortune) only produce RMC, not CMAT.",
     lightShipsNoCmatText:
-      "Light salvage ships do not generate Construction Materials (CMAT).\\nOnly the Reclaimer (and future heavy salvage) can produce CMAT.",
+      "Light salvage ships do not generate Construction Materials (CMAT).\nOnly the Reclaimer (and future heavy salvage) can produce CMAT.",
     loopCmatBetter: diff => `🟢 CMAT loop (Construction Materials) is more profitable than RMC (+${diff} aUEC).`,
     loopRmcBetter: diff => `🟢 RMC loop is more profitable than CMAT (+${diff} aUEC).`,
     loopsEqual: "ℹ Both loops yield the same profit.",
     rmcLightValues: (sl, rmcVal) =>
-      `Salvage SCU used: ${sl} SCU\\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
+      `Salvage SCU used: ${sl} SCU\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
     rmcRecValues: (sr, rmcVal) =>
-      `Salvage SCU used: ${sr} SCU\\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
+      `Salvage SCU used: ${sr} SCU\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
     cmatRecValues: (scuCmat, valCmat) =>
-      `Salvage SCU converted to CMAT (15% yield): ${scuCmat} SCU\\nValue if sold as CMAT: ${valCmat} aUEC`
+      `Salvage SCU converted to CMAT (15% yield): ${scuCmat} SCU\nValue if sold as CMAT: ${valCmat} aUEC`
   }
 };
 
@@ -664,12 +854,31 @@ const graphSubEl = document.getElementById("graphSub");
 const langSwitchLabelEl = document.getElementById("langSwitchLabel");
 const langSelectEl = document.getElementById("langSelect");
 
-/* ==== PROFIL UTILISATEUR (pseudo + clé privée à 6 chiffres) ==== */
+/* Leaderboard local */
+const leaderboardListEl = document.getElementById("leaderboardList");
+const leaderboardEmptyEl = document.getElementById("leaderboardEmpty");
+
+/* Profil utilisateur (pseudo + clé) & modal */
 const userInfoEl = document.getElementById("userInfo");
 const changeUserBtn = document.getElementById("changeUserBtn");
 
+const profileModal = document.getElementById("profileModal");
+const modalCloseBtn = document.getElementById("modalCloseBtn");
+const tabCreateProfile = document.getElementById("tabCreateProfile");
+const tabImportProfile = document.getElementById("tabImportProfile");
+const modalCreateSection = document.getElementById("modalCreateSection");
+const modalImportSection = document.getElementById("modalImportSection");
+const createNicknameInput = document.getElementById("createNickname");
+const createProfileBtn = document.getElementById("createProfileBtn");
+const createdKeyDisplay = document.getElementById("createdKeyDisplay");
+const importNicknameInput = document.getElementById("importNickname");
+const importSecretInput = document.getElementById("importSecret");
+const importProfileBtn = document.getElementById("importProfileBtn");
+const modalMessageEl = document.getElementById("modalMessage");
+
 let currentUser = null;
 
+/* ==== PROFIL (pseudo + clé privée à 6 chiffres) ==== */
 function generateSecret() {
   const n = Math.floor(Math.random() * 1000000);
   return String(n).padStart(6, "0");
@@ -703,6 +912,7 @@ function saveUserProfile(user) {
     localStorage.setItem("salvageCalcUser", JSON.stringify(user));
   } catch (_) {}
   updateUserUI();
+  updateLocalLeaderboard(null);
 }
 
 function updateUserUI() {
@@ -715,6 +925,40 @@ function updateUserUI() {
   }
 }
 
+/* Modal helpers */
+function setActiveModalTab(tab) {
+  if (tab === "import") {
+    tabImportProfile.classList.add("active");
+    tabCreateProfile.classList.remove("active");
+    modalImportSection.classList.add("active");
+    modalCreateSection.classList.remove("active");
+  } else {
+    tabCreateProfile.classList.add("active");
+    tabImportProfile.classList.remove("active");
+    modalCreateSection.classList.add("active");
+    modalImportSection.classList.remove("active");
+  }
+  modalMessageEl.textContent = "";
+}
+
+function openProfileModal(initialTab) {
+  if (!profileModal) return;
+  profileModal.classList.add("open");
+  createdKeyDisplay.style.display = "none";
+  createdKeyDisplay.textContent = "";
+  modalMessageEl.textContent = "";
+  createNicknameInput.value = currentUser ? currentUser.nickname : "";
+  importNicknameInput.value = "";
+  importSecretInput.value = "";
+  setActiveModalTab(initialTab === "import" ? "import" : "create");
+}
+
+function closeProfileModal() {
+  if (!profileModal) return;
+  profileModal.classList.remove("open");
+}
+
+/* Création / import */
 function ensureUserProfile() {
   const existing = loadUserProfile();
   if (existing) {
@@ -722,93 +966,49 @@ function ensureUserProfile() {
     updateUserUI();
     return;
   }
+  // Pas de profil -> on ouvre la modal en mode création
+  openProfileModal("create");
+}
 
-  let nickname = prompt(
-    "Bienvenue sur le Salvage Calculator !\\n\\nChoisis un pseudo pour ton profil :",
-    "Salvager"
-  );
-  if (!nickname || !nickname.trim()) {
+function handleCreateProfile() {
+  let nickname = (createNicknameInput.value || "").trim();
+  if (!nickname) {
     nickname = "Salvager";
   }
-  nickname = nickname.trim();
-
   const secret = generateSecret();
   const id = computeUserId(nickname, secret);
-
   const user = { id, nickname, secret };
   saveUserProfile(user);
 
-  alert(
-    "Ton profil est créé !\\n\\n" +
-    "Pseudo : " + nickname + "\\n" +
-    "Clé privée : " + secret + "\\n\\n" +
-    "Note bien cette clé : elle te permettra de retrouver ton profil sur un autre navigateur plus tard."
-  );
+  createdKeyDisplay.style.display = "block";
+  createdKeyDisplay.textContent =
+    "Profil créé !\nPseudo : " + nickname + "\nClé privée : " + secret + "\n\nNote bien cette clé pour récupérer ton profil sur un autre navigateur.";
+  modalMessageEl.textContent = "";
 }
 
-function changeOrImportProfile() {
-  if (!confirm(
-    "Voulez-vous importer un profil existant (pseudo + clé) ?\\n\\n" +
-    "Cliquez sur OK pour importer un profil.\\nCliquez sur Annuler pour créer un nouveau profil."
-  )) {
-    // Nouveau profil
-    let nickname = prompt("Nouveau pseudo :", currentUser ? currentUser.nickname : "Salvager");
-    if (!nickname || !nickname.trim()) return;
-    nickname = nickname.trim();
-    const secret = generateSecret();
-    const id = computeUserId(nickname, secret);
-    const user = { id, nickname, secret };
-    saveUserProfile(user);
-    alert(
-      "Nouveau profil créé !\\n\\n" +
-      "Pseudo : " + nickname + "\\n" +
-      "Clé privée : " + secret + "\\n\\n" +
-      "Note bien cette clé pour pouvoir récupérer ce profil ailleurs."
-    );
+function handleImportProfile() {
+  const nickname = (importNicknameInput.value || "").trim();
+  const secret = (importSecretInput.value || "").trim();
+
+  if (!nickname) {
+    modalMessageEl.textContent = "Merci de renseigner un pseudo.";
     return;
   }
-
-  // Importer un profil existant
-  let nickname = prompt(
-    "Pseudo du profil à importer :",
-    currentUser ? currentUser.nickname : ""
-  );
-  if (!nickname || !nickname.trim()) return;
-  nickname = nickname.trim();
-
-  let secret = prompt("Clé privée à 6 chiffres de ce profil :", "");
-  if (!secret) return;
-  secret = secret.trim();
   if (!/^[0-9]{6}$/.test(secret)) {
-    alert("Clé invalide. Elle doit contenir exactement 6 chiffres.");
+    modalMessageEl.textContent = "La clé doit contenir exactement 6 chiffres.";
     return;
   }
 
   const id = computeUserId(nickname, secret);
   const user = { id, nickname, secret };
   saveUserProfile(user);
-  alert(
-    "Profil importé !\\n\\n" +
-    "Pseudo : " + nickname + "\\n" +
-    "Clé : " + secret
-  );
+  modalMessageEl.textContent = "Profil importé avec succès.";
 }
 
-// Bouton changer / importer
-if (changeUserBtn) {
-  changeUserBtn.addEventListener("click", changeOrImportProfile);
-}
-
-/* (Prototype) mise à jour d'un leaderboard local
-   Pour l'instant, on garde ça côté navigateur uniquement.
-   Plus tard, on branchera ça sur un Worker Cloudflare pour avoir un vrai leaderboard partagé. */
-const leaderboardListEl = document.getElementById("leaderboardList");
-const leaderboardEmptyEl = document.getElementById("leaderboardEmpty");
-
+/* Leaderboard local (prototype) */
 function updateLocalLeaderboard(lastRun) {
   if (!leaderboardListEl || !leaderboardEmptyEl || !currentUser) return;
 
-  // On stocke un petit résumé local des runs de l'utilisateur
   let stored;
   try {
     stored = JSON.parse(localStorage.getItem("salvageCalcRuns") || "[]");
@@ -831,7 +1031,6 @@ function updateLocalLeaderboard(lastRun) {
 
   leaderboardEmptyEl.style.display = "none";
 
-  // Agrégation simple localement
   let totalRuns = stored.length;
   let totalProfit = 0;
   let totalRmc = 0;
@@ -984,10 +1183,12 @@ function recalc() {
   updateComparison(rmcRecVal, cmatRecVal, rmcRecDecisionEl, cmatRecDecisionEl);
 }
 
+/* Events */
 [scuLightInput, scuRecInput].forEach(el =>
   el.addEventListener("input", () => {
     recalc();
     saveState();
+    // plus tard : ici on pourra enregistrer un "run" et l'envoyer au backend
   })
 );
 
@@ -996,6 +1197,28 @@ langSelectEl.addEventListener("change", () => {
   saveState();
   applyLanguage();
 });
+
+if (changeUserBtn) {
+  changeUserBtn.addEventListener("click", () => openProfileModal("create"));
+}
+
+if (modalCloseBtn) {
+  modalCloseBtn.addEventListener("click", closeProfileModal);
+}
+
+if (profileModal) {
+  profileModal.addEventListener("click", (e) => {
+    if (e.target === profileModal) {
+      closeProfileModal();
+    }
+  });
+}
+
+tabCreateProfile.addEventListener("click", () => setActiveModalTab("create"));
+tabImportProfile.addEventListener("click", () => setActiveModalTab("import"));
+
+createProfileBtn.addEventListener("click", handleCreateProfile);
+importProfileBtn.addEventListener("click", handleImportProfile);
 
 /* Chart */
 let cmatChart = null;
@@ -1139,11 +1362,12 @@ window.addEventListener("load", () => {
     }
   } catch (_) {}
 
-  // Profil utilisateur local (pseudo + clé privée)
+  langSelectEl.value = currentLang;
+
+  // Profil utilisateur
   ensureUserProfile();
   updateUserUI();
 
-  langSelectEl.value = currentLang;
   applyLanguage();
   recalc();
 
