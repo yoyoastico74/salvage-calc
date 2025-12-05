@@ -110,7 +110,6 @@ body.theme-light {
       box-shadow: var(--shadow-main);
       position: relative;
       backdrop-filter: blur(18px) saturate(130%);
-      overflow: hidden;
     }
 
     h1 {
@@ -269,7 +268,7 @@ body.theme-light {
       padding: 12px 12px 16px;
       box-shadow: 0 0 14px rgba(0, 0, 0, 0.7);
       position: relative;
-      overflow: hidden;
+      overflow: visible;
       transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, border-color 0.12s ease-out;
     }
 
@@ -1136,7 +1135,7 @@ body.theme-light {
       </div>
     </div>
 
-    <h1 id="titleMain">SALVAGE CALCULATOR 4.7.3</h1>
+    <h1 id="titleMain">SALVAGE CALCULATOR 4.4</h1>
     <div id="subText" class="sub">
       Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.
     </div>
@@ -1379,7 +1378,7 @@ if (currentTheme === "dark") currentTheme = "neon";
 
 const i18n = {
   fr: {
-    titleMain: "SALVAGE CALCULATOR 4.7.3",
+    titleMain: "SALVAGE CALCULATOR 4.4",
     subText: "Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.",
     entriesTitle: "Entrées",
     labelPrixRmc: "Prix RMC (aUEC / SCU)",
@@ -1451,7 +1450,7 @@ const i18n = {
     }
   },
   en: {
-    titleMain: "SALVAGE CALCULATOR 4.7.3",
+    titleMain: "SALVAGE CALCULATOR 4.4",
     subText: "Compare the profitability between <b>selling your salvage as RMC</b> or <b>processing it into CMAT (Construction Materials)</b>.",
     entriesTitle: "Inputs",
     labelPrixRmc: "RMC price (aUEC / SCU)",
