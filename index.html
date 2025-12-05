@@ -237,6 +237,38 @@
       -moz-appearance: textfield;
     }
 
+    /* SELECT + BOUTON RUN */
+    .panel select {
+      width: 100%;
+      margin-top: 4px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 2px solid #00e5ff;
+      background: #04121c;
+      color: #e9fbff;
+      font-size: 13px;
+      outline: none;
+    }
+    .panel select:focus {
+      border-color: #24ffd0;
+      box-shadow: 0 0 0 2px rgba(36,255,208,0.7);
+    }
+
+    .save-run-btn {
+      margin-top: 8px;
+      width: 100%;
+      padding: 7px 0;
+      border-radius: 8px;
+      border: 1px solid #24ffd0;
+      background: #033023;
+      color: #c4ffe6;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .save-run-btn:hover {
+      background: #04a371;
+    }
+
     /* TAGS + NOTES */
     .tag-row {
       margin-top: 12px;
@@ -581,6 +613,21 @@
         </label>
         <input id="scuReclaimer" type="number" value="0" />
 
+        <!-- Choix du vaisseau pour le run -->
+        <label for="shipSelect" id="labelShipSelect">Vaisseau utilisé pour ce run</label>
+        <select id="shipSelect">
+          <option value="Vulture">Vulture</option>
+          <option value="Salvation">Salvation</option>
+          <option value="Fortune">Fortune</option>
+          <option value="Reclaimer">Reclaimer</option>
+          <option value="Other">Autre / Other</option>
+        </select>
+
+        <button id="saveRunBtn" class="save-run-btn" type="button">
+          Enregistrer ce run dans le leaderboard local
+        </button>
+        <div id="saveRunMessage" class="small-note"></div>
+
         <div class="tag-row">
           <div id="tagLight" class="tag">Vaisseaux légers : hull scraping → RMC uniquement</div>
           <div id="tagReclaimer" class="tag red">Reclaimer : hull + structural salvage → RMC + CMAT (~15% → CMAT)</div>
@@ -761,7 +808,16 @@ const i18n = {
     rmcRecValues: (sr, rmcVal) =>
       `SCU de salvage utilisées : ${sr} SCU\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
     cmatRecValues: (scuCmat, valCmat) =>
-      `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\nValeur si tu vends en CMAT : ${valCmat} aUEC`
+      `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\nValeur si tu vends en CMAT : ${valCmat} aUEC`,
+    /* Leaderboard & runs */
+    leaderboardEmpty: "Aucun run enregistré pour l'instant.",
+    leaderboardLine: (nickname, runs, profit, favShip, totalRmc) =>
+      `${nickname} – ${runs} runs · ${profit} aUEC théoriques · Ship fav : ${favShip} · Total RMC : ${totalRmc} SCU`,
+    labelShipSelect: "Vaisseau utilisé pour ce run",
+    saveRunBtn: "Enregistrer ce run dans le leaderboard local",
+    saveRunSuccess: "Run enregistré dans ton leaderboard local.",
+    saveRunNoUser: "Crée ou importe un profil avant d'enregistrer un run.",
+    saveRunNoScu: "Merci de saisir au moins une SCU de salvage avant d'enregistrer un run."
   },
   en: {
     titleMain: "SALVAGE CALCULATOR 4.4",
@@ -806,7 +862,16 @@ const i18n = {
     rmcRecValues: (sr, rmcVal) =>
       `Salvage SCU used: ${sr} SCU\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
     cmatRecValues: (scuCmat, valCmat) =>
-      `Salvage SCU converted to CMAT (15% yield): ${scuCmat} SCU\nValue if sold as CMAT: ${valCmat} aUEC`
+      `Salvage SCU converted to CMAT (15% yield): ${scuCmat} SCU\nValue if sold as CMAT: ${valCmat} aUEC`,
+    /* Leaderboard & runs */
+    leaderboardEmpty: "No run recorded yet.",
+    leaderboardLine: (nickname, runs, profit, favShip, totalRmc) =>
+      `${nickname} – ${runs} runs · ${profit} theoretical aUEC · Fav ship: ${favShip} · Total RMC: ${totalRmc} SCU`,
+    labelShipSelect: "Ship used for this run",
+    saveRunBtn: "Save this run to the local leaderboard",
+    saveRunSuccess: "Run saved to your local leaderboard.",
+    saveRunNoUser: "Please create/import a profile before saving a run.",
+    saveRunNoScu: "Please enter at least one salvage SCU before saving a run."
   }
 };
 
@@ -875,6 +940,12 @@ const importNicknameInput = document.getElementById("importNickname");
 const importSecretInput = document.getElementById("importSecret");
 const importProfileBtn = document.getElementById("importProfileBtn");
 const modalMessageEl = document.getElementById("modalMessage");
+
+/* Runs / ship select */
+const shipSelectEl = document.getElementById("shipSelect");
+const saveRunBtnEl = document.getElementById("saveRunBtn");
+const saveRunMessageEl = document.getElementById("saveRunMessage");
+const labelShipSelectEl = document.getElementById("labelShipSelect");
 
 let currentUser = null;
 
@@ -1005,9 +1076,10 @@ function handleImportProfile() {
   modalMessageEl.textContent = "Profil importé avec succès.";
 }
 
-/* Leaderboard local (prototype) */
+/* Leaderboard local (multi-profils, prototype) */
 function updateLocalLeaderboard(lastRun) {
-  if (!leaderboardListEl || !leaderboardEmptyEl || !currentUser) return;
+  const t = i18n[currentLang] || i18n.fr;
+  if (!leaderboardListEl || !leaderboardEmptyEl) return;
 
   let stored;
   try {
@@ -1026,43 +1098,111 @@ function updateLocalLeaderboard(lastRun) {
   if (!stored.length) {
     leaderboardListEl.innerHTML = "";
     leaderboardEmptyEl.style.display = "block";
+    leaderboardEmptyEl.textContent = t.leaderboardEmpty;
     return;
   }
 
   leaderboardEmptyEl.style.display = "none";
 
-  let totalRuns = stored.length;
-  let totalProfit = 0;
-  let totalRmc = 0;
-  let favShip = "N/A";
-  const shipsCount = {};
-
+  const perUser = {};
   stored.forEach(r => {
-    totalProfit += r.profit || 0;
-    totalRmc += r.rmc || 0;
+    const uid = r.userId || "unknown";
+    if (!perUser[uid]) {
+      perUser[uid] = {
+        nickname: r.nickname || "Unknown",
+        runs: 0,
+        totalProfit: 0,
+        totalRmc: 0,
+        ships: {}
+      };
+    }
+    const u = perUser[uid];
+    u.runs++;
+    u.totalProfit += Number(r.profit) || 0;
+    u.totalRmc += Number(r.rmc) || 0;
     if (r.ship) {
-      shipsCount[r.ship] = (shipsCount[r.ship] || 0) + 1;
+      u.ships[r.ship] = (u.ships[r.ship] || 0) + 1;
     }
   });
 
-  let bestShip = null;
-  let bestCount = 0;
-  for (const s in shipsCount) {
-    if (shipsCount[s] > bestCount) {
-      bestCount = shipsCount[s];
-      bestShip = s;
-    }
-  }
-  if (bestShip) favShip = bestShip;
+  const sorted = Object.values(perUser).sort((a, b) => b.totalProfit - a.totalProfit);
 
   leaderboardListEl.innerHTML = "";
-  const li = document.createElement("li");
-  li.innerHTML =
-    "<span class='name'>" + currentUser.nickname + "</span> – " +
-    totalRuns + " runs · " +
-    format(totalProfit) + " aUEC théoriques · " +
-    "<span class='ship'>Ship fav : " + favShip + "</span>";
-  leaderboardListEl.appendChild(li);
+  sorted.forEach(u => {
+    let favShip = "N/A";
+    let maxCount = 0;
+    for (const s in u.ships) {
+      if (u.ships[s] > maxCount) {
+        maxCount = u.ships[s];
+        favShip = s;
+      }
+    }
+    const li = document.createElement("li");
+    const profitStr = format(u.totalProfit);
+    const totalRmcStr = format(u.totalRmc);
+    li.innerHTML = t.leaderboardLine(u.nickname, u.runs, profitStr, favShip, totalRmcStr);
+
+    // Surligner l'utilisateur courant
+    if (currentUser && u.nickname === currentUser.nickname) {
+      li.style.fontWeight = "600";
+    }
+
+    leaderboardListEl.appendChild(li);
+  });
+}
+
+/* Sauvegarde d'un run dans le leaderboard local */
+function handleSaveRun() {
+  const t = i18n[currentLang] || i18n.fr;
+
+  if (!currentUser) {
+    saveRunMessageEl.textContent = t.saveRunNoUser;
+    return;
+  }
+
+  const prixRMC  = Number(prixRmcInput.value)  || 0;
+  const prixCMAT = Number(prixCmatInput.value) || 0;
+  const sl = Number(scuLightInput.value) || 0;
+  const sr = Number(scuRecInput.value)   || 0;
+
+  if (sl <= 0 && sr <= 0) {
+    saveRunMessageEl.textContent = t.saveRunNoScu;
+    return;
+  }
+
+  const ship = shipSelectEl.value || (sr > 0 ? "Reclaimer" : "Vulture");
+
+  const rmcLightVal = sl * prixRMC;
+  const rmcRecVal   = sr * prixRMC;
+  const cmatRecScu  = sr * REND_RECLAIMER;
+  const cmatRecVal  = cmatRecScu * prixCMAT;
+
+  let profit = 0;
+  if (ship === "Reclaimer" || sr > 0) {
+    profit = Math.max(rmcRecVal, cmatRecVal);
+  } else {
+    profit = rmcLightVal;
+  }
+
+  const totalRmcScu = sl + sr;
+
+  const newRun = {
+    userId: currentUser.id,
+    nickname: currentUser.nickname,
+    profit,
+    rmc: totalRmcScu,
+    ship,
+    ts: Date.now()
+  };
+
+  updateLocalLeaderboard(newRun);
+  saveRunMessageEl.textContent = t.saveRunSuccess;
+
+  setTimeout(() => {
+    if (saveRunMessageEl.textContent === t.saveRunSuccess) {
+      saveRunMessageEl.textContent = "";
+    }
+  }, 4000);
 }
 
 /* Langue */
@@ -1093,6 +1233,9 @@ function applyLanguage() {
   graphTitleEl.textContent = t.graphTitle;
   graphSubEl.textContent = t.graphSub;
   langSwitchLabelEl.textContent = t.langSwitchLabel;
+  labelShipSelectEl.textContent = t.labelShipSelect;
+  saveRunBtnEl.textContent = t.saveRunBtn;
+  leaderboardEmptyEl.textContent = t.leaderboardEmpty;
 
   recalc();
 }
@@ -1188,7 +1331,7 @@ function recalc() {
   el.addEventListener("input", () => {
     recalc();
     saveState();
-    // plus tard : ici on pourra enregistrer un "run" et l'envoyer au backend
+    // plus tard : ici on pourra éventuellement auto-créer un run
   })
 );
 
@@ -1219,6 +1362,10 @@ tabImportProfile.addEventListener("click", () => setActiveModalTab("import"));
 
 createProfileBtn.addEventListener("click", handleCreateProfile);
 importProfileBtn.addEventListener("click", handleImportProfile);
+
+if (saveRunBtnEl) {
+  saveRunBtnEl.addEventListener("click", handleSaveRun);
+}
 
 /* Chart */
 let cmatChart = null;
