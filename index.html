@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V4.7.1 -->
+<!-- Version : V4.7.2 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -22,10 +22,10 @@
 
   <style>
     :root {
-      --bg: #010309;
-      --overlay: rgba(2, 6, 14, 0.9);
-      --panel-bg: linear-gradient(160deg, #020915, #01030a);
-      --panel-soft: linear-gradient(160deg, #020812, #010309);
+      --bg: #020710;
+      --overlay: rgba(3, 10, 20, 0.78);
+      --panel-bg: linear-gradient(160deg, #071625, #020912);
+      --panel-soft: linear-gradient(160deg, #04111f, #020810);
       --text-main: #e9fbff;
       --text-soft: #c4f7ff;
       --text-muted: #9eb5c7;
@@ -42,10 +42,10 @@
 
     /* Theme variants */
     body.theme-neon {
-      --bg: #010309;
-      --overlay: rgba(2, 6, 14, 0.9);
-      --panel-bg: linear-gradient(160deg, #020915, #01030a);
-      --panel-soft: linear-gradient(160deg, #020812, #010309);
+      --bg: #020710;
+      --overlay: rgba(3, 10, 20, 0.78);
+      --panel-bg: linear-gradient(160deg, #071625, #020912);
+      --panel-soft: linear-gradient(160deg, #04111f, #020810);
       --text-main: #e9fbff;
       --text-soft: #c4f7ff;
       --text-muted: #9eb5c7;
@@ -59,27 +59,7 @@
       --shadow-main: 0 0 24px rgba(0,0,0,0.85);
       --card-bg: #050c16;
     }
-
-    body.theme-dark {
-      --bg: #020509;
-      --overlay: rgba(5, 10, 18, 0.9);
-      --panel-bg: linear-gradient(160deg, #050f1c, #02060e);
-      --panel-soft: linear-gradient(160deg, #040b16, #01040a);
-      --text-main: #d8f6ff;
-      --text-soft: #c0dce8;
-      --text-muted: #8697a7;
-      --accent: #00d4f0;
-      --accent-strong: #35f0ff;
-      --accent-alt: #20e0c0;
-      --danger: #ff6b86;
-      --danger-soft: #3a090f;
-      --border-strong: #00b0de;
-      --border-soft: #2f4b61;
-      --shadow-main: 0 0 18px rgba(0,0,0,0.9);
-      --card-bg: #040914;
-    }
-
-    body.theme-light {
+body.theme-light {
       --bg: #edf5ff;
       --overlay: rgba(240, 247, 255, 0.98);
       --panel-bg: linear-gradient(160deg, #ffffff, #e6f2ff);
@@ -602,7 +582,7 @@
       padding: 10px 12px 12px;
       border-radius: 10px;
       border: 1px solid var(--border-strong);
-      background: linear-gradient(160deg, #010815, #02020c);
+      background: linear-gradient(160deg, #020b14, #030812);
       box-shadow: 0 0 18px rgba(0,0,0,0.7);
       font-size: 12px;
       color: var(--text-main);
@@ -1143,8 +1123,7 @@
         <label for="themeSelect">Thème :</label>
         <select id="themeSelect">
           <option value="neon">Neon</option>
-          <option value="dark">Dark</option>
-          <option value="light">Light</option>
+                    <option value="light">Light</option>
         </select>
       </div>
       <div class="lang-switch">
@@ -1156,7 +1135,7 @@
       </div>
     </div>
 
-    <h1 id="titleMain">SALVAGE CALCULATOR 4.7.1</h1>
+    <h1 id="titleMain">SALVAGE CALCULATOR 4.7.2</h1>
     <div id="subText" class="sub">
       Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.
     </div>
@@ -1391,14 +1370,15 @@
 
 <script>
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V4.7.1";
+const APP_VERSION = "V4.7.2";
 
 let currentLang = localStorage.getItem("salvageCalcLang") || "fr";
 let currentTheme = localStorage.getItem("salvageCalcTheme") || "neon";
+if (currentTheme === "dark") currentTheme = "neon";
 
 const i18n = {
   fr: {
-    titleMain: "SALVAGE CALCULATOR 4.7.1",
+    titleMain: "SALVAGE CALCULATOR 4.7.2",
     subText: "Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.",
     entriesTitle: "Entrées",
     labelPrixRmc: "Prix RMC (aUEC / SCU)",
@@ -1470,7 +1450,7 @@ const i18n = {
     }
   },
   en: {
-    titleMain: "SALVAGE CALCULATOR 4.7.1",
+    titleMain: "SALVAGE CALCULATOR 4.7.2",
     subText: "Compare the profitability between <b>selling your salvage as RMC</b> or <b>processing it into CMAT (Construction Materials)</b>.",
     entriesTitle: "Inputs",
     labelPrixRmc: "RMC price (aUEC / SCU)",
@@ -2192,7 +2172,7 @@ function toggleMyRunsPanel() {
 
 function applyTheme() {
   const body = document.body;
-  body.classList.remove("theme-neon", "theme-dark", "theme-light");
+  body.classList.remove("theme-neon", "theme-light");
   if (currentTheme === "dark") {
     body.classList.add("theme-dark");
   } else if (currentTheme === "light") {
@@ -2376,6 +2356,7 @@ langSelectEl.addEventListener("change", () => {
 
 themeSelectEl.addEventListener("change", () => {
   currentTheme = themeSelectEl.value || "neon";
+  if (currentTheme === "dark") currentTheme = "neon";
   applyTheme();
   saveState();
 });
