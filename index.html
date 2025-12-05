@@ -2,14 +2,15 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Salvage 4.4 – Calcul CMAT</title>
+  <title>Salvage 4.4 – Calcul CMAT + RMC</title>
 
-  <!-- Chart.js pour le graphique -->
+  <!-- Chart.js pour le graphique double -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    /* ---------- STYLE GLOBAL ---------- */
-    body {
+    /* ---------- GLOBAL ---------- */
+    html, body {
+      overflow-x: hidden;
       margin: 0;
       padding: 0;
       font-family: "Segoe UI", system-ui, sans-serif;
@@ -21,23 +22,23 @@
     .overlay {
       background: radial-gradient(circle at top, rgba(0,0,0,0.75), rgba(0,0,0,0.95));
       min-height: 100vh;
-      padding: 30px 10px 40px;
+      padding: 25px 10px 30px;
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1180px;
       margin: 0 auto;
       border: 2px solid #ffb000;
       border-radius: 10px;
-      padding: 25px 30px 30px;
+      padding: 20px 25px 25px;
       background: rgba(5,5,5,0.92);
-      box-shadow: 0 0 30px rgba(0,0,0,0.8);
+      box-shadow: 0 0 30px rgba(0,0,0,0.7);
     }
 
     h1 {
-      margin: 0 0 25px;
+      margin: 0 0 20px;
       text-align: center;
-      font-size: 34px;
+      font-size: 32px;
       text-transform: uppercase;
       letter-spacing: 2px;
       color: #ffb000;
@@ -45,39 +46,39 @@
 
     .sub {
       text-align: center;
-      font-size: 14px;
+      font-size: 13px;
       color: #ffcc66;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
-    /* Panel et grille */
+    /* GRID PRINCIPALE */
     .grid {
       display: grid;
-      grid-template-columns: 1.1fr 1.1fr;
-      gap: 26px;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
     }
 
+    /* PANELS */
     .panel {
       border-radius: 10px;
       border: 1px solid #ffb000;
       background: linear-gradient(160deg, #1a1a1a, #0b0b0b);
-      padding: 18px 18px 24px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+      padding: 15px 15px 20px;
     }
 
     .panel-title {
-      font-size: 20px;
+      font-size: 19px;
       color: #ffb000;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       font-weight: 600;
       text-shadow: 0 0 4px rgba(255,176,0,0.4);
     }
 
-    /* Input */
+    /* INPUTS */
     label {
       display: block;
-      margin-top: 12px;
-      font-size: 15px;
+      margin-top: 10px;
+      font-size: 14px;
       font-weight: 600;
     }
 
@@ -90,14 +91,13 @@
     input[type="number"] {
       width: 100%;
       margin-top: 4px;
-      padding: 10px 12px;
+      padding: 9px 10px;
       border-radius: 6px;
       border: 2px solid #ffb000;
       background: #222;
       color: #fff;
-      font-size: 16px;
+      font-size: 15px;
       outline: none;
-      transition: 0.15s;
     }
 
     input[type="number"]:focus {
@@ -105,16 +105,27 @@
       box-shadow: 0 0 0 2px #ff8000;
     }
 
+    /* Enlever les flèches sur inputs readonly */
+    input[readonly]::-webkit-inner-spin-button,
+    input[readonly]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[readonly] {
+      -moz-appearance: textfield;
+    }
+
+    /* TAGS */
     .tag-row {
-      margin-top: 16px;
+      margin-top: 14px;
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 7px;
       font-size: 11px;
     }
 
     .tag {
-      padding: 5px 9px;
+      padding: 4px 8px;
       border-radius: 999px;
       border: 1px solid #ffb000;
       background: #221600;
@@ -128,13 +139,13 @@
     }
 
     .small-note {
-      margin-top: 8px;
+      margin-top: 7px;
       font-size: 11px;
       color: #bbbbbb;
     }
 
     .api-status {
-      margin-top: 10px;
+      margin-top: 8px;
       font-size: 11px;
       color: #ffdd88;
     }
@@ -142,66 +153,26 @@
       color: #ff9090;
     }
 
-    /* Résultats */
-    .result-block {
-      background: #151515;
-      border-radius: 8px;
-      border: 1px solid #444;
-      padding: 16px 16px 12px;
-      margin-bottom: 16px;
-    }
-
-    .result-head {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 10px;
-      color: #ffe08a;
-    }
-
-    .result-values {
-      font-size: 14px;
-      white-space: pre-line;
-      line-height: 1.5;
-    }
-
-    .decision {
-      margin-top: 10px;
-      padding: 10px 12px;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 600;
-    }
-    .decision.good {
-      background: #082d12;
-      border-left: 4px solid #00ff66;
-      color: #adffbf;
-    }
-    .decision.bad {
-      background: #3a0707;
-      border-left: 4px solid #ff4444;
-      color: #ffb3b3;
-    }
-
-    /* Panel Graphique */
+    /* PANEL GRAPHIQUE */
     .graph-panel {
-      margin-bottom: 25px;
-      padding: 15px 15px 20px;
+      margin-bottom: 18px;
+      padding: 15px 15px 18px;
       border-radius: 10px;
       border: 1px solid #ffb000;
       background: linear-gradient(160deg, #1a1a1a, #0b0b0b);
     }
 
     .graph-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 600;
       color: #ffb000;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     #graphMessage {
       color: #ffaa88;
       font-size: 12px;
-      margin-top: 6px;
+      margin-top: 5px;
     }
 
     @media (max-width: 900px) {
@@ -215,9 +186,9 @@
 <body>
 <div class="overlay">
   <div class="container">
-    <h1>SALVAGE 4.4 – CALCUL CMAT</h1>
+    <h1>SALVAGE 4.4 – CALCULETTE CMAT / RMC</h1>
     <div class="sub">
-      Estime tes gains à partir de <b>Construction Salvage</b> vers <b>Construction Materials</b>.
+      Estime tes gains à partir du Salvage brut vers <b>RMC</b> et <b>CMAT</b>.
     </div>
 
     <div class="grid">
@@ -225,25 +196,23 @@
       <div class="panel">
         <div class="panel-title">Entrées</div>
 
-        <label for="prixSalvage">Prix Construction Salvage (aUEC / SCU)</label>
-        <input id="prixSalvage" type="number" value="0" readonly />
-        <div class="hint">Prix Salvage brut – auto depuis UEX.</div>
+        <label for="prixRmc">Prix RMC (aUEC / SCU)</label>
+        <input id="prixRmc" type="number" value="0" readonly />
+        <div class="hint">RMC = Recycled Material Composite (raffiné).</div>
 
-        <label for="prixCmat">Prix Construction Materials (aUEC / SCU)</label>
+        <label for="prixCmat">Prix CMAT (aUEC / SCU)</label>
         <input id="prixCmat" type="number" value="0" readonly />
-        <div class="hint">Prix CMAT raffiné – auto depuis UEX.</div>
+        <div class="hint">Construction Materials (raffiné).</div>
 
-        <label for="scuLight">SCU de Construction Salvage – Salvation / Vulture / Fortune</label>
+        <label for="scuLight">SCU Salvage – Light Ships (30% rendement)</label>
         <input id="scuLight" type="number" value="0" />
-        <div class="hint">Nombre total de SCU de Salvage brut compacté.</div>
 
-        <label for="scuReclaimer">SCU de Construction Salvage – Reclaimer</label>
+        <label for="scuReclaimer">SCU Salvage – Reclaimer (15% rendement)</label>
         <input id="scuReclaimer" type="number" value="0" />
-        <div class="hint">Nombre total de SCU compactés par le Reclaimer.</div>
 
         <div class="tag-row">
-          <div class="tag">Rendement ~30 % (light ships)</div>
-          <div class="tag red">Rendement ~15 % (Reclaimer)</div>
+          <div class="tag">Light ships : 30%</div>
+          <div class="tag red">Reclaimer : 15%</div>
         </div>
 
         <div class="small-note">Les calculs se mettent à jour automatiquement.</div>
@@ -254,27 +223,48 @@
       <div>
         <!-- PANEL GRAPHIQUE -->
         <div class="graph-panel">
-          <div class="graph-title">Historique CMAT (3 derniers jours)</div>
+          <div class="graph-title">Historique des prix RMC & CMAT (3 jours)</div>
           <canvas id="cmatChart" height="120"></canvas>
           <div id="graphMessage"></div>
         </div>
-        <!-- BLOCK LIGHT SHIPS -->
+        <!-- ======================= PANEL RÉSULTATS RMC ======================= -->
         <div class="panel">
-          <div class="panel-title">Résultats – Light Ships</div>
+          <div class="panel-title">Résultats – Conversion vers RMC</div>
 
+          <!-- Résultats Light Ships -->
           <div class="result-block">
-            <div class="result-head">Salvation / Vulture / Fortune (rendement ~30 %)</div>
-            <div class="result-values" id="lightValues"></div>
-            <div class="decision" id="lightDecision"></div>
+            <div class="result-head">Light Ships (rendement 30 %)</div>
+            <div class="result-values" id="rmcLightValues"></div>
+            <div class="decision" id="rmcLightDecision"></div>
           </div>
 
-          <!-- BLOCK RECLAIMER -->
+          <!-- Résultats Reclaimer -->
           <div class="result-block">
-            <div class="result-head">Reclaimer (rendement ~15 %)</div>
-            <div class="result-values" id="recValues"></div>
-            <div class="decision" id="recDecision"></div>
+            <div class="result-head">Reclaimer (rendement 15 %)</div>
+            <div class="result-values" id="rmcRecValues"></div>
+            <div class="decision" id="rmcRecDecision"></div>
           </div>
         </div>
+
+        <!-- ======================= PANEL RÉSULTATS CMAT ======================= -->
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-title">Résultats – Conversion vers CMAT</div>
+
+          <!-- Résultats Light Ships -->
+          <div class="result-block">
+            <div class="result-head">Light Ships (rendement 30 %)</div>
+            <div class="result-values" id="cmatLightValues"></div>
+            <div class="decision" id="cmatLightDecision"></div>
+          </div>
+
+          <!-- Résultats Reclaimer -->
+          <div class="result-block">
+            <div class="result-head">Reclaimer (rendement 15 %)</div>
+            <div class="result-values" id="cmatRecValues"></div>
+            <div class="decision" id="cmatRecDecision"></div>
+          </div>
+        </div>
+
       </div> <!-- Fin colonne droite -->
     </div> <!-- Fin grid -->
   </div> <!-- Fin container -->
@@ -291,20 +281,26 @@ const REND_RECLAIMER = 0.15;
 /* ============================================================
    RÉFÉRENCES DOM
 ============================================================ */
-const prixSalvageInput = document.getElementById("prixSalvage");
-const prixCmatInput    = document.getElementById("prixCmat");
-const scuLightInput    = document.getElementById("scuLight");
-const scuRecInput      = document.getElementById("scuReclaimer");
+const prixRmcInput  = document.getElementById("prixRmc");
+const prixCmatInput = document.getElementById("prixCmat");
 
-const lightValuesEl    = document.getElementById("lightValues");
-const lightDecisionEl  = document.getElementById("lightDecision");
-const recValuesEl      = document.getElementById("recValues");
-const recDecisionEl    = document.getElementById("recDecision");
+const scuLightInput = document.getElementById("scuLight");
+const scuRecInput   = document.getElementById("scuReclaimer");
 
-const apiStatusEl      = document.getElementById("apiStatus");
+const apiStatusEl   = document.getElementById("apiStatus");
 
-const graphMessage     = document.getElementById("graphMessage");
-const chartCanvas      = document.getElementById("cmatChart");
+const rmcLightValuesEl = document.getElementById("rmcLightValues");
+const rmcLightDecisionEl = document.getElementById("rmcLightDecision");
+const rmcRecValuesEl = document.getElementById("rmcRecValues");
+const rmcRecDecisionEl = document.getElementById("rmcRecDecision");
+
+const cmatLightValuesEl = document.getElementById("cmatLightValues");
+const cmatLightDecisionEl = document.getElementById("cmatLightDecision");
+const cmatRecValuesEl = document.getElementById("cmatRecValues");
+const cmatRecDecisionEl = document.getElementById("cmatRecDecision");
+
+const graphMessage  = document.getElementById("graphMessage");
+const chartCanvas   = document.getElementById("cmatChart");
 
 /* ============================================================
    INITIALISATION SCU À 0
@@ -314,7 +310,7 @@ window.addEventListener("load", () => {
   scuRecInput.value = 0;
 });
 /* ============================================================
-   FORMAT DE NOMBRE
+   FORMATAGE DE NOMBRE
 ============================================================ */
 function format(val) {
   if (isNaN(val)) return "0";
@@ -322,7 +318,7 @@ function format(val) {
 }
 
 /* ============================================================
-   LOGIQUE DE DÉCISION BRUT / RAFFINÉ
+   DÉCISION BRUT vs RAFFINÉ
 ============================================================ */
 function decisionText(brut, raffine) {
   const diff = Math.abs(raffine - brut);
@@ -338,89 +334,139 @@ function decisionText(brut, raffine) {
 }
 
 /* ============================================================
-   CALCULS AUTOMATIQUES
+   CALCULS
 ============================================================ */
 function recalc() {
-  const ps = Number(prixSalvageInput.value) || 0;
-  const pc = Number(prixCmatInput.value) || 0;
+  const prixRMC  = Number(prixRmcInput.value)  || 0;
+  const prixCMAT = Number(prixCmatInput.value) || 0;
+
   const sl = Number(scuLightInput.value) || 0;
-  const sr = Number(scuRecInput.value) || 0;
+  const sr = Number(scuRecInput.value)   || 0;
 
-  // LIGHT SHIPS
-  const lightBrut   = sl * ps;
-  const lightRafScu = sl * REND_LIGHT;
-  const lightRafVal = lightRafScu * pc;
+  /* ------------------ RMC ------------------ */
 
-  lightValuesEl.textContent =
+  // Light ships
+  const rmcLightBrut = sl * prixRMC;
+  const rmcLightRafScu = sl * REND_LIGHT;
+  const rmcLightRafVal = rmcLightRafScu * prixRMC;
+
+  rmcLightValuesEl.textContent =
     `SCU Salvage : ${format(sl)} SCU\n` +
-    `SCU CMAT après raffinage : ${format(lightRafScu)} SCU\n\n` +
-    `Valeur brute : ${format(lightBrut)} aUEC\n` +
-    `Valeur raffinée : ${format(lightRafVal)} aUEC`;
+    `SCU RMC après raffinement : ${format(rmcLightRafScu)} SCU\n\n` +
+    `Valeur brute : ${format(rmcLightBrut)} aUEC\n` +
+    `Valeur raffinée : ${format(rmcLightRafVal)} aUEC`;
 
-  const dLight = decisionText(lightBrut, lightRafVal);
-  lightDecisionEl.textContent = dLight.text;
-  lightDecisionEl.className = "decision " + (dLight.good ? "good" : "bad");
+  const decRmcL = decisionText(rmcLightBrut, rmcLightRafVal);
+  rmcLightDecisionEl.textContent = decRmcL.text;
+  rmcLightDecisionEl.className = "decision " + (decRmcL.good ? "good" : "bad");
 
-  // RECLAIMER
-  const recBrut   = sr * ps;
-  const recRafScu = sr * REND_RECLAIMER;
-  const recRafVal = recRafScu * pc;
+  // Reclaimer
+  const rmcRecBrut = sr * prixRMC;
+  const rmcRecRafScu = sr * REND_RECLAIMER;
+  const rmcRecRafVal = rmcRecRafScu * prixRMC;
 
-  recValuesEl.textContent =
+  rmcRecValuesEl.textContent =
     `SCU Salvage : ${format(sr)} SCU\n` +
-    `SCU CMAT après raffinage : ${format(recRafScu)} SCU\n\n` +
-    `Valeur brute : ${format(recBrut)} aUEC\n` +
-    `Valeur raffinée : ${format(recRafVal)} aUEC`;
+    `SCU RMC après raffinement : ${format(rmcRecRafScu)} SCU\n\n` +
+    `Valeur brute : ${format(rmcRecBrut)} aUEC\n` +
+    `Valeur raffinée : ${format(rmcRecRafVal)} aUEC`;
 
-  const dRec = decisionText(recBrut, recRafVal);
-  recDecisionEl.textContent = dRec.text;
-  recDecisionEl.className = "decision " + (dRec.good ? "good" : "bad");
+  const decRmcR = decisionText(rmcRecBrut, rmcRecRafVal);
+  rmcRecDecisionEl.textContent = decRmcR.text;
+  rmcRecDecisionEl.className = "decision " + (decRmcR.good ? "good" : "bad");
+
+
+  /* ------------------ CMAT ------------------ */
+
+  const cmatLightBrut   = sl * prixCMAT;
+  const cmatLightRafScu = sl * REND_LIGHT;
+  const cmatLightRafVal = cmatLightRafScu * prixCMAT;
+
+  cmatLightValuesEl.textContent =
+    `SCU Salvage : ${format(sl)} SCU\n` +
+    `SCU CMAT après raffinement : ${format(cmatLightRafScu)} SCU\n\n` +
+    `Valeur brute : ${format(cmatLightBrut)} aUEC\n` +
+    `Valeur raffinée : ${format(cmatLightRafVal)} aUEC`;
+
+  const decCmatL = decisionText(cmatLightBrut, cmatLightRafVal);
+  cmatLightDecisionEl.textContent = decCmatL.text;
+  cmatLightDecisionEl.className = "decision " + (decCmatL.good ? "good" : "bad");
+
+  const cmatRecBrut   = sr * prixCMAT;
+  const cmatRecRafScu = sr * REND_RECLAIMER;
+  const cmatRecRafVal = cmatRecRafScu * prixCMAT;
+
+  cmatRecValuesEl.textContent =
+    `SCU Salvage : ${format(sr)} SCU\n` +
+    `SCU CMAT après raffinement : ${format(cmatRecRafScu)} SCU\n\n` +
+    `Valeur brute : ${format(cmatRecBrut)} aUEC\n` +
+    `Valeur raffinée : ${format(cmatRecRafVal)} aUEC`;
+
+  const decCmatR = decisionText(cmatRecBrut, cmatRecRafVal);
+  cmatRecDecisionEl.textContent = decCmatR.text;
+  cmatRecDecisionEl.className = "decision " + (decCmatR.good ? "good" : "bad");
 }
 
+
 /* ============================================================
-   LIENS D'ÉVÈNEMENTS POUR RECALCUL
+   EVENTS DE RECALCUL
 ============================================================ */
 [
-  prixSalvageInput,
-  prixCmatInput,
   scuLightInput,
   scuRecInput
 ].forEach(el => el.addEventListener("input", recalc));
 
+
 /* ============================================================
-   GESTION DU GRAPHIQUE
+   GRAPHIQUE DOUBLE COURBE
 ============================================================ */
 let cmatChart = null;
 
-function renderChart(history) {
-  const labels = history.map(h => new Date(h.date).toLocaleString("fr-FR"));
-  const values = history.map(h => h.sell);
+function renderChart(rmcHist, cmatHist) {
+
+  const rmcLabels  = rmcHist.map(e => new Date(e.date).toLocaleString("fr-FR"));
+  const rmcValues  = rmcHist.map(e => e.sell);
+
+  const cmatLabels = cmatHist.map(e => new Date(e.date).toLocaleString("fr-FR"));
+  const cmatValues = cmatHist.map(e => e.sell);
 
   if (cmatChart) cmatChart.destroy();
 
   cmatChart = new Chart(chartCanvas, {
     type: "line",
     data: {
-      labels,
-      datasets: [{
-        label: "Prix CMAT (aUEC)",
-        data: values,
-        borderWidth: 2
-      }]
+      labels: cmatLabels.length > rmcLabels.length ? cmatLabels : rmcLabels,
+      datasets: [
+        {
+          label: "CMAT (aUEC)",
+          data: cmatValues,
+          borderWidth: 2,
+          borderColor: "#ffb000",
+          backgroundColor: "rgba(255,176,0,0.20)"
+        },
+        {
+          label: "RMC (aUEC)",
+          data: rmcValues,
+          borderWidth: 2,
+          borderColor: "#00e5ff",
+          backgroundColor: "rgba(0,229,255,0.20)"
+        }
+      ]
     },
     options: {
       responsive: true,
-      plugins: { legend: { display: true } },
+      plugins: { legend: { labels: { color: "#fff" }}},
       scales: {
-        x: { ticks: { color: "#ffb000" } },
-        y: { ticks: { color: "#ffb000" } }
+        x: { ticks: { color: "#ffb000" }},
+        y: { ticks: { color: "#ffb000" }}
       }
     }
   });
 }
 
+
 /* ============================================================
-   API : RÉCUPÉRATION DES PRIX & HISTORIQUE VIA WORKER
+   RÉCUPÉRATION DES DONNÉES UEX VIA WORKER
 ============================================================ */
 async function fetchUexPrices() {
   try {
@@ -429,26 +475,27 @@ async function fetchUexPrices() {
     const url = "https://salvage-uex-proxy.yoyoastico74.workers.dev/";
     const res = await fetch(url);
 
-    if (!res.ok) {
-      throw new Error("Worker non accessible");
-    }
+    if (!res.ok) throw new Error("Worker non accessible");
 
     const data = await res.json();
 
-    // Affectation auto des prix
-    prixSalvageInput.value = data.salvagePrice ?? 0;
-    prixCmatInput.value    = data.cmatPrice ?? 0;
+    /* --- PRIX AUTO --- */
+    prixRmcInput.value  = data.rmc.price  ?? 0;
+    prixCmatInput.value = data.cmat.price ?? 0;
 
-    // Vérification de l'historique
-    if (!data.history || data.history.length === 0) {
+    /* --- HISTORIQUE --- */
+    const rmcHist  = data.rmc.history  ?? [];
+    const cmatHist = data.cmat.history ?? [];
+
+    if (!rmcHist.length && !cmatHist.length) {
       graphMessage.textContent = "Aucune donnée historique disponible.";
     } else {
       graphMessage.textContent = "";
-      renderChart(data.history);
+      renderChart(rmcHist, cmatHist);
     }
 
     apiStatusEl.textContent =
-      `Prix mis à jour (Terminal: ${data.bestTerminal.name}).`;
+      `Prix mis à jour (RMC: ${data.rmc.bestTerminal.name} / CMAT: ${data.cmat.bestTerminal.name}).`;
 
     recalc();
 
@@ -459,8 +506,9 @@ async function fetchUexPrices() {
   }
 }
 
+
 /* ============================================================
-   LANCER LE CHARGEMENT
+   LANCEMENT
 ============================================================ */
 fetchUexPrices();
 recalc();
