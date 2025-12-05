@@ -33,7 +33,6 @@
     }
 
     .overlay {
-      /* plus transparent pour mieux voir le fond */
       background: radial-gradient(circle at top, rgba(0,10,20,0.45), rgba(0,2,8,0.55));
       min-height: 100vh;
       padding: 20px 10px 25px;
@@ -88,6 +87,88 @@
       font-size: 11px;
       outline: none;
       cursor: pointer;
+    }
+
+    /* BOX PROFIL UTILISATEUR + LEADERBOARD */
+    .user-box {
+      margin: 0 auto 16px;
+      max-width: 480px;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      color: #c4f7ff;
+      text-align: center;
+      flex-wrap: wrap;
+    }
+
+    .user-box span {
+      opacity: 0.9;
+    }
+
+    .user-box button {
+      background: #021019;
+      border: 1px solid #00e5ff;
+      border-radius: 6px;
+      padding: 4px 9px;
+      color: #aaf7ff;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .user-box button:hover {
+      border-color: #24ffd0;
+    }
+
+    .leaderboard-panel {
+      margin-top: 14px;
+      padding: 10px 12px 12px;
+      border-radius: 10px;
+      border: 1px solid #00c4ff;
+      background: linear-gradient(160deg, #020b14, #030812);
+      box-shadow: 0 0 18px rgba(0,0,0,0.7);
+      font-size: 12px;
+      color: #d8f6ff;
+    }
+
+    .leaderboard-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #00f7ff;
+    }
+
+    .leaderboard-sub {
+      font-size: 11px;
+      color: #9df4ff;
+      margin-bottom: 6px;
+    }
+
+    .leaderboard-list {
+      list-style: none;
+      padding: 0;
+      margin: 6px 0 0;
+    }
+
+    .leaderboard-list li {
+      padding: 3px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .leaderboard-list li span.name {
+      font-weight: 600;
+      color: #aaf7ff;
+    }
+
+    .leaderboard-list li span.ship {
+      opacity: 0.8;
+    }
+
+    .leaderboard-empty {
+      font-size: 11px;
+      color: #9eb5c7;
+      margin-top: 4px;
     }
 
     /* GRID PRINCIPALE (Entrées + Résultats) */
@@ -306,6 +387,11 @@
     <div id="subText" class="sub">
       Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.
     </div>
+    <div class="user-box">
+      <span id="userInfo">Profil : —</span>
+      <button id="changeUserBtn" type="button">Changer / Importer</button>
+    </div>
+
 
     <!-- ======================= SECTION PRINCIPALE (Entrées + Résultats) ======================= -->
     <div class="grid-main">
@@ -418,7 +504,18 @@
       </div>
       <canvas id="cmatChart" height="120"></canvas>
       <div id="graphMessage"></div>
+    
+    <div class="leaderboard-panel">
+      <div class="leaderboard-title">Leaderboard – Salvage (prototype local/cloud)</div>
+      <div class="leaderboard-sub">
+        Classement basé sur le nombre de runs et les bénéfices théoriques. (Affichage démo tant que le backend n'est pas branché.)
+      </div>
+      <ul id="leaderboardList" class="leaderboard-list"></ul>
+      <div id="leaderboardEmpty" class="leaderboard-empty" style="display:none;">
+        Aucun run enregistré pour l'instant.
+      </div>
     </div>
+</div>
 
   </div> <!-- Fin container -->
 </div> <!-- Fin overlay -->
@@ -446,7 +543,7 @@ const i18n = {
     tagLight: "Vaisseaux légers : hull scraping → RMC uniquement",
     tagReclaimer: "Reclaimer : hull + structural salvage → RMC + CMAT (~15% → CMAT)",
     smallNote:
-      "Pour chaque SCU saisie :\n- Light ships : seul le RMC varie (pas de CMAT)\n- Reclaimer : comparaison RMC vs CMAT.",
+      "Pour chaque SCU saisie :\\n- Light ships : seul le RMC varie (pas de CMAT)\\n- Reclaimer : comparaison RMC vs CMAT.",
     apiFetching: "Récupération des prix UEX…",
     apiErrorPrefix: "Erreur API : ",
     apiUpdated: (rmcName, cmatName) =>
@@ -465,16 +562,16 @@ const i18n = {
     lightShipsInfo:
       "ℹ Les vaisseaux légers (Vulture / Salvation / Fortune) ne produisent que du RMC, pas de CMAT.",
     lightShipsNoCmatText:
-      "Les vaisseaux légers ne génèrent pas de Construction Materials (CMAT).\nSeul le Reclaimer (et futurs heavy salvage) peuvent produire du CMAT.",
+      "Les vaisseaux légers ne génèrent pas de Construction Materials (CMAT).\\nSeul le Reclaimer (et futurs heavy salvage) peuvent produire du CMAT.",
     loopCmatBetter: diff => `🟢 Loop CMAT (Construction Materials) plus rentable que RMC (+${diff} aUEC).`,
     loopRmcBetter: diff => `🟢 Loop RMC plus rentable que CMAT (+${diff} aUEC).`,
     loopsEqual: "ℹ Les deux loops rapportent la même chose.",
     rmcLightValues: (sl, rmcVal) =>
-      `SCU de salvage utilisées : ${sl} SCU\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
+      `SCU de salvage utilisées : ${sl} SCU\\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
     rmcRecValues: (sr, rmcVal) =>
-      `SCU de salvage utilisées : ${sr} SCU\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
+      `SCU de salvage utilisées : ${sr} SCU\\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
     cmatRecValues: (scuCmat, valCmat) =>
-      `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\nValeur si tu vends en CMAT : ${valCmat} aUEC`
+      `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\\nValeur si tu vends en CMAT : ${valCmat} aUEC`
   },
   en: {
     titleMain: "SALVAGE CALCULATOR 4.4",
@@ -491,7 +588,7 @@ const i18n = {
     tagLight: "Light salvage ships: hull scraping → RMC only",
     tagReclaimer: "Reclaimer: hull + structural salvage → RMC + CMAT (~15% → CMAT)",
     smallNote:
-      "For each SCU value:\n- Light ships: only RMC changes (no CMAT)\n- Reclaimer: compares RMC vs CMAT.",
+      "For each SCU value:\\n- Light ships: only RMC changes (no CMAT)\\n- Reclaimer: compares RMC vs CMAT.",
     apiFetching: "Fetching UEX prices…",
     apiErrorPrefix: "API error: ",
     apiUpdated: (rmcName, cmatName) =>
@@ -510,16 +607,16 @@ const i18n = {
     lightShipsInfo:
       "ℹ Light salvage ships (Vulture / Salvation / Fortune) only produce RMC, not CMAT.",
     lightShipsNoCmatText:
-      "Light salvage ships do not generate Construction Materials (CMAT).\nOnly the Reclaimer (and future heavy salvage) can produce CMAT.",
+      "Light salvage ships do not generate Construction Materials (CMAT).\\nOnly the Reclaimer (and future heavy salvage) can produce CMAT.",
     loopCmatBetter: diff => `🟢 CMAT loop (Construction Materials) is more profitable than RMC (+${diff} aUEC).`,
     loopRmcBetter: diff => `🟢 RMC loop is more profitable than CMAT (+${diff} aUEC).`,
     loopsEqual: "ℹ Both loops yield the same profit.",
     rmcLightValues: (sl, rmcVal) =>
-      `Salvage SCU used: ${sl} SCU\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
+      `Salvage SCU used: ${sl} SCU\\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
     rmcRecValues: (sr, rmcVal) =>
-      `Salvage SCU used: ${sr} SCU\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
+      `Salvage SCU used: ${sr} SCU\\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
     cmatRecValues: (scuCmat, valCmat) =>
-      `Salvage SCU converted to CMAT (15% yield): ${scuCmat} SCU\nValue if sold as CMAT: ${valCmat} aUEC`
+      `Salvage SCU converted to CMAT (15% yield): ${scuCmat} SCU\\nValue if sold as CMAT: ${valCmat} aUEC`
   }
 };
 
@@ -566,6 +663,208 @@ const graphTitleEl = document.getElementById("graphTitle");
 const graphSubEl = document.getElementById("graphSub");
 const langSwitchLabelEl = document.getElementById("langSwitchLabel");
 const langSelectEl = document.getElementById("langSelect");
+
+/* ==== PROFIL UTILISATEUR (pseudo + clé privée à 6 chiffres) ==== */
+const userInfoEl = document.getElementById("userInfo");
+const changeUserBtn = document.getElementById("changeUserBtn");
+
+let currentUser = null;
+
+function generateSecret() {
+  const n = Math.floor(Math.random() * 1000000);
+  return String(n).padStart(6, "0");
+}
+
+// ID pseudo-deterministe à partir du pseudo + clé
+function computeUserId(nickname, secret) {
+  const base = (nickname || "").trim() + "#" + secret;
+  let hash = 0;
+  for (let i = 0; i < base.length; i++) {
+    hash = (hash * 31 + base.charCodeAt(i)) >>> 0;
+  }
+  return "user_" + hash.toString(16);
+}
+
+function loadUserProfile() {
+  try {
+    const raw = localStorage.getItem("salvageCalcUser");
+    if (!raw) return null;
+    const u = JSON.parse(raw);
+    if (!u || !u.id || !u.nickname || !u.secret) return null;
+    return u;
+  } catch (_) {
+    return null;
+  }
+}
+
+function saveUserProfile(user) {
+  currentUser = user;
+  try {
+    localStorage.setItem("salvageCalcUser", JSON.stringify(user));
+  } catch (_) {}
+  updateUserUI();
+}
+
+function updateUserUI() {
+  if (!userInfoEl) return;
+  if (!currentUser) {
+    userInfoEl.textContent = "Profil : —";
+  } else {
+    userInfoEl.textContent =
+      "Profil : " + currentUser.nickname + " (clé : " + currentUser.secret + ")";
+  }
+}
+
+function ensureUserProfile() {
+  const existing = loadUserProfile();
+  if (existing) {
+    currentUser = existing;
+    updateUserUI();
+    return;
+  }
+
+  let nickname = prompt(
+    "Bienvenue sur le Salvage Calculator !\\n\\nChoisis un pseudo pour ton profil :",
+    "Salvager"
+  );
+  if (!nickname || !nickname.trim()) {
+    nickname = "Salvager";
+  }
+  nickname = nickname.trim();
+
+  const secret = generateSecret();
+  const id = computeUserId(nickname, secret);
+
+  const user = { id, nickname, secret };
+  saveUserProfile(user);
+
+  alert(
+    "Ton profil est créé !\\n\\n" +
+    "Pseudo : " + nickname + "\\n" +
+    "Clé privée : " + secret + "\\n\\n" +
+    "Note bien cette clé : elle te permettra de retrouver ton profil sur un autre navigateur plus tard."
+  );
+}
+
+function changeOrImportProfile() {
+  if (!confirm(
+    "Voulez-vous importer un profil existant (pseudo + clé) ?\\n\\n" +
+    "Cliquez sur OK pour importer un profil.\\nCliquez sur Annuler pour créer un nouveau profil."
+  )) {
+    // Nouveau profil
+    let nickname = prompt("Nouveau pseudo :", currentUser ? currentUser.nickname : "Salvager");
+    if (!nickname || !nickname.trim()) return;
+    nickname = nickname.trim();
+    const secret = generateSecret();
+    const id = computeUserId(nickname, secret);
+    const user = { id, nickname, secret };
+    saveUserProfile(user);
+    alert(
+      "Nouveau profil créé !\\n\\n" +
+      "Pseudo : " + nickname + "\\n" +
+      "Clé privée : " + secret + "\\n\\n" +
+      "Note bien cette clé pour pouvoir récupérer ce profil ailleurs."
+    );
+    return;
+  }
+
+  // Importer un profil existant
+  let nickname = prompt(
+    "Pseudo du profil à importer :",
+    currentUser ? currentUser.nickname : ""
+  );
+  if (!nickname || !nickname.trim()) return;
+  nickname = nickname.trim();
+
+  let secret = prompt("Clé privée à 6 chiffres de ce profil :", "");
+  if (!secret) return;
+  secret = secret.trim();
+  if (!/^[0-9]{6}$/.test(secret)) {
+    alert("Clé invalide. Elle doit contenir exactement 6 chiffres.");
+    return;
+  }
+
+  const id = computeUserId(nickname, secret);
+  const user = { id, nickname, secret };
+  saveUserProfile(user);
+  alert(
+    "Profil importé !\\n\\n" +
+    "Pseudo : " + nickname + "\\n" +
+    "Clé : " + secret
+  );
+}
+
+// Bouton changer / importer
+if (changeUserBtn) {
+  changeUserBtn.addEventListener("click", changeOrImportProfile);
+}
+
+/* (Prototype) mise à jour d'un leaderboard local
+   Pour l'instant, on garde ça côté navigateur uniquement.
+   Plus tard, on branchera ça sur un Worker Cloudflare pour avoir un vrai leaderboard partagé. */
+const leaderboardListEl = document.getElementById("leaderboardList");
+const leaderboardEmptyEl = document.getElementById("leaderboardEmpty");
+
+function updateLocalLeaderboard(lastRun) {
+  if (!leaderboardListEl || !leaderboardEmptyEl || !currentUser) return;
+
+  // On stocke un petit résumé local des runs de l'utilisateur
+  let stored;
+  try {
+    stored = JSON.parse(localStorage.getItem("salvageCalcRuns") || "[]");
+  } catch (_) {
+    stored = [];
+  }
+
+  if (lastRun) {
+    stored.push(lastRun);
+    try {
+      localStorage.setItem("salvageCalcRuns", JSON.stringify(stored));
+    } catch (_) {}
+  }
+
+  if (!stored.length) {
+    leaderboardListEl.innerHTML = "";
+    leaderboardEmptyEl.style.display = "block";
+    return;
+  }
+
+  leaderboardEmptyEl.style.display = "none";
+
+  // Agrégation simple localement
+  let totalRuns = stored.length;
+  let totalProfit = 0;
+  let totalRmc = 0;
+  let favShip = "N/A";
+  const shipsCount = {};
+
+  stored.forEach(r => {
+    totalProfit += r.profit || 0;
+    totalRmc += r.rmc || 0;
+    if (r.ship) {
+      shipsCount[r.ship] = (shipsCount[r.ship] || 0) + 1;
+    }
+  });
+
+  let bestShip = null;
+  let bestCount = 0;
+  for (const s in shipsCount) {
+    if (shipsCount[s] > bestCount) {
+      bestCount = shipsCount[s];
+      bestShip = s;
+    }
+  }
+  if (bestShip) favShip = bestShip;
+
+  leaderboardListEl.innerHTML = "";
+  const li = document.createElement("li");
+  li.innerHTML =
+    "<span class='name'>" + currentUser.nickname + "</span> – " +
+    totalRuns + " runs · " +
+    format(totalProfit) + " aUEC théoriques · " +
+    "<span class='ship'>Ship fav : " + favShip + "</span>";
+  leaderboardListEl.appendChild(li);
+}
 
 /* Langue */
 function applyLanguage() {
@@ -840,9 +1139,17 @@ window.addEventListener("load", () => {
     }
   } catch (_) {}
 
+  // Profil utilisateur local (pseudo + clé privée)
+  ensureUserProfile();
+  updateUserUI();
+
   langSelectEl.value = currentLang;
   applyLanguage();
   recalc();
+
+  // Leaderboard local (lecture des données si présentes)
+  updateLocalLeaderboard(null);
+
   fetchUexPrices();
 });
 </script>
