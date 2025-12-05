@@ -22,23 +22,23 @@
     .overlay {
       background: radial-gradient(circle at top, rgba(0,0,0,0.75), rgba(0,0,0,0.95));
       min-height: 100vh;
-      padding: 25px 10px 30px;
+      padding: 20px 10px 25px;
     }
 
     .container {
-      max-width: 1180px;
+      max-width: 1120px;
       margin: 0 auto;
       border: 2px solid #ffb000;
       border-radius: 10px;
-      padding: 20px 25px 25px;
+      padding: 16px 20px 20px;
       background: rgba(5,5,5,0.92);
-      box-shadow: 0 0 30px rgba(0,0,0,0.7);
+      box-shadow: 0 0 24px rgba(0,0,0,0.7);
     }
 
     h1 {
-      margin: 0 0 20px;
+      margin: 0 0 16px;
       text-align: center;
-      font-size: 32px;
+      font-size: 30px;
       text-transform: uppercase;
       letter-spacing: 2px;
       color: #ffb000;
@@ -48,14 +48,14 @@
       text-align: center;
       font-size: 13px;
       color: #ffcc66;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     /* GRID PRINCIPALE */
     .grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 22px;
+      gap: 20px;
     }
 
     /* PANELS */
@@ -63,13 +63,13 @@
       border-radius: 10px;
       border: 1px solid #ffb000;
       background: linear-gradient(160deg, #1a1a1a, #0b0b0b);
-      padding: 15px 15px 20px;
+      padding: 12px 12px 16px;
     }
 
     .panel-title {
-      font-size: 19px;
+      font-size: 18px;
       color: #ffb000;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       font-weight: 600;
       text-shadow: 0 0 4px rgba(255,176,0,0.4);
     }
@@ -77,7 +77,7 @@
     /* INPUTS */
     label {
       display: block;
-      margin-top: 10px;
+      margin-top: 8px;
       font-size: 14px;
       font-weight: 600;
     }
@@ -91,12 +91,12 @@
     input[type="number"] {
       width: 100%;
       margin-top: 4px;
-      padding: 9px 10px;
+      padding: 8px 10px;
       border-radius: 6px;
       border: 2px solid #ffb000;
       background: #222;
       color: #fff;
-      font-size: 15px;
+      font-size: 14px;
       outline: none;
     }
 
@@ -105,19 +105,19 @@
       box-shadow: 0 0 0 2px #ff8000;
     }
 
-    /* Enlever les flèches sur inputs readonly */
-    input[readonly]::-webkit-inner-spin-button,
-    input[readonly]::-webkit-outer-spin-button {
+    /* Enlever les flèches sur TOUS les inputs number */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
       -webkit-appearance: none;
       margin: 0;
     }
-    input[readonly] {
+    input[type=number] {
       -moz-appearance: textfield;
     }
 
     /* TAGS */
     .tag-row {
-      margin-top: 14px;
+      margin-top: 12px;
       display: flex;
       flex-wrap: wrap;
       gap: 7px;
@@ -155,24 +155,65 @@
 
     /* PANEL GRAPHIQUE */
     .graph-panel {
-      margin-bottom: 18px;
-      padding: 15px 15px 18px;
+      margin-bottom: 14px;
+      padding: 12px 12px 16px;
       border-radius: 10px;
       border: 1px solid #ffb000;
       background: linear-gradient(160deg, #1a1a1a, #0b0b0b);
     }
 
     .graph-title {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 600;
       color: #ffb000;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     #graphMessage {
       color: #ffaa88;
       font-size: 12px;
-      margin-top: 5px;
+      margin-top: 4px;
+    }
+
+    /* RÉSULTATS */
+    .result-block {
+      background: #151515;
+      border-radius: 8px;
+      border: 1px solid #444;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+
+    .result-head {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #ffe08a;
+    }
+
+    .result-values {
+      font-size: 13px;
+      line-height: 1.4;
+      white-space: pre-line;
+      margin-bottom: 4px;
+    }
+
+    .decision {
+      margin-top: 4px;
+      padding: 7px 9px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .decision.good {
+      background: #082d12;
+      border-left: 4px solid #00ff66;
+      color: #adffbf;
+    }
+    .decision.bad {
+      background: #3a0707;
+      border-left: 4px solid #ff4444;
+      color: #ffb3b3;
     }
 
     @media (max-width: 900px) {
@@ -188,7 +229,7 @@
   <div class="container">
     <h1>SALVAGE CALCULATOR 4.4</h1>
     <div class="sub">
-      Estime tes gains à partir du Salvage brut vers <b>RMC</b> et <b>CMAT</b>.
+      Compare la rentabilité du Salvage brut raffiné en <b>RMC</b> ou en <b>CMAT</b>.
     </div>
 
     <div class="grid">
@@ -204,14 +245,14 @@
         <input id="prixCmat" type="number" value="0" readonly />
         <div class="hint">Construction Materials (raffiné).</div>
 
-        <label for="scuLight">SCU Salvage – Light Ships (30% rendement)</label>
+        <label for="scuLight">SCU Salvage – Salvation / Vulture / Fortune (30% rendement)</label>
         <input id="scuLight" type="number" value="0" />
 
         <label for="scuReclaimer">SCU Salvage – Reclaimer (15% rendement)</label>
         <input id="scuReclaimer" type="number" value="0" />
 
         <div class="tag-row">
-          <div class="tag">Light ships : 30%</div>
+          <div class="tag">Salvation / Vulture / Fortune : 30%</div>
           <div class="tag red">Reclaimer : 15%</div>
         </div>
 
@@ -223,43 +264,40 @@
       <div>
         <!-- PANEL GRAPHIQUE -->
         <div class="graph-panel">
-          <div class="graph-title">Historique des prix RMC & CMAT (3 jours)</div>
+          <div class="graph-title">Historique des prix RMC &amp; CMAT (dernières valeurs)</div>
           <canvas id="cmatChart" height="120"></canvas>
           <div id="graphMessage"></div>
         </div>
-        <!-- ======================= PANEL RÉSULTATS RMC ======================= -->
-        <div class="panel">
-          <div class="panel-title">Résultats – Conversion vers RMC</div>
 
-          <!-- Résultats Light Ships -->
+        <!-- PANEL RÉSULTATS RMC -->
+        <div class="panel">
+          <div class="panel-title">Résultats – Recycled Material Composite (RMC)</div>
+
           <div class="result-block">
-            <div class="result-head">Light Ships (rendement 30 %)</div>
+            <div class="result-head">Salvation / Vulture / Fortune (30 %)</div>
             <div class="result-values" id="rmcLightValues"></div>
             <div class="decision" id="rmcLightDecision"></div>
           </div>
 
-          <!-- Résultats Reclaimer -->
           <div class="result-block">
-            <div class="result-head">Reclaimer (rendement 15 %)</div>
+            <div class="result-head">Reclaimer (15 %)</div>
             <div class="result-values" id="rmcRecValues"></div>
             <div class="decision" id="rmcRecDecision"></div>
           </div>
         </div>
 
-        <!-- ======================= PANEL RÉSULTATS CMAT ======================= -->
-        <div class="panel" style="margin-top: 20px;">
-          <div class="panel-title">Résultats – Conversion vers CMAT</div>
+        <!-- PANEL RÉSULTATS CMAT -->
+        <div class="panel" style="margin-top: 14px;">
+          <div class="panel-title">Résultats – Construction Materials (CMAT)</div>
 
-          <!-- Résultats Light Ships -->
           <div class="result-block">
-            <div class="result-head">Light Ships (rendement 30 %)</div>
+            <div class="result-head">Salvation / Vulture / Fortune (30 %)</div>
             <div class="result-values" id="cmatLightValues"></div>
             <div class="decision" id="cmatLightDecision"></div>
           </div>
 
-          <!-- Résultats Reclaimer -->
           <div class="result-block">
-            <div class="result-head">Reclaimer (rendement 15 %)</div>
+            <div class="result-head">Reclaimer (15 %)</div>
             <div class="result-values" id="cmatRecValues"></div>
             <div class="decision" id="cmatRecDecision"></div>
           </div>
@@ -309,6 +347,7 @@ window.addEventListener("load", () => {
   scuLightInput.value = 0;
   scuRecInput.value = 0;
 });
+
 /* ============================================================
    FORMATAGE DE NOMBRE
 ============================================================ */
@@ -343,10 +382,8 @@ function recalc() {
   const sl = Number(scuLightInput.value) || 0;
   const sr = Number(scuRecInput.value)   || 0;
 
-  /* ------------------ RMC ------------------ */
-
-  // Light ships
-  const rmcLightBrut = sl * prixRMC;
+  /* ----- RMC ----- */
+  const rmcLightBrut   = sl * prixRMC;
   const rmcLightRafScu = sl * REND_LIGHT;
   const rmcLightRafVal = rmcLightRafScu * prixRMC;
 
@@ -360,8 +397,7 @@ function recalc() {
   rmcLightDecisionEl.textContent = decRmcL.text;
   rmcLightDecisionEl.className = "decision " + (decRmcL.good ? "good" : "bad");
 
-  // Reclaimer
-  const rmcRecBrut = sr * prixRMC;
+  const rmcRecBrut   = sr * prixRMC;
   const rmcRecRafScu = sr * REND_RECLAIMER;
   const rmcRecRafVal = rmcRecRafScu * prixRMC;
 
@@ -375,9 +411,7 @@ function recalc() {
   rmcRecDecisionEl.textContent = decRmcR.text;
   rmcRecDecisionEl.className = "decision " + (decRmcR.good ? "good" : "bad");
 
-
-  /* ------------------ CMAT ------------------ */
-
+  /* ----- CMAT ----- */
   const cmatLightBrut   = sl * prixCMAT;
   const cmatLightRafScu = sl * REND_LIGHT;
   const cmatLightRafVal = cmatLightRafScu * prixCMAT;
@@ -407,7 +441,6 @@ function recalc() {
   cmatRecDecisionEl.className = "decision " + (decCmatR.good ? "good" : "bad");
 }
 
-
 /* ============================================================
    EVENTS DE RECALCUL
 ============================================================ */
@@ -416,26 +449,26 @@ function recalc() {
   scuRecInput
 ].forEach(el => el.addEventListener("input", recalc));
 
-
 /* ============================================================
    GRAPHIQUE DOUBLE COURBE
 ============================================================ */
 let cmatChart = null;
 
 function renderChart(rmcHist, cmatHist) {
-
-  const rmcLabels  = rmcHist.map(e => new Date(e.date).toLocaleString("fr-FR"));
+  const rmcLabels  = rmcHist.map((e, i) => `RMC #${i + 1}`);
   const rmcValues  = rmcHist.map(e => e.sell);
 
-  const cmatLabels = cmatHist.map(e => new Date(e.date).toLocaleString("fr-FR"));
+  const cmatLabels = cmatHist.map((e, i) => `CMAT #${i + 1}`);
   const cmatValues = cmatHist.map(e => e.sell);
 
   if (cmatChart) cmatChart.destroy();
 
+  const labels = cmatLabels.length > rmcLabels.length ? cmatLabels : rmcLabels;
+
   cmatChart = new Chart(chartCanvas, {
     type: "line",
     data: {
-      labels: cmatLabels.length > rmcLabels.length ? cmatLabels : rmcLabels,
+      labels,
       datasets: [
         {
           label: "CMAT (aUEC)",
@@ -464,7 +497,6 @@ function renderChart(rmcHist, cmatHist) {
   });
 }
 
-
 /* ============================================================
    RÉCUPÉRATION DES DONNÉES UEX VIA WORKER
 ============================================================ */
@@ -479,11 +511,9 @@ async function fetchUexPrices() {
 
     const data = await res.json();
 
-    /* --- PRIX AUTO --- */
     prixRmcInput.value  = data.rmc.price  ?? 0;
     prixCmatInput.value = data.cmat.price ?? 0;
 
-    /* --- HISTORIQUE --- */
     const rmcHist  = data.rmc.history  ?? [];
     const cmatHist = data.cmat.history ?? [];
 
@@ -506,7 +536,6 @@ async function fetchUexPrices() {
   }
 }
 
-
 /* ============================================================
    LANCEMENT
 ============================================================ */
@@ -516,4 +545,3 @@ recalc();
 
 </body>
 </html>
-
