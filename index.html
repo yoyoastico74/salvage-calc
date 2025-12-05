@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Version : V4.1 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -584,6 +585,15 @@
       color: #c4f7ff;
       min-height: 14px;
     }
+
+    .app-version {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #7fc8ff;
+      text-align: right;
+      opacity: 0.9;
+    }
+
   </style>
 </head>
 
@@ -756,6 +766,7 @@
         </div>
       </div>
     </div>
+    <div id="appVersion" class="app-version"></div>
   </div> <!-- Fin container -->
 </div> <!-- Fin overlay -->
 
@@ -809,6 +820,8 @@
 <!-- ======================= SCRIPTS ======================= -->
 <script>
 const REND_RECLAIMER = 0.15;
+const APP_VERSION = "V4.1";
+
 
 /* I18N */
 let currentLang = localStorage.getItem("salvageCalcLang") || "fr";
@@ -977,6 +990,7 @@ const graphTitleEl = document.getElementById("graphTitle");
 const graphSubEl = document.getElementById("graphSub");
 const langSwitchLabelEl = document.getElementById("langSwitchLabel");
 const langSelectEl = document.getElementById("langSelect");
+const appVersionEl = document.getElementById("appVersion");
 
 /* Leaderboard local */
 const leaderboardListEl = document.getElementById("leaderboardList");
@@ -1357,6 +1371,10 @@ function applyLanguage() {
 
   clearMyRunsBtnEl.textContent = t.clearMyRunsBtn;
   clearAllRunsBtnEl.textContent = t.clearAllRunsBtn;
+
+  if (appVersionEl) {
+    appVersionEl.textContent = "Version " + APP_VERSION;
+  }
 
   updateAdminUI();
   recalc();
