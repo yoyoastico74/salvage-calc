@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Version : V4.2 -->
+<!-- Version : V4.5 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <title>Salvage Calculator 4.4</title>
 
-  <!-- Open Graph (preview Discord, Facebook, etc.) -->
+  <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Star Citizen – Salvage Calculator">
   <meta property="og:description" content="Compare la rentabilité RMC vs CMAT avec les prix UEX en temps réel.">
@@ -18,11 +18,9 @@
   <meta name="twitter:description" content="Compare RMC vs CMAT avec prix UEX live.">
   <meta name="twitter:image" content="https://shog-sc.github.io/salvage-calc/icon.png">
 
-  <!-- Chart.js pour le graphique -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    /* ---------- GLOBAL ---------- */
     html, body {
       overflow-x: hidden;
       margin: 0;
@@ -67,7 +65,6 @@
       margin-bottom: 18px;
     }
 
-    /* Sélecteur de langue */
     .lang-switch {
       position: absolute;
       top: 12px;
@@ -90,7 +87,6 @@
       cursor: pointer;
     }
 
-    /* BOX PROFIL UTILISATEUR */
     .user-box {
       margin: 0 auto 16px;
       max-width: 480px;
@@ -102,10 +98,6 @@
       color: #c4f7ff;
       text-align: center;
       flex-wrap: wrap;
-    }
-
-    .user-box span {
-      opacity: 0.9;
     }
 
     .user-box button {
@@ -122,7 +114,6 @@
       border-color: #24ffd0;
     }
 
-    /* LEADERBOARD (prototype local) */
     .leaderboard-panel {
       padding: 10px 12px 12px;
       border-radius: 10px;
@@ -153,8 +144,28 @@
     }
 
     .leaderboard-list li {
-      padding: 3px 0;
+      padding: 6px 0;
       border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 11px;
+    }
+
+    .leaderboard-item-current {
+      background: radial-gradient(circle at left, rgba(0,255,200,0.18), transparent);
+      border-left: 3px solid #24ffd0;
+      padding-left: 6px;
+    }
+
+    .leaderboard-badge {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 6px;
+      margin-right: 4px;
+      border-radius: 999px;
+      background: rgba(0, 255, 200, 0.18);
+      border: 1px solid #24ffd0;
+      color: #c9fff3;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .leaderboard-empty {
@@ -193,14 +204,12 @@
       min-height: 12px;
     }
 
-    /* GRID PRINCIPALE (Entrées + Résultats) */
     .grid-main {
       display: grid;
       grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
       gap: 20px;
     }
 
-    /* PANELS */
     .panel {
       border-radius: 10px;
       border: 1px solid #00c4ff;
@@ -217,7 +226,6 @@
       text-shadow: 0 0 6px rgba(0,255,255,0.5);
     }
 
-    /* INPUTS */
     label {
       display: block;
       margin-top: 8px;
@@ -258,7 +266,6 @@
       -moz-appearance: textfield;
     }
 
-    /* SELECT + BOUTON RUN */
     .panel select {
       width: 100%;
       margin-top: 4px;
@@ -270,6 +277,7 @@
       font-size: 13px;
       outline: none;
     }
+
     .panel select:focus {
       border-color: #24ffd0;
       box-shadow: 0 0 0 2px rgba(36,255,208,0.7);
@@ -286,11 +294,11 @@
       font-size: 13px;
       cursor: pointer;
     }
+
     .save-run-btn:hover {
       background: #04a371;
     }
 
-    /* TAGS + NOTES */
     .tag-row {
       margin-top: 12px;
       display: flex;
@@ -340,7 +348,6 @@
       color: #24ffd0;
     }
 
-    /* PANELS RÉSULTATS */
     .results-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -388,7 +395,6 @@
       color: #ffb3b3;
     }
 
-    /* SECTION GRAPHIQUE EN BAS DE PAGE */
     .market-panel {
       margin-top: 20px;
       padding: 12px 12px 16px;
@@ -417,7 +423,6 @@
       margin-top: 4px;
     }
 
-    /* Nouvelle grille bas de page : graph à gauche, leaderboard à droite */
     .market-grid {
       display: grid;
       grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
@@ -442,7 +447,6 @@
       }
     }
 
-    /* ===== MODAL PROFIL ===== */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -541,12 +545,6 @@
       outline: none;
     }
 
-    .modal input[type="text"]:focus,
-    .modal input[type="number"]:focus {
-      border-color: #24ffd0;
-      box-shadow: 0 0 0 1px rgba(36,255,208,0.6);
-    }
-
     .modal-small {
       font-size: 11px;
       color: #9df4ff;
@@ -563,10 +561,6 @@
       color: #c4ffe6;
       font-size: 12px;
       cursor: pointer;
-    }
-
-    .modal button.action:hover {
-      background: #04a371;
     }
 
     .key-display {
@@ -586,6 +580,93 @@
       min-height: 14px;
     }
 
+    .my-runs-btn {
+      margin-top: 6px;
+      width: 100%;
+      padding: 4px 0;
+      border-radius: 6px;
+      border: 1px solid #315d73;
+      background: #031019;
+      color: #c4f7ff;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .my-runs-btn:hover {
+      border-color: #24ffd0;
+      background: #033023;
+    }
+
+    .my-runs-panel {
+      margin-top: 6px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 228, 255, 0.35);
+      background: rgba(1, 10, 18, 0.9);
+    }
+
+    .my-runs-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #8feaff;
+      margin-bottom: 4px;
+    }
+
+    .my-runs-section {
+      margin-bottom: 6px;
+    }
+
+    .my-runs-subtitle {
+      font-size: 11px;
+      font-weight: 600;
+      color: #9fe9ff;
+      margin-bottom: 2px;
+    }
+
+    .my-runs-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 11px;
+      color: #e3f9ff;
+    }
+
+    .my-runs-list li {
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .my-runs-empty {
+      font-size: 11px;
+      color: #9eb5c7;
+      margin-top: 2px;
+    }
+
+    .my-run-mainline {
+      flex: 1;
+    }
+
+    .my-run-sold-toggle {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: #9fe9ff;
+      white-space: nowrap;
+    }
+
+    .my-run-sold-toggle input[type="checkbox"] {
+      margin: 0;
+      width: 12px;
+      height: 12px;
+    }
+
     .app-version {
       margin-top: 10px;
       font-size: 11px;
@@ -593,14 +674,11 @@
       text-align: right;
       opacity: 0.9;
     }
-
   </style>
 </head>
-
 <body>
 <div class="overlay">
   <div class="container">
-    <!-- Switch langue -->
     <div class="lang-switch">
       <span id="langSwitchLabel">Langue :</span>
       <select id="langSelect">
@@ -613,6 +691,7 @@
     <div id="subText" class="sub">
       Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.
     </div>
+
     <div class="info-panel" style="margin:10px auto 15px; max-width:600px; font-size:13px; color:#aeeaff; background:rgba(0,20,35,0.35); padding:10px 14px; border-left:3px solid #24ffd0; border-radius:6px;">
       <b>Comment utiliser l’outil :</b><br>
       1. Choisis ton vaisseau et entre tes SCU de salvage.<br>
@@ -620,14 +699,13 @@
       3. Crée/import un profil pour sauvegarder tes runs.<br>
       4. Le leaderboard est local (pour l’instant), une version communautaire arrive bientôt.
     </div>
+
     <div class="user-box">
       <span id="userInfo">Profil : —</span>
       <button id="changeUserBtn" type="button">Gérer mon profil</button>
     </div>
 
-    <!-- ======================= SECTION PRINCIPALE (Entrées + Résultats) ======================= -->
     <div class="grid-main">
-      <!-- COLONNE GAUCHE : ENTRÉES -->
       <div class="panel">
         <div id="entriesTitle" class="panel-title">Entrées</div>
 
@@ -647,7 +725,6 @@
           CMAT = Construction Materials (issu du Construction Salvage, Reclaimer uniquement).
         </div>
 
-        <!-- Point de vente bien visible -->
         <div class="sellpoints">
           <div><span id="sellRmcLabel" class="label">Point de vente RMC :</span> <span id="rmcTerminal">—</span></div>
           <div><span id="sellCmatLabel" class="label">Point de vente CMAT :</span> <span id="cmatTerminal">—</span></div>
@@ -669,7 +746,6 @@
         </label>
         <input id="scuReclaimer" type="number" value="0" />
 
-        <!-- Choix du vaisseau pour le run -->
         <label for="shipSelect" id="labelShipSelect">Vaisseau utilisé pour ce run</label>
         <select id="shipSelect">
           <option value="Vulture">Vulture</option>
@@ -696,9 +772,7 @@
         <div id="apiStatus" class="api-status">Récupération des prix UEX…</div>
       </div>
 
-      <!-- COLONNE DROITE : RÉSULTATS -->
       <div class="results-grid">
-        <!-- PANEL RÉSULTATS RMC -->
         <div class="panel">
           <div id="rmcPanelTitle" class="panel-title">Loop RMC – Vendre en Recycled Material Composite</div>
 
@@ -719,7 +793,6 @@
           </div>
         </div>
 
-        <!-- PANEL RÉSULTATS CMAT -->
         <div class="panel">
           <div id="cmatPanelTitle" class="panel-title">Loop CMAT – Transformer en Construction Materials</div>
 
@@ -742,7 +815,6 @@
       </div>
     </div>
 
-    <!-- ======================= SECTION GRAPHIQUE + LEADERBOARD EN BAS ======================= -->
     <div class="market-panel">
       <div id="graphTitle" class="graph-title">Analyse du marché – Historique RMC &amp; CMAT</div>
       <div id="graphSub" class="graph-sub">
@@ -757,9 +829,27 @@
 
         <div class="leaderboard-panel">
           <div class="leaderboard-title">Leaderboard – Salvage (prototype local)</div>
-          <div class="leaderboard-sub">
+          <div id="leaderboardSub" class="leaderboard-sub">
             Classement basé sur le nombre de runs et les bénéfices théoriques (local au navigateur pour l’instant).
           </div>
+
+          <button id="toggleMyRunsBtn" type="button" class="my-runs-btn">Voir mes runs détaillés</button>
+          <div id="myRunsPanel" class="my-runs-panel" style="display:none;">
+            <div id="myRunsTitle" class="my-runs-title">Mes runs enregistrés</div>
+
+            <div class="my-runs-section">
+              <div id="myRunsActiveTitle" class="my-runs-subtitle">En attente de vente</div>
+              <ul id="myRunsActiveList" class="my-runs-list"></ul>
+              <div id="myRunsActiveEmpty" class="my-runs-empty">Aucun run en attente de vente.</div>
+            </div>
+
+            <div class="my-runs-section">
+              <div id="myRunsSoldTitle" class="my-runs-subtitle">Runs vendus</div>
+              <ul id="myRunsSoldList" class="my-runs-list"></ul>
+              <div id="myRunsSoldEmpty" class="my-runs-empty">Aucun run vendu pour l'instant.</div>
+            </div>
+          </div>
+
           <ul id="leaderboardList" class="leaderboard-list"></ul>
           <div id="leaderboardEmpty" class="leaderboard-empty" style="display:none;">
             Aucun run enregistré pour l'instant.
@@ -773,11 +863,11 @@
         </div>
       </div>
     </div>
-    <div id="appVersion" class="app-version"></div>
-  </div> <!-- Fin container -->
-</div> <!-- Fin overlay -->
 
-<!-- ===== MODAL PROFIL ===== -->
+    <div id="appVersion" class="app-version"></div>
+  </div>
+</div>
+
 <div id="profileModal" class="modal-backdrop">
   <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-header">
@@ -792,29 +882,23 @@
     <div id="modalCreateSection" class="modal-section active">
       <label for="createNickname">Pseudo</label>
       <input id="createNickname" type="text" placeholder="Ex : Salvager_001" />
-
       <div class="modal-small">
         Un profil utilisera ce pseudo et une clé privée générée automatiquement.
       </div>
-
       <button id="createProfileBtn" class="action" type="button">
         Créer le profil
       </button>
-
       <div id="createdKeyDisplay" class="key-display" style="display:none;"></div>
     </div>
 
     <div id="modalImportSection" class="modal-section">
       <label for="importNickname">Pseudo</label>
       <input id="importNickname" type="text" placeholder="Ton pseudo" />
-
       <label for="importSecret">Clé privée (6 chiffres)</label>
       <input id="importSecret" type="text" maxlength="6" placeholder="123456" />
-
       <div class="modal-small">
         Utilise le pseudo + la clé fournie lors de la création de ton profil.
       </div>
-
       <button id="importProfileBtn" class="action" type="button">
         Importer ce profil
       </button>
@@ -824,13 +908,10 @@
   </div>
 </div>
 
-<!-- ======================= SCRIPTS ======================= -->
 <script>
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V4.2";
+const APP_VERSION = "V4.5";
 
-
-/* I18N */
 let currentLang = localStorage.getItem("salvageCalcLang") || "fr";
 
 const i18n = {
@@ -848,12 +929,10 @@ const i18n = {
     labelScuReclaimer: "SCU de salvage traitées – Reclaimer (peut vendre en RMC ou produire du CMAT ~15 %)",
     tagLight: "Vaisseaux légers : hull scraping → RMC uniquement",
     tagReclaimer: "Reclaimer : hull + structural salvage → RMC + CMAT (~15% → CMAT)",
-    smallNote:
-      "Pour chaque SCU saisie :\n- Light ships : seul le RMC varie (pas de CMAT)\n- Reclaimer : comparaison RMC vs CMAT.",
+    smallNote: "Pour chaque SCU saisie :\\n- Light ships : seul le RMC varie (pas de CMAT)\\n- Reclaimer : comparaison RMC vs CMAT.",
     apiFetching: "Récupération des prix UEX…",
     apiErrorPrefix: "Erreur API : ",
-    apiUpdated: (rmcName, cmatName) =>
-      `Prix mis à jour (RMC: ${rmcName} / CMAT: ${cmatName}).`,
+    apiUpdated: (rmcName, cmatName) => `Prix mis à jour (RMC: ${rmcName} / CMAT: ${cmatName}).`,
     rmcPanelTitle: "Loop RMC – Vendre en Recycled Material Composite",
     cmatPanelTitle: "Loop CMAT – Transformer en Construction Materials",
     rmcLightHead: "Salvation / Vulture / Fortune (RMC uniquement)",
@@ -865,23 +944,19 @@ const i18n = {
     graphNoData: "Aucune donnée historique disponible.",
     graphError: "Impossible de charger l'historique.",
     langSwitchLabel: "Langue :",
-    lightShipsInfo:
-      "ℹ Les vaisseaux légers (Vulture / Salvation / Fortune) ne produisent que du RMC, pas de CMAT.",
-    lightShipsNoCmatText:
-      "Les vaisseaux légers ne génèrent pas de Construction Materials (CMAT).\nSeul le Reclaimer (et futurs heavy salvage) peuvent produire du CMAT.",
+    lightShipsInfo: "ℹ Les vaisseaux légers (Vulture / Salvation / Fortune) ne produisent que du RMC, pas de CMAT.",
+    lightShipsNoCmatText: "Les vaisseaux légers ne génèrent pas de Construction Materials (CMAT).\\nSeul le Reclaimer (et futurs heavy salvage) peuvent produire du CMAT.",
     loopCmatBetter: diff => `🟢 Loop CMAT (Construction Materials) plus rentable que RMC (+${diff} aUEC).`,
     loopRmcBetter: diff => `🟢 Loop RMC plus rentable que CMAT (+${diff} aUEC).`,
     loopsEqual: "ℹ Les deux loops rapportent la même chose.",
-    rmcLightValues: (sl, rmcVal) =>
-      `SCU de salvage utilisées : ${sl} SCU\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
-    rmcRecValues: (sr, rmcVal) =>
-      `SCU de salvage utilisées : ${sr} SCU\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
-    cmatRecValues: (scuCmat, valCmat) =>
-      `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\nValeur si tu vends en CMAT : ${valCmat} aUEC`,
-    /* Leaderboard & runs */
+    rmcLightValues: (sl, rmcVal) => `SCU de salvage utilisées : ${sl} SCU\\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
+    rmcRecValues: (sr, rmcVal) => `SCU de salvage utilisées : ${sr} SCU\\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
+    cmatRecValues: (scuCmat, valCmat) => `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\\nValeur si tu vends en CMAT : ${valCmat} aUEC`,
     leaderboardEmpty: "Aucun run enregistré pour l'instant.",
     leaderboardLine: (nickname, runs, profit, favShip, totalRmc) =>
       `${nickname} – ${runs} runs · ${profit} aUEC théoriques · Ship fav : ${favShip} · Total RMC : ${totalRmc} SCU`,
+    leaderboardYou: "Vous",
+    leaderboardSub: "Leaderboard local : classement basé sur tes runs enregistrés. Les données sont stockées sur ton navigateur uniquement (pour l’instant).",
     labelShipSelect: "Vaisseau utilisé pour ce run",
     saveRunBtn: "Enregistrer ce run dans le leaderboard local",
     saveRunSuccess: "Run enregistré dans ton leaderboard local.",
@@ -891,7 +966,23 @@ const i18n = {
     clearAllRunsBtn: "Reset complet (local)",
     clearMyRunsNoUser: "Aucun profil chargé. Crée ou importe un profil pour supprimer uniquement tes runs.",
     clearMyRunsDone: "Tes runs ont été supprimés du leaderboard local.",
-    clearAllRunsDone: "Leaderboard local entièrement réinitialisé."
+    clearAllRunsDone: "Leaderboard local entièrement réinitialisé.",
+    myRunsBtn: "Voir mes runs détaillés",
+    myRunsTitle: "Mes runs enregistrés",
+    myRunsActiveTitle: "En attente de vente",
+    myRunsSoldTitle: "Runs vendus",
+    myRunsActiveEmpty: "Aucun run en attente de vente.",
+    myRunsSoldEmpty: "Aucun run vendu pour l'instant.",
+    myRunsNoUser: "Crée ou importe un profil pour voir tes runs détaillés.",
+    myRunsSoldLabel: "Vente validée",
+    myRunsLine: (index, ship, scuText, rmcText, cmatText, profitText, dateStr) => {
+      let parts = [`#${index} – ${dateStr}`, ship];
+      if (scuText) parts.push(scuText);
+      if (rmcText) parts.push(rmcText);
+      if (cmatText) parts.push(cmatText);
+      if (profitText) parts.push(profitText);
+      return parts.join(" · ");
+    }
   },
   en: {
     titleMain: "SALVAGE CALCULATOR 4.4",
@@ -907,12 +998,10 @@ const i18n = {
     labelScuReclaimer: "Processed salvage SCU – Reclaimer (can sell as RMC or produce CMAT ~15%)",
     tagLight: "Light salvage ships: hull scraping → RMC only",
     tagReclaimer: "Reclaimer: hull + structural salvage → RMC + CMAT (~15% → CMAT)",
-    smallNote:
-      "For each SCU value:\n- Light ships: only RMC changes (no CMAT)\n- Reclaimer: compares RMC vs CMAT.",
+    smallNote: "For each SCU value:\\n- Light ships: only RMC changes (no CMAT)\\n- Reclaimer: compares RMC vs CMAT.",
     apiFetching: "Fetching UEX prices…",
     apiErrorPrefix: "API error: ",
-    apiUpdated: (rmcName, cmatName) =>
-      `Prices updated (RMC: ${rmcName} / CMAT: ${cmatName}).`,
+    apiUpdated: (rmcName, cmatName) => `Prices updated (RMC: ${rmcName} / CMAT: ${cmatName}).`,
     rmcPanelTitle: "RMC loop – Selling as Recycled Material Composite",
     cmatPanelTitle: "CMAT loop – Processing into Construction Materials",
     rmcLightHead: "Salvation / Vulture / Fortune (RMC only)",
@@ -924,23 +1013,19 @@ const i18n = {
     graphNoData: "No historical data available.",
     graphError: "Unable to load history.",
     langSwitchLabel: "Language:",
-    lightShipsInfo:
-      "ℹ Light salvage ships (Vulture / Salvation / Fortune) only produce RMC, not CMAT.",
-    lightShipsNoCmatText:
-      "Light salvage ships do not generate Construction Materials (CMAT).\nOnly the Reclaimer (and future heavy salvage) can produce CMAT.",
+    lightShipsInfo: "ℹ Light salvage ships (Vulture / Salvation / Fortune) only produce RMC, not CMAT.",
+    lightShipsNoCmatText: "Light salvage ships do not generate Construction Materials (CMAT).\\nOnly the Reclaimer (and future heavy salvage) can produce CMAT.",
     loopCmatBetter: diff => `🟢 CMAT loop (Construction Materials) is more profitable than RMC (+${diff} aUEC).`,
     loopRmcBetter: diff => `🟢 RMC loop is more profitable than CMAT (+${diff} aUEC).`,
     loopsEqual: "ℹ Both loops yield the same profit.",
-    rmcLightValues: (sl, rmcVal) =>
-      `Salvage SCU used: ${sl} SCU\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
-    rmcRecValues: (sr, rmcVal) =>
-      `Salvage SCU used: ${sr} SCU\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
-    cmatRecValues: (scuCmat, valCmat) =>
-      `Salvage SCU converted to CMAT (15% yield): ${scuCmat} SCU\nValue if sold as CMAT: ${valCmat} aUEC`,
-    /* Leaderboard & runs */
+    rmcLightValues: (sl, rmcVal) => `Salvage SCU used: ${sl} SCU\\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
+    rmcRecValues: (sr, rmcVal) => `Salvage SCU used: ${sr} SCU\\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
+    cmatRecValues: (scuCmat, valCmat) => `Salvage SCU converted to CMAT (15% yield): ${scuCmat} SCU\\nValue if sold as CMAT: ${valCmat} aUEC`,
     leaderboardEmpty: "No run recorded yet.",
     leaderboardLine: (nickname, runs, profit, favShip, totalRmc) =>
       `${nickname} – ${runs} runs · ${profit} theoretical aUEC · Fav ship: ${favShip} · Total RMC: ${totalRmc} SCU`,
+    leaderboardYou: "You",
+    leaderboardSub: "Local leaderboard: sorted from your saved runs. Data is stored locally in your browser (for now).",
     labelShipSelect: "Ship used for this run",
     saveRunBtn: "Save this run to the local leaderboard",
     saveRunSuccess: "Run saved to your local leaderboard.",
@@ -950,11 +1035,26 @@ const i18n = {
     clearAllRunsBtn: "Reset leaderboard (local)",
     clearMyRunsNoUser: "No profile loaded. Create or import a profile to delete only your runs.",
     clearMyRunsDone: "Your runs have been removed from the local leaderboard.",
-    clearAllRunsDone: "Local leaderboard fully reset."
+    clearAllRunsDone: "Local leaderboard fully reset.",
+    myRunsBtn: "View my detailed runs",
+    myRunsTitle: "My saved runs",
+    myRunsActiveTitle: "Pending sale",
+    myRunsSoldTitle: "Sold runs",
+    myRunsActiveEmpty: "No pending run.",
+    myRunsSoldEmpty: "No sold run yet.",
+    myRunsNoUser: "Create or import a profile to see your detailed runs.",
+    myRunsSoldLabel: "Sale confirmed",
+    myRunsLine: (index, ship, scuText, rmcText, cmatText, profitText, dateStr) => {
+      let parts = [`#${index} – ${dateStr}`, ship];
+      if (scuText) parts.push(scuText);
+      if (rmcText) parts.push(rmcText);
+      if (cmatText) parts.push(cmatText);
+      if (profitText) parts.push(profitText);
+      return parts.join(" · ");
+    }
   }
 };
 
-/* DOM refs */
 const prixRmcInput  = document.getElementById("prixRmc");
 const prixCmatInput = document.getElementById("prixCmat");
 const scuLightInput = document.getElementById("scuLight");
@@ -999,14 +1099,22 @@ const langSwitchLabelEl = document.getElementById("langSwitchLabel");
 const langSelectEl = document.getElementById("langSelect");
 const appVersionEl = document.getElementById("appVersion");
 
-/* Leaderboard local */
 const leaderboardListEl = document.getElementById("leaderboardList");
 const leaderboardEmptyEl = document.getElementById("leaderboardEmpty");
 const clearMyRunsBtnEl = document.getElementById("clearMyRunsBtn");
 const clearAllRunsBtnEl = document.getElementById("clearAllRunsBtn");
 const leaderboardActionMsgEl = document.getElementById("leaderboardActionMsg");
+const leaderboardSubEl = document.getElementById("leaderboardSub");
+const toggleMyRunsBtnEl = document.getElementById("toggleMyRunsBtn");
+const myRunsPanelEl = document.getElementById("myRunsPanel");
+const myRunsActiveListEl = document.getElementById("myRunsActiveList");
+const myRunsSoldListEl = document.getElementById("myRunsSoldList");
+const myRunsActiveEmptyEl = document.getElementById("myRunsActiveEmpty");
+const myRunsSoldEmptyEl = document.getElementById("myRunsSoldEmpty");
+const myRunsTitleEl = document.getElementById("myRunsTitle");
+const myRunsActiveTitleEl = document.getElementById("myRunsActiveTitle");
+const myRunsSoldTitleEl = document.getElementById("myRunsSoldTitle");
 
-/* Profil utilisateur (pseudo + clé) & modal */
 const userInfoEl = document.getElementById("userInfo");
 const changeUserBtn = document.getElementById("changeUserBtn");
 
@@ -1024,7 +1132,6 @@ const importSecretInput = document.getElementById("importSecret");
 const importProfileBtn = document.getElementById("importProfileBtn");
 const modalMessageEl = document.getElementById("modalMessage");
 
-/* Runs / ship select */
 const shipSelectEl = document.getElementById("shipSelect");
 const saveRunBtnEl = document.getElementById("saveRunBtn");
 const saveRunMessageEl = document.getElementById("saveRunMessage");
@@ -1032,9 +1139,9 @@ const labelShipSelectEl = document.getElementById("labelShipSelect");
 
 let currentUser = null;
 
-// --- Admin ---
+// Admin
 const ADMIN_NICKNAME = "Shog";
-const ADMIN_SECRET = "130890"; // clé admin spéciale
+const ADMIN_SECRET = "130890";
 
 function isAdminUser(user) {
   return !!user && user.nickname === ADMIN_NICKNAME && user.secret === ADMIN_SECRET;
@@ -1042,18 +1149,14 @@ function isAdminUser(user) {
 
 function updateAdminUI() {
   if (!clearAllRunsBtnEl) return;
-  // Bouton reset complet visible uniquement pour l'admin
   clearAllRunsBtnEl.style.display = isAdminUser(currentUser) ? "block" : "none";
 }
 
-
-/* ==== PROFIL (pseudo + clé privée à 6 chiffres) ==== */
 function generateSecret() {
   const n = Math.floor(Math.random() * 1000000);
   return String(n).padStart(6, "0");
 }
 
-// ID pseudo-deterministe à partir du pseudo + clé
 function computeUserId(nickname, secret) {
   const base = (nickname || "").trim() + "#" + secret;
   let hash = 0;
@@ -1081,8 +1184,8 @@ function saveUserProfile(user) {
     localStorage.setItem("salvageCalcUser", JSON.stringify(user));
   } catch (_) {}
   updateUserUI();
-  updateLocalLeaderboard(null);
   updateAdminUI();
+  updateLocalLeaderboard();
 }
 
 function updateUserUI() {
@@ -1095,7 +1198,6 @@ function updateUserUI() {
   }
 }
 
-/* Modal helpers */
 function setActiveModalTab(tab) {
   if (tab === "import") {
     tabImportProfile.classList.add("active");
@@ -1128,7 +1230,6 @@ function closeProfileModal() {
   profileModal.classList.remove("open");
 }
 
-/* Création / import */
 function ensureUserProfile() {
   const existing = loadUserProfile();
   if (existing) {
@@ -1137,23 +1238,21 @@ function ensureUserProfile() {
     updateAdminUI();
     return;
   }
-  // Pas de profil -> on ouvre la modal en mode création
   openProfileModal("create");
 }
 
 function handleCreateProfile() {
   let nickname = (createNicknameInput.value || "").trim();
-  if (!nickname) {
-    nickname = "Salvager";
-  }
+  if (!nickname) nickname = "Salvager";
   const secret = generateSecret();
   const id = computeUserId(nickname, secret);
   const user = { id, nickname, secret };
   saveUserProfile(user);
-
   createdKeyDisplay.style.display = "block";
   createdKeyDisplay.textContent =
-    "Profil créé !\nPseudo : " + nickname + "\nClé privée : " + secret + "\n\nNote bien cette clé pour récupérer ton profil sur un autre navigateur.";
+    "Profil créé !\\nPseudo : " + nickname +
+    "\\nClé privée : " + secret +
+    "\\n\\nNote bien cette clé pour récupérer ton profil sur un autre navigateur.";
   modalMessageEl.textContent = "";
 }
 
@@ -1176,24 +1275,32 @@ function handleImportProfile() {
   modalMessageEl.textContent = "Profil importé avec succès.";
 }
 
-/* Leaderboard local (multi-profils, prototype) */
-function updateLocalLeaderboard(lastRun) {
+function getRuns() {
+  try {
+    return JSON.parse(localStorage.getItem("salvageCalcRuns") || "[]");
+  } catch (_) {
+    return [];
+  }
+}
+
+function saveRuns(runs) {
+  try {
+    localStorage.setItem("salvageCalcRuns", JSON.stringify(runs));
+  } catch (_) {}
+}
+
+function format(val) {
+  if (val == null || isNaN(val)) return "0";
+  return Number(val).toLocaleString(currentLang === "fr" ? "fr-FR" : "en-US", {
+    maximumFractionDigits: 0
+  });
+}
+
+function updateLocalLeaderboard() {
   const t = i18n[currentLang] || i18n.fr;
   if (!leaderboardListEl || !leaderboardEmptyEl) return;
 
-  let stored;
-  try {
-    stored = JSON.parse(localStorage.getItem("salvageCalcRuns") || "[]");
-  } catch (_) {
-    stored = [];
-  }
-
-  if (lastRun) {
-    stored.push(lastRun);
-    try {
-      localStorage.setItem("salvageCalcRuns", JSON.stringify(stored));
-    } catch (_) {}
-  }
+  const stored = getRuns();
 
   if (!stored.length) {
     leaderboardListEl.innerHTML = "";
@@ -1209,6 +1316,7 @@ function updateLocalLeaderboard(lastRun) {
     const uid = r.userId || "unknown";
     if (!perUser[uid]) {
       perUser[uid] = {
+        uid,
         nickname: r.nickname || "Unknown",
         runs: 0,
         totalProfit: 0,
@@ -1228,7 +1336,7 @@ function updateLocalLeaderboard(lastRun) {
   const sorted = Object.values(perUser).sort((a, b) => b.totalProfit - a.totalProfit);
 
   leaderboardListEl.innerHTML = "";
-  sorted.forEach(u => {
+  sorted.slice(0, 10).forEach(u => {
     let favShip = "N/A";
     let maxCount = 0;
     for (const s in u.ships) {
@@ -1240,18 +1348,28 @@ function updateLocalLeaderboard(lastRun) {
     const li = document.createElement("li");
     const profitStr = format(u.totalProfit);
     const totalRmcStr = format(u.totalRmc);
-    li.innerHTML = t.leaderboardLine(u.nickname, u.runs, profitStr, favShip, totalRmcStr);
 
-    // Surligner l'utilisateur courant
-    if (currentUser && u.nickname === currentUser.nickname) {
-      li.style.fontWeight = "600";
+    const isCurrent = currentUser && u.uid === currentUser.id;
+    const badge = isCurrent
+      ? `<span class="leaderboard-badge">${t.leaderboardYou}</span> `
+      : "";
+
+    li.innerHTML = badge + t.leaderboardLine(
+      u.nickname,
+      u.runs,
+      profitStr,
+      favShip,
+      totalRmcStr
+    );
+
+    if (isCurrent) {
+      li.classList.add("leaderboard-item-current");
     }
 
     leaderboardListEl.appendChild(li);
   });
 }
 
-/* Sauvegarde d'un run dans le leaderboard local */
 function handleSaveRun() {
   const t = i18n[currentLang] || i18n.fr;
 
@@ -1292,12 +1410,23 @@ function handleSaveRun() {
     profit,
     rmc: totalRmcScu,
     ship,
-    ts: Date.now()
+    ts: Date.now(),
+    scuLight: sl,
+    scuRec: sr,
+    prixRMC: prixRMC,
+    prixCMAT: prixCMAT,
+    rmcLightVal: rmcLightVal,
+    rmcRecVal: rmcRecVal,
+    cmatRecVal: cmatRecVal,
+    sold: false
   };
 
-  updateLocalLeaderboard(newRun);
-  saveRunMessageEl.textContent = t.saveRunSuccess;
+  const runs = getRuns();
+  runs.push(newRun);
+  saveRuns(runs);
+  updateLocalLeaderboard();
 
+  saveRunMessageEl.textContent = t.saveRunSuccess;
   setTimeout(() => {
     if (saveRunMessageEl.textContent === t.saveRunSuccess) {
       saveRunMessageEl.textContent = "";
@@ -1305,7 +1434,6 @@ function handleSaveRun() {
   }, 4000);
 }
 
-/* Suppression des runs */
 function clearMyRuns() {
   const t = i18n[currentLang] || i18n.fr;
   leaderboardActionMsgEl.textContent = "";
@@ -1315,36 +1443,221 @@ function clearMyRuns() {
     return;
   }
 
-  let stored;
-  try {
-    stored = JSON.parse(localStorage.getItem("salvageCalcRuns") || "[]");
-  } catch (_) {
-    stored = [];
-  }
-
+  const stored = getRuns();
   const filtered = stored.filter(r => r.userId !== currentUser.id);
-
-  try {
-    localStorage.setItem("salvageCalcRuns", JSON.stringify(filtered));
-  } catch (_) {}
-
-  updateLocalLeaderboard(null);
+  saveRuns(filtered);
+  updateLocalLeaderboard();
   leaderboardActionMsgEl.textContent = t.clearMyRunsDone;
 }
 
 function clearAllRuns() {
   const t = i18n[currentLang] || i18n.fr;
   leaderboardActionMsgEl.textContent = "";
-
-  try {
-    localStorage.setItem("salvageCalcRuns", JSON.stringify([]));
-  } catch (_) {}
-
-  updateLocalLeaderboard(null);
+  saveRuns([]);
+  updateLocalLeaderboard();
   leaderboardActionMsgEl.textContent = t.clearAllRunsDone;
 }
 
-/* Langue */
+function updateRunSold(ts, sold) {
+  const runs = getRuns();
+  let changed = false;
+  runs.forEach(r => {
+    if (r.ts === ts) {
+      r.sold = !!sold;
+      changed = true;
+    }
+  });
+  if (changed) {
+    saveRuns(runs);
+    updateLocalLeaderboard();
+  }
+}
+
+function buildMyRunsList() {
+  const t = i18n[currentLang] || i18n.fr;
+  if (!myRunsPanelEl ||
+      !myRunsActiveListEl || !myRunsSoldListEl ||
+      !myRunsActiveEmptyEl || !myRunsSoldEmptyEl) return;
+
+  myRunsActiveListEl.innerHTML = "";
+  myRunsSoldListEl.innerHTML = "";
+
+  if (!currentUser) {
+    myRunsActiveEmptyEl.style.display = "block";
+    myRunsSoldEmptyEl.style.display = "none";
+    myRunsActiveEmptyEl.textContent = t.myRunsNoUser;
+    return;
+  }
+
+  const stored = getRuns();
+  const mine = stored
+    .filter(r => r.userId === currentUser.id)
+    .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+  const active = mine.filter(r => !r.sold);
+  const sold = mine.filter(r => r.sold);
+  const maxToShow = 20;
+
+  if (!active.length) {
+    myRunsActiveEmptyEl.style.display = "block";
+    myRunsActiveEmptyEl.textContent = t.myRunsActiveEmpty;
+  } else {
+    myRunsActiveEmptyEl.style.display = "none";
+    active.slice(0, maxToShow).forEach((r, idx) => {
+      const li = document.createElement("li");
+      const main = document.createElement("div");
+      main.className = "my-run-mainline";
+
+      const profitStr = format(Number(r.profit) || 0);
+
+      const scuLight = Number(r.scuLight || 0);
+      const scuRec = Number(r.scuRec || 0);
+      const scuTotal = scuLight || scuRec ? (scuLight + scuRec) : null;
+
+      const rmcValRaw = (r.rmcLightVal || 0) + (r.rmcRecVal || 0);
+      const rmcValStr = rmcValRaw ? format(rmcValRaw) : "";
+      const cmatValRaw = r.cmatRecVal || 0;
+      const cmatValStr = cmatValRaw ? format(cmatValRaw) : "";
+
+      const scuTotalStr = scuTotal != null ? format(scuTotal) : "";
+      const scuLightStr = scuTotal != null ? format(scuLight) : "";
+      const scuRecStr = scuTotal != null ? format(scuRec) : "";
+
+      const d = r.ts ? new Date(r.ts) : null;
+      const dateStr = d
+        ? d.toLocaleString(currentLang === "fr" ? "fr-FR" : "en-US", {
+            day: "2-digit",
+            month: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
+          })
+        : "-";
+
+      const scuText = scuTotalStr
+        ? `SCU: ${scuTotalStr} (L: ${scuLightStr} / R: ${scuRecStr})`
+        : "";
+      const rmcText = rmcValStr ? `RMC: ${rmcValStr} aUEC` : "";
+      const cmatText = cmatValStr ? `CMAT: ${cmatValStr} aUEC` : "";
+      const profitText = profitStr ? `Profit: ${profitStr} aUEC` : "";
+
+      main.textContent = t.myRunsLine(
+        idx + 1,
+        r.ship || "?",
+        scuText,
+        rmcText,
+        cmatText,
+        profitText,
+        dateStr
+      );
+
+      const toggle = document.createElement("label");
+      toggle.className = "my-run-sold-toggle";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = !!r.sold;
+      cb.addEventListener("change", () => {
+        updateRunSold(r.ts, cb.checked);
+        buildMyRunsList();
+      });
+      const span = document.createElement("span");
+      span.textContent = t.myRunsSoldLabel;
+
+      toggle.appendChild(cb);
+      toggle.appendChild(span);
+
+      li.appendChild(main);
+      li.appendChild(toggle);
+
+      myRunsActiveListEl.appendChild(li);
+    });
+  }
+
+  if (!sold.length) {
+    myRunsSoldEmptyEl.style.display = "block";
+    myRunsSoldEmptyEl.textContent = t.myRunsSoldEmpty;
+  } else {
+    myRunsSoldEmptyEl.style.display = "none";
+    sold.slice(0, maxToShow).forEach((r, idx) => {
+      const li = document.createElement("li");
+      const main = document.createElement("div");
+      main.className = "my-run-mainline";
+
+      const profitStr = format(Number(r.profit) || 0);
+
+      const scuLight = Number(r.scuLight || 0);
+      const scuRec = Number(r.scuRec || 0);
+      const scuTotal = scuLight || scuRec ? (scuLight + scuRec) : null;
+
+      const rmcValRaw = (r.rmcLightVal || 0) + (r.rmcRecVal || 0);
+      const rmcValStr = rmcValRaw ? format(rmcValRaw) : "";
+      const cmatValRaw = r.cmatRecVal || 0;
+      const cmatValStr = cmatValRaw ? format(cmatValRaw) : "";
+
+      const scuTotalStr = scuTotal != null ? format(scuTotal) : "";
+      const scuLightStr = scuTotal != null ? format(scuLight) : "";
+      const scuRecStr = scuTotal != null ? format(scuRec) : "";
+
+      const d = r.ts ? new Date(r.ts) : null;
+      const dateStr = d
+        ? d.toLocaleString(currentLang === "fr" ? "fr-FR" : "en-US", {
+            day: "2-digit",
+            month: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
+          })
+        : "-";
+
+      const scuText = scuTotalStr
+        ? `SCU: ${scuTotalStr} (L: ${scuLightStr} / R: ${scuRecStr})`
+        : "";
+      const rmcText = rmcValStr ? `RMC: ${rmcValStr} aUEC` : "";
+      const cmatText = cmatValStr ? `CMAT: ${cmatValStr} aUEC` : "";
+      const profitText = profitStr ? `Profit: ${profitStr} aUEC` : "";
+
+      main.textContent = t.myRunsLine(
+        idx + 1,
+        r.ship || "?",
+        scuText,
+        rmcText,
+        cmatText,
+        profitText,
+        dateStr
+      );
+
+      const toggle = document.createElement("label");
+      toggle.className = "my-run-sold-toggle";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = !!r.sold;
+      cb.addEventListener("change", () => {
+        updateRunSold(r.ts, cb.checked);
+        buildMyRunsList();
+      });
+      const span = document.createElement("span");
+      span.textContent = t.myRunsSoldLabel;
+
+      toggle.appendChild(cb);
+      toggle.appendChild(span);
+
+      li.appendChild(main);
+      li.appendChild(toggle);
+
+      myRunsSoldListEl.appendChild(li);
+    });
+  }
+}
+
+function toggleMyRunsPanel() {
+  if (!myRunsPanelEl) return;
+  const isHidden = myRunsPanelEl.style.display === "none" || myRunsPanelEl.style.display === "";
+  if (isHidden) {
+    myRunsPanelEl.style.display = "block";
+    buildMyRunsList();
+  } else {
+    myRunsPanelEl.style.display = "none";
+  }
+}
+
 function applyLanguage() {
   const t = i18n[currentLang] || i18n.fr;
   document.documentElement.lang = currentLang;
@@ -1373,11 +1686,32 @@ function applyLanguage() {
   graphSubEl.textContent = t.graphSub;
   langSwitchLabelEl.textContent = t.langSwitchLabel;
   labelShipSelectEl.textContent = t.labelShipSelect;
-  saveRunBtnEl.textContent = t.saveRunBtn;
   leaderboardEmptyEl.textContent = t.leaderboardEmpty;
 
   clearMyRunsBtnEl.textContent = t.clearMyRunsBtn;
   clearAllRunsBtnEl.textContent = t.clearAllRunsBtn;
+
+  if (leaderboardSubEl) {
+    leaderboardSubEl.textContent = t.leaderboardSub;
+  }
+  if (toggleMyRunsBtnEl) {
+    toggleMyRunsBtnEl.textContent = t.myRunsBtn;
+  }
+  if (myRunsTitleEl) {
+    myRunsTitleEl.textContent = t.myRunsTitle;
+  }
+  if (myRunsActiveTitleEl) {
+    myRunsActiveTitleEl.textContent = t.myRunsActiveTitle;
+  }
+  if (myRunsSoldTitleEl) {
+    myRunsSoldTitleEl.textContent = t.myRunsSoldTitle;
+  }
+  if (myRunsActiveEmptyEl) {
+    myRunsActiveEmptyEl.textContent = t.myRunsActiveEmpty;
+  }
+  if (myRunsSoldEmptyEl) {
+    myRunsSoldEmptyEl.textContent = t.myRunsSoldEmpty;
+  }
 
   if (appVersionEl) {
     appVersionEl.textContent = "Version " + APP_VERSION;
@@ -1394,13 +1728,6 @@ function saveState() {
   };
   localStorage.setItem("salvageCalcState", JSON.stringify(state));
   localStorage.setItem("salvageCalcLang", currentLang);
-}
-
-function format(val) {
-  if (isNaN(val)) return "0";
-  return val.toLocaleString(currentLang === "fr" ? "fr-FR" : "en-US", {
-    maximumFractionDigits: 0
-  });
 }
 
 function updateComparison(rmcValue, cmatValue, rmcDecEl, cmatDecEl) {
@@ -1447,7 +1774,6 @@ function recalc() {
 
   const rmcLightVal = sl * prixRMC;
   rmcLightValuesEl.textContent = t.rmcLightValues(format(sl), format(rmcLightVal));
-
   if (sl > 0) {
     rmcLightDecisionEl.textContent = t.lightShipsInfo;
   } else {
@@ -1464,7 +1790,6 @@ function recalc() {
 
   const cmatRecScu = sr * REND_RECLAIMER;
   const cmatRecVal = cmatRecScu * prixCMAT;
-
   cmatRecValuesEl.textContent = t.cmatRecValues(
     format(cmatRecScu),
     format(cmatRecVal)
@@ -1473,7 +1798,6 @@ function recalc() {
   updateComparison(rmcRecVal, cmatRecVal, rmcRecDecisionEl, cmatRecDecisionEl);
 }
 
-/* Events */
 [scuLightInput, scuRecInput].forEach(el =>
   el.addEventListener("input", () => {
     recalc();
@@ -1513,6 +1837,10 @@ if (saveRunBtnEl) {
   saveRunBtnEl.addEventListener("click", handleSaveRun);
 }
 
+if (toggleMyRunsBtnEl) {
+  toggleMyRunsBtnEl.addEventListener("click", toggleMyRunsPanel);
+}
+
 if (clearMyRunsBtnEl) {
   clearMyRunsBtnEl.addEventListener("click", clearMyRuns);
 }
@@ -1521,12 +1849,10 @@ if (clearAllRunsBtnEl) {
   clearAllRunsBtnEl.addEventListener("click", clearAllRuns);
 }
 
-/* Chart */
 let cmatChart = null;
 
 function renderChart(rmcHist, cmatHist) {
   const maxLen = Math.max(rmcHist.length, cmatHist.length);
-
   const labels = [];
   const rmcValues = [];
   const cmatValues = [];
@@ -1607,17 +1933,13 @@ function renderChart(rmcHist, cmatHist) {
   });
 }
 
-/* Fetch UEX via worker */
 async function fetchUexPrices() {
   const t = i18n[currentLang] || i18n.fr;
   try {
     apiStatusEl.textContent = t.apiFetching;
-
     const url = "https://salvage-uex-proxy.yoyoastico74.workers.dev/";
     const res = await fetch(url);
-
     if (!res.ok) throw new Error("Worker non accessible");
-
     const data = await res.json();
 
     prixRmcInput.value  = data.rmc.price  ?? 0;
@@ -1642,7 +1964,6 @@ async function fetchUexPrices() {
     );
 
     recalc();
-
   } catch (err) {
     const tt = i18n[currentLang] || i18n.fr;
     apiStatusEl.textContent = tt.apiErrorPrefix + err.message;
@@ -1651,7 +1972,6 @@ async function fetchUexPrices() {
   }
 }
 
-/* Init */
 window.addEventListener("load", () => {
   try {
     const saved = JSON.parse(localStorage.getItem("salvageCalcState") || "{}");
@@ -1664,21 +1984,15 @@ window.addEventListener("load", () => {
   } catch (_) {}
 
   langSelectEl.value = currentLang;
-
-  // Profil utilisateur
   ensureUserProfile();
   updateUserUI();
   updateAdminUI();
 
   applyLanguage();
-  recalc();
-
-  // Leaderboard local (lecture des données si présentes)
-  updateLocalLeaderboard(null);
+  updateLocalLeaderboard();
 
   fetchUexPrices();
 });
 </script>
-
 </body>
 </html>
