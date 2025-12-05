@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Salvage Calculator 4.4</title>
 
-  <!-- Chart.js pour le graphique double -->
+  <!-- Chart.js pour le graphique -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -36,7 +36,7 @@
     }
 
     h1 {
-      margin: 0 0 16px;
+      margin: 0 0 12px;
       text-align: center;
       font-size: 30px;
       text-transform: uppercase;
@@ -48,13 +48,13 @@
       text-align: center;
       font-size: 13px;
       color: #ffcc66;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
-    /* GRID PRINCIPALE */
-    .grid {
+    /* GRID PRINCIPALE (Entrées + Résultats) */
+    .grid-main {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
       gap: 20px;
     }
 
@@ -105,7 +105,6 @@
       box-shadow: 0 0 0 2px #ff8000;
     }
 
-    /* Enlever les flèches sur TOUS les inputs number */
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button {
       -webkit-appearance: none;
@@ -115,7 +114,7 @@
       -moz-appearance: textfield;
     }
 
-    /* TAGS */
+    /* TAGS + NOTES */
     .tag-row {
       margin-top: 12px;
       display: flex;
@@ -153,29 +152,13 @@
       color: #ff9090;
     }
 
-    /* PANEL GRAPHIQUE */
-    .graph-panel {
-      margin-bottom: 14px;
-      padding: 12px 12px 16px;
-      border-radius: 10px;
-      border: 1px solid #ffb000;
-      background: linear-gradient(160deg, #1a1a1a, #0b0b0b);
+    /* PANELS RÉSULTATS */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
     }
 
-    .graph-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #ffb000;
-      margin-bottom: 6px;
-    }
-
-    #graphMessage {
-      color: #ffaa88;
-      font-size: 12px;
-      margin-top: 4px;
-    }
-
-    /* RÉSULTATS */
     .result-block {
       background: #151515;
       border-radius: 8px;
@@ -216,8 +199,36 @@
       color: #ffb3b3;
     }
 
+    /* SECTION GRAPHIQUE EN BAS DE PAGE */
+    .market-panel {
+      margin-top: 20px;
+      padding: 12px 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #ffb000;
+      background: linear-gradient(160deg, #141414, #060606);
+    }
+
+    .graph-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #ffb000;
+      margin-bottom: 4px;
+    }
+
+    .graph-sub {
+      font-size: 11px;
+      color: #ffdd88;
+      margin-bottom: 8px;
+    }
+
+    #graphMessage {
+      color: #ffaa88;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
     @media (max-width: 900px) {
-      .grid {
+      .grid-main {
         grid-template-columns: 1fr;
       }
     }
@@ -229,11 +240,12 @@
   <div class="container">
     <h1>SALVAGE CALCULATOR 4.4</h1>
     <div class="sub">
-      Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT</b>.
+      Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.
     </div>
 
-    <div class="grid">
-      <!-- ======================= COLONNE GAUCHE ======================= -->
+    <!-- ======================= SECTION PRINCIPALE (Entrées + Résultats) ======================= -->
+    <div class="grid-main">
+      <!-- COLONNE GAUCHE : ENTRÉES -->
       <div class="panel">
         <div class="panel-title">Entrées</div>
 
@@ -247,38 +259,31 @@
 
         <label for="scuLight">
           SCU de salvage traitées – Salvation / Vulture / Fortune
-          <span style="font-weight: normal;">(loop RMC vs CMAT, rendement 30% pour CMAT)</span>
+          <span style="font-weight: normal;">(loop RMC vs CMAT, 30% de conversion en CMAT)</span>
         </label>
         <input id="scuLight" type="number" value="0" />
 
         <label for="scuReclaimer">
           SCU de salvage traitées – Reclaimer
-          <span style="font-weight: normal;">(loop RMC vs CMAT, rendement 15% pour CMAT)</span>
+          <span style="font-weight: normal;">(loop RMC vs CMAT, 15% de conversion en CMAT)</span>
         </label>
         <input id="scuReclaimer" type="number" value="0" />
 
         <div class="tag-row">
-          <div class="tag">Loop CMAT (Vulture / Salvation / Fortune) : 30% de conversion en CMAT</div>
-          <div class="tag red">Loop CMAT (Reclaimer) : 15% de conversion en CMAT</div>
+          <div class="tag">Loop CMAT (Vulture / Salvation / Fortune) : ~30% → CMAT</div>
+          <div class="tag red">Loop CMAT (Reclaimer) : ~15% → CMAT</div>
         </div>
 
         <div class="small-note">
-          Pour chaque valeur de SCU, l'outil compare :
+          Pour chaque SCU saisie, l'outil compare :
           <br>- vendre tout en RMC
           <br>- transformer en CMAT (Construction Salvage → CMAT).
         </div>
         <div id="apiStatus" class="api-status">Récupération des prix UEX…</div>
       </div>
 
-      <!-- ======================= COLONNE DROITE ======================= -->
-      <div>
-        <!-- PANEL GRAPHIQUE -->
-        <div class="graph-panel">
-          <div class="graph-title">Historique des prix RMC &amp; CMAT (dernières valeurs)</div>
-          <canvas id="cmatChart" height="120"></canvas>
-          <div id="graphMessage"></div>
-        </div>
-
+      <!-- COLONNE DROITE : RÉSULTATS -->
+      <div class="results-grid">
         <!-- PANEL RÉSULTATS RMC -->
         <div class="panel">
           <div class="panel-title">Loop RMC – Vendre en Recycled Material Composite</div>
@@ -297,7 +302,7 @@
         </div>
 
         <!-- PANEL RÉSULTATS CMAT -->
-        <div class="panel" style="margin-top: 14px;">
+        <div class="panel">
           <div class="panel-title">Loop CMAT – Transformer en Construction Materials</div>
 
           <div class="result-block">
@@ -312,17 +317,26 @@
             <div class="decision" id="cmatRecDecision"></div>
           </div>
         </div>
+      </div>
+    </div>
 
-      </div> <!-- Fin colonne droite -->
-    </div> <!-- Fin grid -->
+    <!-- ======================= SECTION GRAPHIQUE EN BAS ======================= -->
+    <div class="market-panel">
+      <div class="graph-title">Analyse du marché – Historique RMC &amp; CMAT</div>
+      <div class="graph-sub">
+        Données issues d’UEX via ton Worker. L’axe X montre les dates (JJ/MM) des dernières mises à jour de prix.
+      </div>
+      <canvas id="cmatChart" height="120"></canvas>
+      <div id="graphMessage"></div>
+    </div>
+
   </div> <!-- Fin container -->
 </div> <!-- Fin overlay -->
 
 <!-- ======================= SCRIPTS ======================= -->
 <script>
 /* ============================================================
-   RENDREMENTS CMAT
-   (part de tes SCU de salvage qui se transforment en CMAT)
+   RENDREMENTS CMAT (part des SCU salvage converties en CMAT)
 ============================================================ */
 const REND_LIGHT = 0.30;      // Vulture / Salvation / Fortune
 const REND_RECLAIMER = 0.15;  // Reclaimer
@@ -451,6 +465,7 @@ function recalc() {
     `SCU de salvage converties en CMAT (rendement 15 %) : ${format(cmatRecScu)} SCU\n` +
     `Valeur si tu vends en CMAT : ${format(cmatRecVal)} aUEC`;
 
+  // Décision pour le Reclaimer
   updateComparison(rmcRecVal, cmatRecVal, rmcRecDecisionEl, cmatRecDecisionEl);
 }
 
@@ -463,20 +478,41 @@ function recalc() {
 ].forEach(el => el.addEventListener("input", recalc));
 
 /* ============================================================
-   GRAPHIQUE DOUBLE COURBE
+   GRAPHIQUE DOUBLE COURBE (RMC & CMAT) AVEC DATES JJ/MM
 ============================================================ */
 let cmatChart = null;
 
 function renderChart(rmcHist, cmatHist) {
-  const rmcLabels  = rmcHist.map((e, i) => `RMC #${i + 1}`);
-  const rmcValues  = rmcHist.map(e => e.sell);
+  // On part du principe que les tableaux sont déjà ordonnés (ancien -> récent).
+  const maxLen = Math.max(rmcHist.length, cmatHist.length);
 
-  const cmatLabels = cmatHist.map((e, i) => `CMAT #${i + 1}`);
-  const cmatValues = cmatHist.map(e => e.sell);
+  const labels = [];
+  const rmcValues = [];
+  const cmatValues = [];
+
+  for (let i = 0; i < maxLen; i++) {
+    const rEntry = rmcHist[i] || null;
+    const cEntry = cmatHist[i] || null;
+
+    // Choisir une source pour la date : CMAT en priorité, sinon RMC
+    const src = cEntry || rEntry;
+
+    if (src && src.date) {
+      const d = new Date(src.date);
+      const label = d.toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit"
+      });
+      labels.push(label);
+    } else {
+      labels.push(`P${i + 1}`);
+    }
+
+    rmcValues.push(rEntry ? rEntry.sell : null);
+    cmatValues.push(cEntry ? cEntry.sell : null);
+  }
 
   if (cmatChart) cmatChart.destroy();
-
-  const labels = cmatLabels.length > rmcLabels.length ? cmatLabels : rmcLabels;
 
   cmatChart = new Chart(chartCanvas, {
     type: "line",
@@ -484,27 +520,50 @@ function renderChart(rmcHist, cmatHist) {
       labels,
       datasets: [
         {
-          label: "CMAT (aUEC)",
+          label: "CMAT (aUEC / SCU)",
           data: cmatValues,
           borderWidth: 2,
-          borderColor: "#ffb000",
-          backgroundColor: "rgba(255,176,0,0.20)"
+          spanGaps: true
         },
         {
-          label: "RMC (aUEC)",
+          label: "RMC (aUEC / SCU)",
           data: rmcValues,
           borderWidth: 2,
-          borderColor: "#00e5ff",
-          backgroundColor: "rgba(0,229,255,0.20)"
+          spanGaps: true
         }
       ]
     },
     options: {
       responsive: true,
-      plugins: { legend: { labels: { color: "#fff" }}},
+      plugins: {
+        legend: {
+          labels: {
+            color: "#ffffff",
+            font: { size: 11 }
+          }
+        }
+      },
       scales: {
-        x: { ticks: { color: "#ffb000" }},
-        y: { ticks: { color: "#ffb000" }}
+        x: {
+          ticks: {
+            color: "#ffb000",
+            maxRotation: 60,
+            minRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 8
+          },
+          grid: {
+            display: false
+          }
+        },
+        y: {
+          ticks: {
+            color: "#ffb000"
+          },
+          grid: {
+            color: "rgba(255,255,255,0.06)"
+          }
+        }
       }
     }
   });
