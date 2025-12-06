@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V5.2.4 -->
+<!-- Version : V5.2.5 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -1413,7 +1413,7 @@ body.theme-light {
 
 <script>
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V5.2.4";
+const APP_VERSION = "V5.2.5";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -2416,32 +2416,30 @@ function updateComparison(rmcValue, cmatValue, rmcDecEl, cmatDecEl) {
   }
 }
 
-function recalc() {
-  const t = i18n[currentLang] || i18n.fr;
-  const prixRMC  = Number(prixRmcInput.value)  || 0;
-  const prixCMAT = Number(prixCmatInput.value) || 0;
+function resetDecision(el) {
+  if (!el) return;
+  el.textContent = "";
+  el.className = "decision";
+}
 
-  const sl = Number(scuLightInput.value) || 0;
-  const sr = Number(scuRecInput.value)   || 0;
-
+function updateLightShipsLoop(t, prixRMC, prixCMAT, sl) {
   // Light ships: RMC loop
   const rmcLightVal = sl * prixRMC;
   rmcLightValuesEl.textContent = t.rmcLightValues(format(sl), format(rmcLightVal));
   rmcLightExtraEl.textContent = sl > 0 ? t.lightShipsInfo : "";
-  rmcLightDecisionEl.textContent = "";
-  rmcLightDecisionEl.className = "decision";
+  resetDecision(rmcLightDecisionEl);
 
   // Light ships: no CMAT loop
   cmatLightValuesEl.textContent = t.lightShipsNoCmatText;
   cmatLightExtraEl.textContent = "";
-  cmatLightDecisionEl.textContent = "";
-  cmatLightDecisionEl.className = "decision";
+  resetDecision(cmatLightDecisionEl);
+}
 
+function updateReclaimerLoop(t, prixCMAT, sl, sr) {
   // Reclaimer: RMC sale disabled – informational block only
   rmcRecValuesEl.textContent = t.rmcRecValues();
   rmcRecExtraEl.textContent = "";
-  rmcRecDecisionEl.textContent = "";
-  rmcRecDecisionEl.className = "decision";
+  resetDecision(rmcRecDecisionEl);
 
   // Reclaimer: CMAT loop (15% yield)
   const cmatRecScu = sr * REND_RECLAIMER;
@@ -2466,8 +2464,22 @@ function recalc() {
     cmatRecExtraEl.textContent = "";
   }
 
-  // No RMC vs CMAT comparison for Reclaimer in 4.4+
+  // No explicit RMC vs CMAT decision for Reclaimer in 4.4+
+  resetDecision(cmatRecDecisionEl);
 }
+
+function recalc() {
+  const t = i18n[currentLang] || i18n.fr;
+  const prixRMC  = Number(prixRmcInput.value)  || 0;
+  const prixCMAT = Number(prixCmatInput.value) || 0;
+
+  const sl = Number(scuLightInput.value) || 0;
+  const sr = Number(scuRecInput.value)   || 0;
+
+  updateLightShipsLoop(t, prixRMC, prixCMAT, sl);
+  updateReclaimerLoop(t, prixCMAT, sl, sr);
+}
+
 
 [scuLightInput, scuRecInput].forEach(el =>
   el.addEventListener("input", () => {
