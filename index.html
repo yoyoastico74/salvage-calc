@@ -853,23 +853,27 @@ body.theme-light {
       list-style: none;
       padding: 0;
       margin: 0;
-      max-height: 130px;
+      max-height: 150px;
       overflow-y: auto;
       font-size: 11px;
       color: var(--text-main);
     }
 
     .my-runs-list li {
-      padding: 2px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding: 6px 8px;
+      margin-bottom: 4px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 255, 200, 0.25);
+      background: rgba(0, 20, 30, 0.75);
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
-      gap: 6px;
+      gap: 8px;
     }
 
     body.theme-light .my-runs-list li {
-      border-bottom-color: #d3e3f2;
+      border-color: #7fc0ff;
+      background: #f5fbff;
     }
 
     .my-runs-empty {
