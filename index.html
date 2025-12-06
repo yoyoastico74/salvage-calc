@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V5.3.3 -->
+<!-- Version : V5.3.4 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -1615,7 +1615,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V5.3.3";
+const APP_VERSION = "V5.3.4";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -3000,14 +3000,6 @@ function calcDebutant() {
   if (typeof scuLightInput !== "undefined" && scuLightInput) {
     scuLightInput.value = String(scuHull);
   }
-  if (typeof scuRecInput !== "undefined" && scuRecInput) {
-    scuRecInput.value = String(scuCs);
-  }
-  if (typeof recalc === "function") {
-    recalc();
-  }
-}
-
   if (typeof scuRecInput !== "undefined" && scuRecInput) {
     scuRecInput.value = String(scuCs);
   }
