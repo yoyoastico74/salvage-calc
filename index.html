@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V5.2.5 -->
+<!-- Version : V5.2.7 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -1178,10 +1178,14 @@ body.theme-light {
 
     <div class="info-panel" id="infoPanel">
       <b>Comment utiliser l’outil :</b><br>
-      1. Choisis ton vaisseau et entre tes SCU de salvage.<br>
-      2. Affiche automatiquement la valeur de ton salvage (RMC pour les vaisseaux légers, CMAT pour le Reclaimer).<br>
-      3. Crée/import un profil (pseudo + clé) pour sauvegarder tes runs.<br>
-      4. Le leaderboard est encore local, une version communautaire arrive bientôt.
+      1. Renseigne tes SCU de salvage et les prix RMC / CMAT.<br>
+      2. Lance le calcul pour voir la valeur de ton run selon la boucle (RMC ou CMAT).<br>
+      <span class="info-more-toggle" onclick="toggleMoreInfo()">En savoir plus…</span>
+      <div id="infoMore" class="info-more" style="display:none;">
+        • Hull Scraping → RMC vendable (tous les vaisseaux salvage).<br>
+        • Construction Salvage Reclaimer → CMAT (~15 %, raffinage obligatoire).<br>
+        • Les prix sont basés sur UEX / relevés en jeu et peuvent varier selon les patchs.
+      </div>
     </div>
 
     <div class="user-box">
@@ -1198,7 +1202,7 @@ body.theme-light {
         </label>
         <input id="prixRmc" type="number" value="0" readonly />
         <div id="hintPrixRmc" class="hint">
-          RMC = Recycled Material Composite (issu du hull scraping).
+          RMC : matériau recyclé issu du hull scraping.
         </div>
 
         <label for="prixCmat">
@@ -1249,9 +1253,7 @@ body.theme-light {
         </div>
 
         <div id="smallNote" class="small-note">
-          Pour chaque SCU saisie :
-          - Light ships : seul le RMC varie (pas de CMAT)
-          - Reclaimer : loop CMAT uniquement (raffinage obligatoire, pas de vente RMC).
+          Light ships → RMC. Reclaimer → CMAT (~15 %, raffinage obligatoire).
         </div>
         <div id="apiStatus" class="api-status">Récupération des prix UEX…</div>
       </div>
@@ -1412,8 +1414,15 @@ body.theme-light {
 </div>
 
 <script>
+
+function toggleMoreInfo() {
+  const el = document.getElementById("infoMore");
+  if (!el) return;
+  el.style.display = (el.style.display === "none" || el.style.display === "") ? "block" : "none";
+}
+
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V5.2.5";
+const APP_VERSION = "V5.2.7";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -1442,9 +1451,7 @@ const i18n = {
     labelScuReclaimer: "SCU de salvage traitées – Reclaimer (Hull Scraping → RMC, Construction Salvage → CMAT ~15 %).",
     tagLight: "Vaisseaux légers : hull scraping → RMC uniquement",
     tagReclaimer: "Reclaimer : Hull Scraping → RMC vendable · Construction Salvage → CMAT (~15 %, raffinage obligatoire).",
-    smallNote: "Pour chaque SCU saisie:
-- Light ships : RMC uniquement (hull scraping).
-- Reclaimer : RMC pour le hull scraping, CMAT (~15 %) pour le Construction Salvage (raffinage obligatoire, pas de vente directe du RMC CS).",
+    smallNote: "Pour chaque SCU saisie:\n- Light ships : RMC uniquement (hull scraping).\n- Reclaimer : RMC pour le hull scraping, CMAT (~15 %) pour le Construction Salvage (raffinage obligatoire, pas de vente directe du RMC CS).",
     apiFetching: "Récupération des prix UEX…",
     apiErrorPrefix: "Erreur API : ",
     apiUpdated: (rmcName, cmatName) => `Prix mis à jour (RMC: ${rmcName} / CMAT: ${cmatName}).`,
@@ -1466,9 +1473,7 @@ const i18n = {
     loopRmcBetter: diff => `🟢 Loop RMC plus rentable que CMAT (+${diff} aUEC).`,
     loopsEqual: "ℹ Les deux loops rapportent la même chose.",
     rmcLightValues: (sl, rmcVal) => `SCU de salvage utilisées : ${sl} SCU\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
-    rmcRecValues: () => "Loop Reclaimer : raffinage obligatoire.
-Le Reclaimer peut vendre le RMC issu du hull scraping.
-Le RMC issu du Construction Salvage n’est plus vendable : tu dois le raffiner en CMAT avant la vente.",
+    rmcRecValues: () => "Loop Reclaimer : raffinage obligatoire.\nLe Reclaimer peut vendre le RMC issu du hull scraping.\nLe RMC issu du Construction Salvage n’est plus vendable : tu dois le raffiner en CMAT avant la vente.",
     cmatRecValues: (scuCmat, valCmat) => `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\nValeur si tu vends en CMAT : ${valCmat} aUEC`,
     cmatRecExtra: (scuRec, scuCmat, pctCmat, pctTotal) =>
       `Sur ${scuRec} SCU du Reclaimer, ${scuCmat} SCU partent en CMAT (~${pctCmat}% du salvage Reclaimer, ~${pctTotal}% du total salvage).`,
@@ -1520,9 +1525,7 @@ Le RMC issu du Construction Salvage n’est plus vendable : tu dois le raffiner 
     labelScuReclaimer: "Processed salvage SCU – Reclaimer (Hull Scraping → sellable RMC; Construction Salvage → CMAT ~15%).",
     tagLight: "Light salvage ships: hull scraping → RMC only",
     tagReclaimer: "Reclaimer: Hull Scraping → sellable RMC · Construction Salvage → CMAT (~15%, refining required).",
-    smallNote: "For each SCU value:
-- Light ships: RMC only (hull scraping).
-- Reclaimer: RMC for hull scraping, CMAT (~15%) for Construction Salvage (refining required, no direct sale of CS RMC).",
+    smallNote: "For each SCU value:\n- Light ships: RMC only (hull scraping).\n- Reclaimer: RMC for hull scraping, CMAT (~15%) for Construction Salvage (refining required, no direct sale of CS RMC).",
     apiFetching: "Fetching UEX prices…",
     apiErrorPrefix: "API error: ",
     apiUpdated: (rmcName, cmatName) => `Prices updated (RMC: ${rmcName} / CMAT: ${cmatName}).`,
@@ -1544,9 +1547,7 @@ Le RMC issu du Construction Salvage n’est plus vendable : tu dois le raffiner 
     loopRmcBetter: diff => `🟢 RMC loop is more profitable than CMAT (+${diff} aUEC).`,
     loopsEqual: "ℹ Both loops yield the same profit.",
     rmcLightValues: (sl, rmcVal) => `Salvage SCU used: ${sl} SCU\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
-    rmcRecValues: () => "Reclaimer loop: refining is mandatory.
-The Reclaimer can sell RMC obtained from hull scraping.
-RMC from Construction Salvage is no longer sellable: you must refine it into CMAT before selling.",
+    rmcRecValues: () => "Reclaimer loop: refining is mandatory.\nThe Reclaimer can sell RMC obtained from hull scraping.\nRMC from Construction Salvage is no longer sellable: you must refine it into CMAT before selling.",
     cmatRecValues: (scuCmat, valCmat) => `Salvage SCU converted to CMAT (15% yield): ${scuCmat} SCU\nValue if sold as CMAT: ${valCmat} aUEC`,
     cmatRecExtra: (scuRec, scuCmat, pctCmat, pctTotal) =>
       `Out of ${scuRec} Reclaimer SCU, ${scuCmat} SCU become CMAT (~${pctCmat}% of Reclaimer salvage, ~${pctTotal}% of total salvage).`,
