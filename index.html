@@ -675,7 +675,6 @@ body.theme-light {
       color: var(--text-soft);
       margin-top: 2px;
     }
-
     .leaderboard-item-current {
       background: radial-gradient(circle at left, rgba(0,255,200,0.18), transparent);
       border-left: 3px solid var(--accent-alt);
@@ -1606,6 +1605,9 @@ body.theme-light {
     </div>
 
     <div id="modalMessage" class="modal-message"></div>
+
+    <div class="app-version"><span id="app-version-pill"></span></div>
+    <div class="app-footer-brand">Powered by <span>Shog Salvage Tools</span></div>
   </div>
 </div>
 
@@ -1618,7 +1620,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V5.3.0";
+const APP_VERSION = "V5.4.2";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -3007,6 +3009,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   if (btnCalcDeb) {
     btnCalcDeb.addEventListener("click", calcDebutant);
+  }
+
+  const verPill = document.getElementById("app-version-pill");
+  if (verPill) {
+    verPill.textContent = `VERSION ${APP_VERSION}`;
   }
 
   // Démarre en mode débutant
