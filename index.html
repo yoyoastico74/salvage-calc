@@ -1173,13 +1173,13 @@ body.theme-light {
 
     <h1 id="titleMain">SALVAGE CALCULATOR 4.4</h1>
     <div id="subText" class="sub">
-      Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.
+      Détermine la valeur générée par ton salvage selon la boucle de ton vaisseau (RMC ou CMAT).
     </div>
 
     <div class="info-panel" id="infoPanel">
       <b>Comment utiliser l’outil :</b><br>
       1. Choisis ton vaisseau et entre tes SCU de salvage.<br>
-      2. Compare automatiquement la rentabilité RMC vs CMAT.<br>
+      2. Affiche automatiquement la valeur de ton salvage (RMC pour les vaisseaux légers, CMAT pour le Reclaimer).<br>
       3. Crée/import un profil (pseudo + clé) pour sauvegarder tes runs.<br>
       4. Le leaderboard est encore local, une version communautaire arrive bientôt.
     </div>
@@ -1430,19 +1430,21 @@ if (currentTheme === "dark") currentTheme = "neon";
 const i18n = {
   fr: {
     titleMain: "SALVAGE CALCULATOR 4.4",
-    subText: "Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.",
+    subText: "Détermine la valeur générée par ton salvage selon la boucle de ton vaisseau (RMC ou CMAT).",
     entriesTitle: "Entrées",
     labelPrixRmc: "Prix RMC (aUEC / SCU)",
-    hintPrixRmc: "RMC = Recycled Material Composite (issu du hull scraping).",
+    hintPrixRmc: "RMC : matériau recyclé issu du hull scraping.",
     labelPrixCmat: "Prix CMAT (aUEC / SCU)",
-    hintPrixCmat: "CMAT = Construction Materials (issu du Construction Salvage, Reclaimer uniquement).",
+    hintPrixCmat: "CMAT : matériaux de construction (Reclaimer → raffinage).",
     sellRmcLabel: "Point de vente RMC :",
     sellCmatLabel: "Point de vente CMAT :",
     labelScuLight: "SCU de salvage traitées – Salvation / Vulture / Fortune (ces vaisseaux ne produisent que du RMC)",
-    labelScuReclaimer: "SCU de salvage traitées – Reclaimer (Construction Salvage → Raffinerie → CMAT, rendement ~15 % – RMC non vendable)",
+    labelScuReclaimer: "SCU de salvage traitées – Reclaimer (Hull Scraping → RMC, Construction Salvage → CMAT ~15 %).",
     tagLight: "Vaisseaux légers : hull scraping → RMC uniquement",
-    tagReclaimer: "Reclaimer : Construction Salvage → Raffinerie → CMAT (raffinage obligatoire, ~15 % vers CMAT, RMC non vendable)",
-    smallNote: "Pour chaque SCU saisie:\n- Light ships : seul le RMC varie (pas de CMAT)\n- Reclaimer : loop CMAT uniquement (raffinage obligatoire, pas de vente RMC).\n\nImportant : en jeu, le Reclaimer g\u00e9n\u00e8re des caisses de Construction Salvage qui doivent être raffin\u00e9es pour devenir des Construction Materials. On ne peut pas vendre directement le Construction Salvage ; ce calcul suppose que tu passes par la raffinerie.\n\n⚠️ Les taux de conversion et la rentabilit\u00e9 peuvent varier selon l'épave et les mises à jour. Les valeurs sont bas\u00e9es sur des observations en 4.3.2 / 4.4, avec un rendement Reclaimer d'environ 15 % pour la production de CMAT.",
+    tagReclaimer: "Reclaimer : Hull Scraping → RMC vendable · Construction Salvage → CMAT (~15 %, raffinage obligatoire).",
+    smallNote: "Pour chaque SCU saisie:
+- Light ships : RMC uniquement (hull scraping).
+- Reclaimer : RMC pour le hull scraping, CMAT (~15 %) pour le Construction Salvage (raffinage obligatoire, pas de vente directe du RMC CS).",
     apiFetching: "Récupération des prix UEX…",
     apiErrorPrefix: "Erreur API : ",
     apiUpdated: (rmcName, cmatName) => `Prix mis à jour (RMC: ${rmcName} / CMAT: ${cmatName}).`,
@@ -1458,13 +1460,15 @@ const i18n = {
     graphError: "Impossible de charger l'historique.",
     langSwitchLabel: "Langue :",
     themeLabel: "Thème :",
-    lightShipsInfo: "ℹ Les vaisseaux légers (Vulture / Salvation / Fortune) ne produisent que du RMC, pas de CMAT.",
-    lightShipsNoCmatText: "Les vaisseaux légers ne génèrent pas de Construction Materials (CMAT).\nSeul le Reclaimer (et futurs heavy salvage) peuvent produire du CMAT.",
+    lightShipsInfo: "ℹ Vaisseaux légers : RMC uniquement (pas de CMAT).",
+    lightShipsNoCmatText: "Les vaisseaux légers ne génèrent pas de Construction Materials (CMAT). Seul le Reclaimer (et futurs heavy salvage) peuvent produire du CMAT via Construction Salvage.",
     loopCmatBetter: diff => `🟢 Loop CMAT (Construction Materials) plus rentable que RMC (+${diff} aUEC).`,
     loopRmcBetter: diff => `🟢 Loop RMC plus rentable que CMAT (+${diff} aUEC).`,
     loopsEqual: "ℹ Les deux loops rapportent la même chose.",
     rmcLightValues: (sl, rmcVal) => `SCU de salvage utilisées : ${sl} SCU\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
-    rmcRecValues: () => "Loop Reclaimer : raffinage obligatoire.\nLe Reclaimer ne peut plus vendre de RMC.\nTu dois raffiner le Construction Salvage en CMAT avant la vente.",
+    rmcRecValues: () => "Loop Reclaimer : raffinage obligatoire.
+Le Reclaimer peut vendre le RMC issu du hull scraping.
+Le RMC issu du Construction Salvage n’est plus vendable : tu dois le raffiner en CMAT avant la vente.",
     cmatRecValues: (scuCmat, valCmat) => `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\nValeur si tu vends en CMAT : ${valCmat} aUEC`,
     cmatRecExtra: (scuRec, scuCmat, pctCmat, pctTotal) =>
       `Sur ${scuRec} SCU du Reclaimer, ${scuCmat} SCU partent en CMAT (~${pctCmat}% du salvage Reclaimer, ~${pctTotal}% du total salvage).`,
@@ -1504,19 +1508,21 @@ const i18n = {
   },
   en: {
     titleMain: "SALVAGE CALCULATOR 4.4",
-    subText: "Compare the profitability between <b>selling your salvage as RMC</b> or <b>processing it into CMAT (Construction Materials)</b>.",
+    subText: "Determine the value generated by your salvage depending on your ship’s loop (RMC or CMAT).",
     entriesTitle: "Inputs",
     labelPrixRmc: "RMC price (aUEC / SCU)",
-    hintPrixRmc: "RMC = Recycled Material Composite (from hull scraping).",
+    hintPrixRmc: "RMC : matériau recyclé issu du hull scraping.",
     labelPrixCmat: "CMAT price (aUEC / SCU)",
-    hintPrixCmat: "CMAT = Construction Materials (from Construction Salvage, Reclaimer only).",
+    hintPrixCmat: "CMAT : matériaux de construction (Reclaimer → raffinage).",
     sellRmcLabel: "RMC sell point:",
     sellCmatLabel: "CMAT sell point:",
     labelScuLight: "Processed salvage SCU – Salvation / Vulture / Fortune (these ships only produce RMC)",
-    labelScuReclaimer: "Processed salvage SCU – Reclaimer (Construction Salvage → Refinery → CMAT, ~15% yield – no RMC sale)",
+    labelScuReclaimer: "Processed salvage SCU – Reclaimer (Hull Scraping → sellable RMC; Construction Salvage → CMAT ~15%).",
     tagLight: "Light salvage ships: hull scraping → RMC only",
-    tagReclaimer: "Reclaimer: Construction Salvage → Refinery → CMAT (refining mandatory, ~15% to CMAT, no RMC sale)",
-    smallNote: "For each SCU value:\n- Light ships: only RMC changes (no CMAT)\n- Reclaimer: CMAT-only loop (refining mandatory, no RMC sale).\n\nImportant: in-game, the Reclaimer produces Construction Salvage crates that must be refined into Construction Materials. You cannot sell Construction Salvage directly; this calculator assumes you run it through a refinery.\n\n⚠️ Conversion rates and profitability can vary depending on the wreck and game updates. Values are based on observations in 4.3.2 / 4.4, using a Reclaimer CMAT yield of about 15%.",
+    tagReclaimer: "Reclaimer: Hull Scraping → sellable RMC · Construction Salvage → CMAT (~15%, refining required).",
+    smallNote: "For each SCU value:
+- Light ships: RMC only (hull scraping).
+- Reclaimer: RMC for hull scraping, CMAT (~15%) for Construction Salvage (refining required, no direct sale of CS RMC).",
     apiFetching: "Fetching UEX prices…",
     apiErrorPrefix: "API error: ",
     apiUpdated: (rmcName, cmatName) => `Prices updated (RMC: ${rmcName} / CMAT: ${cmatName}).`,
@@ -1532,13 +1538,15 @@ const i18n = {
     graphError: "Unable to load history.",
     langSwitchLabel: "Language:",
     themeLabel: "Theme:",
-    lightShipsInfo: "ℹ Light salvage ships (Vulture / Salvation / Fortune) only produce RMC, not CMAT.",
-    lightShipsNoCmatText: "Light salvage ships do not generate Construction Materials (CMAT).\nOnly the Reclaimer (and future heavy salvage) can produce CMAT.",
+    lightShipsInfo: "ℹ Light ships: RMC only (no CMAT).",
+    lightShipsNoCmatText: "Light ships do not generate Construction Materials (CMAT). Only the Reclaimer (and future heavy salvage) can produce CMAT via Construction Salvage.",
     loopCmatBetter: diff => `🟢 CMAT loop (Construction Materials) is more profitable than RMC (+${diff} aUEC).`,
     loopRmcBetter: diff => `🟢 RMC loop is more profitable than CMAT (+${diff} aUEC).`,
     loopsEqual: "ℹ Both loops yield the same profit.",
     rmcLightValues: (sl, rmcVal) => `Salvage SCU used: ${sl} SCU\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
-    rmcRecValues: () => "Reclaimer loop: refining is mandatory.\nThe Reclaimer can no longer sell RMC.\nYou must refine Construction Salvage into CMAT before selling.",
+    rmcRecValues: () => "Reclaimer loop: refining is mandatory.
+The Reclaimer can sell RMC obtained from hull scraping.
+RMC from Construction Salvage is no longer sellable: you must refine it into CMAT before selling.",
     cmatRecValues: (scuCmat, valCmat) => `Salvage SCU converted to CMAT (15% yield): ${scuCmat} SCU\nValue if sold as CMAT: ${valCmat} aUEC`,
     cmatRecExtra: (scuRec, scuCmat, pctCmat, pctTotal) =>
       `Out of ${scuRec} Reclaimer SCU, ${scuCmat} SCU become CMAT (~${pctCmat}% of Reclaimer salvage, ~${pctTotal}% of total salvage).`,
