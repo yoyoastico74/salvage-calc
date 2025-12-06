@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V5.2.3 -->
+<!-- Version : V5.2.4 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -1120,6 +1120,35 @@ body.theme-light {
       color: var(--text-soft);
       min-height: 14px;
     }
+  
+    .reclaimer-flow {
+      margin-top: 6px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px dashed rgba(0, 229, 255, 0.5);
+      background: rgba(0, 0, 0, 0.35);
+      font-size: 11px;
+      color: var(--text-soft);
+      line-height: 1.4;
+    }
+
+    .reclaimer-flow-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+      font-size: 11px;
+    }
+
+    .reclaimer-flow-steps span {
+      display: inline-block;
+      padding: 0 2px;
+    }
+
+    body.theme-light .reclaimer-flow {
+      background: #edf5ff;
+      border-color: rgba(16, 50, 67, 0.4);
+      color: #103243;
+    }
+
   </style>
 </head>
 <body class="theme-neon">
@@ -1196,7 +1225,7 @@ body.theme-light {
         <label for="scuReclaimer">
           <span id="labelScuReclaimer">
             SCU de salvage traitées – Reclaimer
-            (Construction Salvage → Raffinerie → CMAT, rendement ~15 % – RMC non vendable)
+            (ne peut pas vendre de CMAT uniquement (raffinage obligatoire) ~15 %)
           </span>
         </label>
         <input id="scuReclaimer" type="number" value="0" />
@@ -1216,13 +1245,13 @@ body.theme-light {
 
         <div class="tag-row">
           <div id="tagLight" class="tag">Vaisseaux légers : hull scraping → RMC uniquement</div>
-          <div id="tagReclaimer" class="tag red">Reclaimer : Construction Salvage → Raffinerie → CMAT (raffinage obligatoire, ~15 % de conversion)</div>
+          <div id="tagReclaimer" class="tag red">Reclaimer : hull + structural salvage → RMC + CMAT (~15% → CMAT)</div>
         </div>
 
         <div id="smallNote" class="small-note">
           Pour chaque SCU saisie :
-          - Vaisseaux légers : seul le RMC varie (pas de CMAT)
-          - Reclaimer : loop CMAT uniquement (raffinage obligatoire, pas de vente RMC).
+          - Light ships : seul le RMC varie (pas de CMAT)
+          - Reclaimer : comparaison RMC vs CMAT.
         </div>
         <div id="apiStatus" class="api-status">Récupération des prix UEX…</div>
       </div>
@@ -1242,178 +1271,13 @@ body.theme-light {
 
           <div class="result-block">
             <div id="rmcRecHead" class="result-head">
-              Reclaimer – Loop Reclaimer : raffinage obligatoire (RMC désactivé)
+              Reclaimer (peut choisir RMC ou CMAT)
             </div>
-            <div class="result-values" id="rmcRecValues"></div>
-            <div class="result-extra" id="rmcRecExtra"></div>
-            <div class="decision" id="rmcRecDecision"></div>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div id="cmatPanelTitle" class="panel-title">Loop CMAT – Transformer en Construction Materials</div>
-
-          <div class="result-block">
-            <div id="cmatLightHead" class="result-head">
-              Salvation / Vulture / Fortune
-            </div>
-            <div class="result-values" id="cmatLightValues"></div>
-            <div class="result-extra" id="cmatLightExtra"></div>
-            <div class="decision" id="cmatLightDecision"></div>
-          </div>
-
-          <div class="result-block">
-            <div id="cmatRecHead" class="result-head">
-              Reclaimer (15 % de conversion en CMAT)
-            </div>
-            <div class="result-values" id="cmatRecValues"></div>
-            <div class="result-extra" id="cmatRecExtra"></div>
-            <div class="decision" id="cmatRecDecision"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="market-panel">
-      <div id="graphTitle" class="graph-title">Analyse du marché – Historique RMC &amp; CMAT</div>
-      <div id="graphSub" class="graph-sub">
-        Données issues d’UEX via ton Worker. L’axe X montre les dates (JJ/MM) des dernières mises à jour de prix.
-      </div>
-
-      <div class="market-grid">
-        <div class="market-graph-col">
-          <canvas id="cmatChart" height="120"></canvas>
-          <div id="graphMessage"></div>
-        </div>
-
-        <div class="leaderboard-panel">
-          <div class="leaderboard-title-row">
-            <div class="leaderboard-title">Leaderboard – Salvage (online)</div>
-            <div class="leaderboard-badges">
-              <span class="badge-local-beta">Online Beta</span>
-            </div>
-          </div>
-          <div id="leaderboardSub" class="leaderboard-sub">
-            Classement basé sur le nombre de runs et les bénéfices théoriques (local au navigateur pour l’instant).
-          </div>
-
-          <button id="toggleMyRunsBtn" type="button" class="my-runs-btn">Voir mes runs détaillés</button>
-          <div id="myRunsPanel" class="my-runs-panel">
-            <div id="myRunsTitle" class="my-runs-title">Mes runs enregistrés</div>
-
-            <div class="my-runs-section">
-              <div id="myRunsActiveTitle" class="my-runs-subtitle">En attente de vente</div>
-              <ul id="myRunsActiveList" class="my-runs-list"></ul>
-              <div id="myRunsActiveEmpty" class="my-runs-empty">Aucun run en attente de vente.</div>
-            </div>
-
-            <div class="my-runs-section">
-              <div id="myRunsSoldTitle" class="my-runs-subtitle">Runs vendus</div>
-              <ul id="myRunsSoldList" class="my-runs-list"></ul>
-              <div id="myRunsSoldEmpty" class="my-runs-empty">Aucun run vendu pour l'instant.</div>
-            </div>
-          </div>
-
-          <ul id="leaderboardList" class="leaderboard-list"></ul>
-          <div id="leaderboardEmpty" class="leaderboard-empty" style="display:none;">
-            Aucun run enregistré pour l'instant.
-          </div>
-
-          <div class="leaderboard-actions">
-            <button id="clearMyRunsBtn" type="button">Supprimer mes runs</button>
-            <button id="clearAllRunsBtn" type="button">Reset complet (local)</button>
-            <div id="leaderboardActionMsg" class="leaderboard-action-msg"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="appVersion" class="app-version"><span></span></div>
-    <div class="app-footer-brand">
-      Powered by <span>Shog Salvage Tools</span>
-    </div>
-  </div>
-</div>
-
-<div id="profileModal" class="modal-backdrop">
-  <div class="modal" role="dialog" aria-modal="true">
-    <div class="modal-header">
-      <h2>Profil Salvage Calculator</h2>
-      <button id="modalCloseBtn" class="modal-close-btn" type="button">×</button>
-    </div>
-    <div class="modal-tabs">
-      <button id="tabCreateProfile" class="active" type="button">Créer un profil</button>
-      <button id="tabImportProfile" type="button">Importer un profil</button>
-    </div>
-
-    <div id="modalCreateSection" class="modal-section active">
-      <label for="createNickname">Pseudo</label>
-      <input id="createNickname" type="text" placeholder="Ex : Salvager_001" />
-      <div class="modal-small">
-        Un profil utilisera ce pseudo et une clé privée générée automatiquement.
-      </div>
-      <button id="createProfileBtn" class="action" type="button">
-        Créer le profil
-      </button>
-      <div id="createdKeyDisplay" class="key-display" style="display:none;"></div>
-    </div>
-
-    <div id="modalImportSection" class="modal-section">
-      <label for="importNickname">Pseudo</label>
-      <input id="importNickname" type="text" placeholder="Ton pseudo" />
-      <label for="importSecret">Clé privée (6 chiffres)</label>
-      <input id="importSecret" type="text" maxlength="6" placeholder="123456" />
-      <div class="modal-small">
-        Utilise le pseudo + la clé fournie lors de la création de ton profil.
-      </div>
-      <button id="importProfileBtn" class="action" type="button">
-        Importer ce profil
-      </button>
-    </div>
-
-    <div id="modalMessage" class="modal-message"></div>
-  </div>
-</div>
-
-<script>
-const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V5.2.3";
-
-const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
-const LEADERBOARD_REFRESH_MS = 60000;
-const LEADERBOARD_RUN_COOLDOWN_MS = 30000;
-let lastOnlineRunTs = Number(localStorage.getItem("salvageCalcLastOnlineRunTs") || 0);
-let lastLeaderboardFetch = 0;
-let cachedLeaderboardUsers = [];
-
-
-let currentLang = localStorage.getItem("salvageCalcLang") || "fr";
-let currentTheme = localStorage.getItem("salvageCalcTheme") || "neon";
-if (currentTheme === "dark") currentTheme = "neon";
-
-const i18n = {
-  fr: {
-    titleMain: "SALVAGE CALCULATOR 4.4",
-    subText: "Compare la rentabilité entre <b>vendre ton salvage en RMC</b> ou <b>le transformer en CMAT (Construction Materials)</b>.",
-    entriesTitle: "Entrées",
-    labelPrixRmc: "Prix RMC (aUEC / SCU)",
-    hintPrixRmc: "RMC = Recycled Material Composite (issu du hull scraping).",
-    labelPrixCmat: "Prix CMAT (aUEC / SCU)",
-    hintPrixCmat: "CMAT = Construction Materials (issu du Construction Salvage, Reclaimer uniquement).",
-    sellRmcLabel: "Point de vente RMC :",
-    sellCmatLabel: "Point de vente CMAT :",
-    labelScuLight: "SCU de salvage traitées – Salvation / Vulture / Fortune (ces vaisseaux ne produisent que du RMC)",
-    labelScuReclaimer: "SCU de salvage traitées – Reclaimer (Construction Salvage → Raffinerie → CMAT, rendement ~15 % – RMC non vendable)",
-    tagLight: "Vaisseaux légers : hull scraping → RMC uniquement",
-    tagReclaimer: "Reclaimer : Construction Salvage → Raffinerie → CMAT (raffinage obligatoire, ~15 % de conversion)",
-    smallNote: "Pour chaque SCU saisie :\n- Vaisseaux légers : seul le RMC varie (pas de CMAT)\n- Reclaimer : loop CMAT uniquement (raffinage obligatoire, pas de vente RMC).\n\n⚠️ Les taux de conversion et la rentabilité peuvent varier selon l'épave et les mises à jour. Les valeurs sont basées sur des observations en 4.3.2 / 4.4, avec un rendement Reclaimer d'environ 15 % pour la production de CMAT.",
-    apiFetching: "Récupération des prix UEX…",
-    apiErrorPrefix: "Erreur API : ",
-    apiUpdated: (rmcName, cmatName) => `Prix mis à jour (RMC: ${rmcName} / CMAT: ${cmatName}).`,
+            <div class="result-values" id="rmcRecValues: () => "Le Reclaimer ne peut pas vendre de RMC. Raffinage obligatoire.",
     rmcPanelTitle: "Loop RMC – Vendre en Recycled Material Composite",
     cmatPanelTitle: "Loop CMAT – Transformer en Construction Materials",
     rmcLightHead: "Salvation / Vulture / Fortune (RMC uniquement)",
-    rmcRecHead: "Reclaimer – Loop Reclaimer : raffinage obligatoire (RMC désactivé)",
+    rmcRecHead: "Reclaimer (peut choisir RMC ou CMAT)",
     cmatLightHead: "Salvation / Vulture / Fortune",
     cmatRecHead: "Reclaimer (15 % de conversion en CMAT)",
     graphTitle: "Analyse du marché – Historique RMC & CMAT",
@@ -1428,7 +1292,7 @@ const i18n = {
     loopRmcBetter: diff => `🟢 Loop RMC plus rentable que CMAT (+${diff} aUEC).`,
     loopsEqual: "ℹ Les deux loops rapportent la même chose.",
     rmcLightValues: (sl, rmcVal) => `SCU de salvage utilisées : ${sl} SCU\nValeur si tu vends tout en RMC : ${rmcVal} aUEC`,
-    rmcRecValues: () => "Loop Reclaimer : raffinage obligatoire.\nLe Reclaimer ne peut pas vendre de RMC.\nLe salvage doit passer par Construction Salvage → Raffinerie → CMAT.",
+    rmcRecValues: () => "Le Reclaimer ne peut pas vendre de RMC. Raffinage obligatoire.",
     cmatRecValues: (scuCmat, valCmat) => `SCU de salvage converties en CMAT (rendement 15 %) : ${scuCmat} SCU\nValeur si tu vends en CMAT : ${valCmat} aUEC`,
     cmatRecExtra: (scuRec, scuCmat, pctCmat, pctTotal) =>
       `Sur ${scuRec} SCU du Reclaimer, ${scuCmat} SCU partent en CMAT (~${pctCmat}% du salvage Reclaimer, ~${pctTotal}% du total salvage).`,
@@ -1477,17 +1341,17 @@ const i18n = {
     sellRmcLabel: "RMC sell point:",
     sellCmatLabel: "CMAT sell point:",
     labelScuLight: "Processed salvage SCU – Salvation / Vulture / Fortune (these ships only produce RMC)",
-    labelScuReclaimer: "Processed salvage SCU – Reclaimer (Construction Salvage → Refinery → CMAT, ~15% yield – no RMC sale)",
+    labelScuReclaimer: "Processed salvage SCU – Reclaimer (can sell as RMC or produce CMAT ~15%)",
     tagLight: "Light salvage ships: hull scraping → RMC only",
-    tagReclaimer: "Reclaimer: Construction Salvage → Refinery → CMAT (refining mandatory, ~15% to CMAT)",
-    smallNote: "For each SCU value:\n- Light ships: only RMC changes (no CMAT)\n- Reclaimer: CMAT-only loop (refining mandatory, no RMC sale).\n\n⚠️ Conversion rates and profitability can vary depending on the wreck and game updates. Values are based on observations in 4.3.2 / 4.4, using a Reclaimer CMAT yield of about 15%.",
+    tagReclaimer: "Reclaimer: hull + structural salvage → RMC + CMAT (~15% → CMAT)",
+    smallNote: "For each SCU value:\n- Light ships: only RMC changes (no CMAT)\n- Reclaimer: compares RMC vs CMAT.\n\nImportant: in-game, the Reclaimer produces Construction Salvage crates that must be refined into Construction Materials. You cannot sell Construction Salvage directly; this calculator assumes you run it through a refinery.\n\n⚠️ Conversion rates (RMC / CMAT) and profitability can vary depending on the wreck and game updates. Values are based on observations in 4.3.2 / 4.4, using a Reclaimer CMAT yield of about 15%.",
     apiFetching: "Fetching UEX prices…",
     apiErrorPrefix: "API error: ",
     apiUpdated: (rmcName, cmatName) => `Prices updated (RMC: ${rmcName} / CMAT: ${cmatName}).`,
     rmcPanelTitle: "RMC loop – Selling as Recycled Material Composite",
     cmatPanelTitle: "CMAT loop – Processing into Construction Materials",
     rmcLightHead: "Salvation / Vulture / Fortune (RMC only)",
-    rmcRecHead: "Reclaimer – Reclaimer loop: refining only (RMC disabled)",
+    rmcRecHead: "Reclaimer (can choose RMC or CMAT)",
     cmatLightHead: "Salvation / Vulture / Fortune",
     cmatRecHead: "Reclaimer (15% conversion to CMAT)",
     graphTitle: "Market analysis – RMC & CMAT history",
@@ -1502,7 +1366,7 @@ const i18n = {
     loopRmcBetter: diff => `🟢 RMC loop is more profitable than CMAT (+${diff} aUEC).`,
     loopsEqual: "ℹ Both loops yield the same profit.",
     rmcLightValues: (sl, rmcVal) => `Salvage SCU used: ${sl} SCU\nValue if sold entirely as RMC: ${rmcVal} aUEC`,
-    rmcRecValues: () => "Reclaimer loop: refining is mandatory.\nThe Reclaimer can no longer sell RMC.\nSalvage must go through Construction Salvage → Refinery → CMAT.",
+    rmcRecValues: () => "Le Reclaimer ne peut pas vendre de RMC. Raffinage obligatoire.",
     cmatRecValues: (scuCmat, valCmat) => `Salvage SCU converted to CMAT (15% yield): ${scuCmat} SCU\nValue if sold as CMAT: ${valCmat} aUEC`,
     cmatRecExtra: (scuRec, scuCmat, pctCmat, pctTotal) =>
       `Out of ${scuRec} Reclaimer SCU, ${scuCmat} SCU become CMAT (~${pctCmat}% of Reclaimer salvage, ~${pctTotal}% of total salvage).`,
@@ -1550,327 +1414,7 @@ const apiStatusEl   = document.getElementById("apiStatus");
 const rmcLightValuesEl = document.getElementById("rmcLightValues");
 const rmcLightExtraEl = document.getElementById("rmcLightExtra");
 const rmcLightDecisionEl = document.getElementById("rmcLightDecision");
-const rmcRecValuesEl = document.getElementById("rmcRecValues");
-const rmcRecExtraEl = document.getElementById("rmcRecExtra");
-const rmcRecDecisionEl = document.getElementById("rmcRecDecision");
-const cmatLightValuesEl = document.getElementById("cmatLightValues");
-const cmatLightExtraEl = document.getElementById("cmatLightExtra");
-const cmatLightDecisionEl = document.getElementById("cmatLightDecision");
-const cmatRecValuesEl = document.getElementById("cmatRecValues");
-const cmatRecExtraEl = document.getElementById("cmatRecExtra");
-const cmatRecDecisionEl = document.getElementById("cmatRecDecision");
-const graphMessage  = document.getElementById("graphMessage");
-const chartCanvas   = document.getElementById("cmatChart");
-const rmcTerminalEl = document.getElementById("rmcTerminal");
-const cmatTerminalEl = document.getElementById("cmatTerminal");
-
-const titleMainEl = document.getElementById("titleMain");
-const subTextEl = document.getElementById("subText");
-const entriesTitleEl = document.getElementById("entriesTitle");
-const labelPrixRmcEl = document.getElementById("labelPrixRmc");
-const hintPrixRmcEl = document.getElementById("hintPrixRmc");
-const labelPrixCmatEl = document.getElementById("labelPrixCmat");
-const hintPrixCmatEl = document.getElementById("hintPrixCmat");
-const sellRmcLabelEl = document.getElementById("sellRmcLabel");
-const sellCmatLabelEl = document.getElementById("sellCmatLabel");
-const labelScuLightEl = document.getElementById("labelScuLight");
-const labelScuReclaimerEl = document.getElementById("labelScuReclaimer");
-const tagLightEl = document.getElementById("tagLight");
-const tagReclaimerEl = document.getElementById("tagReclaimer");
-const smallNoteEl = document.getElementById("smallNote");
-const rmcPanelTitleEl = document.getElementById("rmcPanelTitle");
-const cmatPanelTitleEl = document.getElementById("cmatPanelTitle");
-const rmcLightHeadEl = document.getElementById("rmcLightHead");
-const rmcRecHeadEl = document.getElementById("rmcRecHead");
-const cmatLightHeadEl = document.getElementById("cmatLightHead");
-const cmatRecHeadEl = document.getElementById("cmatRecHead");
-const graphTitleEl = document.getElementById("graphTitle");
-const graphSubEl = document.getElementById("graphSub");
-const langSwitchLabelEl = document.getElementById("langSwitchLabel");
-const themeSelectEl = document.getElementById("themeSelect");
-const langSelectEl = document.getElementById("langSelect");
-const appVersionEl = document.getElementById("appVersion");
-
-const leaderboardListEl = document.getElementById("leaderboardList");
-const leaderboardEmptyEl = document.getElementById("leaderboardEmpty");
-const clearMyRunsBtnEl = document.getElementById("clearMyRunsBtn");
-const clearAllRunsBtnEl = document.getElementById("clearAllRunsBtn");
-const leaderboardActionMsgEl = document.getElementById("leaderboardActionMsg");
-const leaderboardSubEl = document.getElementById("leaderboardSub");
-
-const toggleMyRunsBtnEl = document.getElementById("toggleMyRunsBtn");
-const myRunsPanelEl = document.getElementById("myRunsPanel");
-const myRunsActiveListEl = document.getElementById("myRunsActiveList");
-const myRunsSoldListEl = document.getElementById("myRunsSoldList");
-const myRunsActiveEmptyEl = document.getElementById("myRunsActiveEmpty");
-const myRunsSoldEmptyEl = document.getElementById("myRunsSoldEmpty");
-const myRunsTitleEl = document.getElementById("myRunsTitle");
-const myRunsActiveTitleEl = document.getElementById("myRunsActiveTitle");
-const myRunsSoldTitleEl = document.getElementById("myRunsSoldTitle");
-
-const userInfoEl = document.getElementById("userInfo");
-const changeUserBtn = document.getElementById("changeUserBtn");
-
-const profileModal = document.getElementById("profileModal");
-const modalCloseBtn = document.getElementById("modalCloseBtn");
-const tabCreateProfile = document.getElementById("tabCreateProfile");
-const tabImportProfile = document.getElementById("tabImportProfile");
-const modalCreateSection = document.getElementById("modalCreateSection");
-const modalImportSection = document.getElementById("modalImportSection");
-const createNicknameInput = document.getElementById("createNickname");
-const createProfileBtn = document.getElementById("createProfileBtn");
-const createdKeyDisplay = document.getElementById("createdKeyDisplay");
-const importNicknameInput = document.getElementById("importNickname");
-const importSecretInput = document.getElementById("importSecret");
-const importProfileBtn = document.getElementById("importProfileBtn");
-const modalMessageEl = document.getElementById("modalMessage");
-
-const shipSelectEl = document.getElementById("shipSelect");
-const saveRunBtnEl = document.getElementById("saveRunBtn");
-const saveRunMessageEl = document.getElementById("saveRunMessage");
-const labelShipSelectEl = document.getElementById("labelShipSelect");
-
-let currentUser = null;
-
-// Admin
-const ADMIN_NICKNAME = "Shog";
-const ADMIN_SECRET = "130890";
-
-function isAdminUser(user) {
-  return !!user && user.nickname === ADMIN_NICKNAME && user.secret === ADMIN_SECRET;
-}
-
-function updateAdminUI() {
-  if (!clearAllRunsBtnEl) return;
-  clearAllRunsBtnEl.style.display = isAdminUser(currentUser) ? "block" : "none";
-
-  if (userInfoEl && currentUser && isAdminUser(currentUser)) {
-    if (!userInfoEl.querySelector(".admin-badge-inline")) {
-      const badge = document.createElement("span");
-      badge.className = "admin-badge-inline";
-      badge.textContent = "ADMIN";
-      userInfoEl.appendChild(badge);
-    }
-  }
-}
-
-function generateSecret() {
-  const n = Math.floor(Math.random() * 1000000);
-  return String(n).padStart(6, "0");
-}
-
-function computeUserId(nickname, secret) {
-  const base = (nickname || "").trim() + "#" + secret;
-  let hash = 0;
-  for (let i = 0; i < base.length; i++) {
-    hash = (hash * 31 + base.charCodeAt(i)) >>> 0;
-  }
-  return "user_" + hash.toString(16);
-}
-
-function loadUserProfile() {
-  try {
-    const raw = localStorage.getItem("salvageCalcUser");
-    if (!raw) return null;
-    const u = JSON.parse(raw);
-    if (!u || !u.id || !u.nickname || !u.secret) return null;
-    return u;
-  } catch (_) {
-    return null;
-  }
-}
-
-function saveUserProfile(user) {
-  currentUser = user;
-  try {
-    localStorage.setItem("salvageCalcUser", JSON.stringify(user));
-  } catch (_) {}
-  updateUserUI();
-  updateAdminUI();
-  updateLocalLeaderboard();
-  buildMyRunsList();
-}
-
-function updateUserUI() {
-  if (!userInfoEl) return;
-  if (!currentUser) {
-    userInfoEl.textContent = "Profil : —";
-  } else {
-    userInfoEl.textContent =
-      "Profil : " + currentUser.nickname + " (clé : " + currentUser.secret + ")";
-  }
-}
-
-function setActiveModalTab(tab) {
-  if (tab === "import") {
-    tabImportProfile.classList.add("active");
-    tabCreateProfile.classList.remove("active");
-    modalImportSection.classList.add("active");
-    modalCreateSection.classList.remove("active");
-  } else {
-    tabCreateProfile.classList.add("active");
-    tabImportProfile.classList.remove("active");
-    modalCreateSection.classList.add("active");
-    modalImportSection.classList.remove("active");
-  }
-  modalMessageEl.textContent = "";
-}
-
-function openProfileModal(initialTab) {
-  if (!profileModal) return;
-  profileModal.classList.add("open");
-  createdKeyDisplay.style.display = "none";
-  createdKeyDisplay.textContent = "";
-  modalMessageEl.textContent = "";
-  createNicknameInput.value = currentUser ? currentUser.nickname : "";
-  importNicknameInput.value = "";
-  importSecretInput.value = "";
-  setActiveModalTab(initialTab === "import" ? "import" : "create");
-}
-
-function closeProfileModal() {
-  if (!profileModal) return;
-  profileModal.classList.remove("open");
-}
-
-function ensureUserProfile() {
-  const existing = loadUserProfile();
-  if (existing) {
-    currentUser = existing;
-    updateUserUI();
-    updateAdminUI();
-    return;
-  }
-}
-
-function handleCreateProfile() {
-  const t = i18n[currentLang] || i18n.fr;
-  let nickname = (createNicknameInput.value || "").trim();
-  if (!nickname) nickname = "Salvager";
-  const secret = generateSecret();
-  const id = computeUserId(nickname, secret);
-  const user = { id, nickname, secret };
-  saveUserProfile(user);
-  createdKeyDisplay.style.display = "block";
-  createdKeyDisplay.textContent =
-    "Profil créé !\nPseudo : " + nickname +
-    "\nClé privée : " + secret +
-    "\n\nNote bien cette clé pour récupérer ton profil sur un autre navigateur.";
-  modalMessageEl.textContent = "";
-}
-
-function handleImportProfile() {
-  const t = i18n[currentLang] || i18n.fr;
-  const nickname = (importNicknameInput.value || "").trim();
-  const secret = (importSecretInput.value || "").trim();
-
-  if (!nickname) {
-    modalMessageEl.textContent = "Merci de renseigner un pseudo.";
-    return;
-  }
-  if (!/^[0-9]{6}$/.test(secret)) {
-    modalMessageEl.textContent = "La clé doit contenir exactement 6 chiffres.";
-    return;
-  }
-
-  const id = computeUserId(nickname, secret);
-  const user = { id, nickname, secret };
-  saveUserProfile(user);
-  modalMessageEl.textContent = "Profil importé avec succès.";
-}
-
-function getRuns() {
-  try {
-    return JSON.parse(localStorage.getItem("salvageCalcRuns") || "[]");
-  } catch (_) {
-    return [];
-  }
-}
-
-function saveRuns(runs) {
-  try {
-    localStorage.setItem("salvageCalcRuns", JSON.stringify(runs));
-  } catch (_) {}
-}
-
-function format(val) {
-  if (val == null || isNaN(val)) return "0";
-  return Number(val).toLocaleString(currentLang === "fr" ? "fr-FR" : "en-US", {
-    maximumFractionDigits: 0
-  });
-}
-
-async function updateLocalLeaderboard(force = false) {
-  const t = i18n[currentLang] || i18n.fr;
-  if (!leaderboardListEl || !leaderboardEmptyEl) return;
-
-  const now = Date.now();
-  if (!force && cachedLeaderboardUsers.length && (now - lastLeaderboardFetch) < LEADERBOARD_REFRESH_MS) {
-    renderOnlineLeaderboard(cachedLeaderboardUsers, t);
-    return;
-  }
-
-  leaderboardEmptyEl.style.display = "block";
-  leaderboardEmptyEl.textContent = t.leaderboardLoading || "Chargement du leaderboard en ligne…";
-
-  try {
-    const resp = await fetch(LEADERBOARD_API_BASE + "/api/leaderboard", {
-      method: "GET",
-      headers: {
-        "Accept": "application/json"
-      }
-    });
-    if (!resp.ok) {
-      throw new Error("HTTP " + resp.status);
-    }
-    const data = await resp.json();
-    const users = Array.isArray(data.users) ? data.users : [];
-    cachedLeaderboardUsers = users;
-    lastLeaderboardFetch = Date.now();
-    renderOnlineLeaderboard(users, t);
-  } catch (err) {
-    console.error("Leaderboard fetch error:", err);
-    leaderboardListEl.innerHTML = "";
-    leaderboardEmptyEl.style.display = "block";
-    const prefix = t.leaderboardErrorPrefix || "Erreur leaderboard : ";
-    leaderboardEmptyEl.textContent = prefix + String(err.message || err);
-  }
-}
-
-function renderOnlineLeaderboard(users, t) {
-  if (!leaderboardListEl || !leaderboardEmptyEl) return;
-
-  if (!users.length) {
-    leaderboardListEl.innerHTML = "";
-    leaderboardEmptyEl.style.display = "block";
-    leaderboardEmptyEl.textContent = t.leaderboardEmpty;
-    return;
-  }
-
-  leaderboardEmptyEl.style.display = "none";
-
-  const sorted = users.slice().sort((a, b) => {
-    if ((b.totalProfit || 0) !== (a.totalProfit || 0)) {
-      return (b.totalProfit || 0) - (a.totalProfit || 0);
-    }
-    return (b.totalRuns || 0) - (a.totalRuns || 0);
-  });
-
-  leaderboardListEl.innerHTML = "";
-  sorted.slice(0, 10).forEach(u => {
-    const profitStr = format(u.totalProfit);
-    const totalRmcStr = format(u.totalRmcScu || 0);
-    const favShip = u.favShip || "N/A";
-
-    const isCurrent =
-      currentUser &&
-      currentUser.nickname &&
-      u.nickname &&
-      u.nickname.toLowerCase() === currentUser.nickname.toLowerCase();
-
-    let html = "";
-    if (isCurrent) {
-      html += `<span class="leaderboard-badge-you">${t.leaderboardYou}</span> `;
+const rmcRecValues: () => "Le Reclaimer ne peut pas vendre de RMC. Raffinage obligatoire.";
     }
 
     html += t.leaderboardLine(
@@ -1976,12 +1520,9 @@ function handleSaveRun() {
   const cmatRecScu  = sr * REND_RECLAIMER;
   const cmatRecVal  = cmatRecScu * prixCMAT;
 
-  // Profit logic:
-  // - Light ships: based on RMC value.
-  // - Reclaimer (or any run with Reclaimer SCU): CMAT-only (RMC disabled).
   let profit = 0;
   if (ship === "Reclaimer" || sr > 0) {
-    profit = cmatRecVal;
+    profit = Math.max(rmcRecVal, cmatRecVal);
   } else {
     profit = rmcLightVal;
   }
@@ -2400,119 +1941,7 @@ function recalc() {
   cmatLightDecisionEl.className = "decision";
 
   const rmcRecVal = sr * prixRMC;
-  rmcRecValuesEl.textContent = t.rmcRecValues(format(sr), format(rmcRecVal));
-
-  const cmatRecScu = sr * REND_RECLAIMER;
-  const cmatRecVal = cmatRecScu * prixCMAT;
-  cmatRecValuesEl.textContent = t.cmatRecValues(
-    format(cmatRecScu),
-    format(cmatRecVal)
-  );
-
-  const totalScu = sl + sr;
-  const pctCmatReclaimer = sr > 0 ? (cmatRecScu / sr) * 100 : 0;
-  const pctCmatTotal = totalScu > 0 ? (cmatRecScu / totalScu) * 100 : 0;
-
-  if (sr > 0) {
-    cmatRecExtraEl.textContent = t.cmatRecExtra(
-      format(sr),
-      format(cmatRecScu),
-      pctCmatReclaimer.toFixed(1),
-      pctCmatTotal.toFixed(1)
-    );
-  } else {
-    cmatRecExtraEl.textContent = "";
-  }
-
-  updateComparison(rmcRecVal, cmatRecVal, rmcRecDecisionEl, cmatRecDecisionEl);
-}
-
-[scuLightInput, scuRecInput].forEach(el =>
-  el.addEventListener("input", () => {
-    recalc();
-    saveState();
-  })
-);
-
-langSelectEl.addEventListener("change", () => {
-  currentLang = langSelectEl.value || "fr";
-  saveState();
-  applyLanguage();
-  myRunsPanelEl.classList.remove("open");
-});
-
-themeSelectEl.addEventListener("change", () => {
-  currentTheme = themeSelectEl.value || "neon";
-  if (currentTheme === "dark") currentTheme = "neon";
-  applyTheme();
-  saveState();
-});
-
-if (changeUserBtn) {
-  changeUserBtn.addEventListener("click", () => openProfileModal("create"));
-}
-
-if (modalCloseBtn) {
-  modalCloseBtn.addEventListener("click", closeProfileModal);
-}
-
-if (profileModal) {
-  profileModal.addEventListener("click", (e) => {
-    if (e.target === profileModal) {
-      closeProfileModal();
-    }
-  });
-}
-
-tabCreateProfile.addEventListener("click", () => setActiveModalTab("create"));
-tabImportProfile.addEventListener("click", () => setActiveModalTab("import"));
-
-createProfileBtn.addEventListener("click", handleCreateProfile);
-importProfileBtn.addEventListener("click", handleImportProfile);
-
-if (saveRunBtnEl) {
-  saveRunBtnEl.addEventListener("click", handleSaveRun);
-}
-
-if (toggleMyRunsBtnEl) {
-  toggleMyRunsBtnEl.addEventListener("click", toggleMyRunsPanel);
-}
-
-if (clearMyRunsBtnEl) {
-  clearMyRunsBtnEl.addEventListener("click", clearMyRuns);
-}
-
-if (clearAllRunsBtnEl) {
-  clearAllRunsBtnEl.addEventListener("click", clearAllRuns);
-}
-
-let cmatChart = null;
-
-function renderChart(rmcHist, cmatHist) {
-  const maxLen = Math.max(rmcHist.length, cmatHist.length);
-  const labels = [];
-  const rmcValues = [];
-  const cmatValues = [];
-
-  for (let i = 0; i < maxLen; i++) {
-    const rEntry = rmcHist[i] || null;
-    const cEntry = cmatHist[i] || null;
-    const src = cEntry || rEntry;
-
-    if (src && src.date) {
-      let d;
-      if (typeof src.date === "number") {
-        d = new Date(src.date * 1000);
-      } else {
-        d = new Date(src.date);
-      }
-      const label = d.toLocaleDateString(
-        currentLang === "fr" ? "fr-FR" : "en-GB",
-        { day: "2-digit", month: "2-digit" }
-      );
-      labels.push(label);
-    } else {
-      labels.push(`P${i + 1}`);
+  rmcRecValues: () => "Le Reclaimer ne peut pas vendre de RMC. Raffinage obligatoire.");
     }
 
     rmcValues.push(rEntry ? rEntry.sell : null);
