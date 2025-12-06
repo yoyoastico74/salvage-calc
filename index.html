@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V5.2.9 -->
+<!-- Version : V5.3.0 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -1151,6 +1151,7 @@ body.theme-light {
 
   
   
+  
   .mode-toggle {
     display: flex;
     gap: 0.75rem;
@@ -1182,6 +1183,65 @@ body.theme-light {
     opacity: 1;
   }
   .mode-section.hidden {
+    display: none;
+  }
+  .mode-debutant-card {
+    background: rgba(3, 10, 25, 0.9);
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 0 18px rgba(0, 255, 200, 0.12);
+    border: 1px solid rgba(0, 255, 200, 0.25);
+  }
+  .mode-debutant-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem 1.25rem;
+    align-items: center;
+  }
+  .mode-debutant-grid .field-label {
+    font-size: 0.85rem;
+    opacity: 0.85;
+  }
+  .mode-debutant-grid .field-value {
+    font-size: 0.9rem;
+    text-align: center;
+    opacity: 0.9;
+  }
+  .mode-debutant-result {
+    margin-top: 0.8rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 0.75rem;
+    font-size: 0.9rem;
+  }
+  .mode-debutant-total {
+    margin-top: 0.4rem;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  .btn-calc {
+    padding: 0.45rem 1.2rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border: 1px solid rgba(0, 255, 200, 0.6);
+    background: rgba(0, 40, 40, 0.85);
+    color: #dfffff;
+    cursor: pointer;
+    box-shadow: 0 0 12px rgba(0, 255, 200, 0.6);
+    transition: all 0.15s ease-out;
+  }
+  .btn-calc:hover {
+    box-shadow: 0 0 18px rgba(0, 255, 200, 0.9);
+    color: #ffffff;
+  }
+  .neon-total {
+    color: #32f5e1;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-shadow: 0 0 6px rgba(0,255,200,0.6), 0 0 12px rgba(0,255,200,0.4);
+    margin-top: 0.6rem;
+  }
+.mode-section.hidden {
     display: none;
   }
   .mode-debutant-card {
@@ -1284,13 +1344,13 @@ body.theme-light {
         </div>
 
         <div style="margin-top:1rem; text-align:center;">
-          <button id="btnCalcDebutant" class="btn-primary">Calculer le run</button>
+          <button id="btnCalcDebutant" class="btn-calc">Calculer le run</button>
         </div>
 
         <div class="mode-debutant-result">
           <div>Hull Scraping → RMC vendu : <span id="debResRmc">–</span> aUEC</div>
           <div>Construction Salvage → CMAT raffiné : <span id="debResCmat">–</span> aUEC</div>
-          <div class="mode-debutant-total">Total (vente RMC + CMAT) : <span id="debResTotal">–</span> aUEC</div>
+          <div class="mode-debutant-total neon-total">Total (vente RMC + CMAT) : <span id="debResTotal">–</span> aUEC</div>
         </div>
 
         <div style="margin-top:0.5rem; font-size:0.8rem; opacity:0.8;">
@@ -1530,7 +1590,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V5.2.9";
+const APP_VERSION = "V5.3.0";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
