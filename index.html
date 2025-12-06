@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V5.3.4 -->
+<!-- Version : V5.3.5 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -1188,16 +1188,16 @@ body.theme-light {
   .mode-debutant-card {
     background: rgba(3, 10, 25, 0.9);
     border-radius: 18px;
-    padding: 1rem 1.1rem;
+    padding: 1.4rem 1.6rem;
     box-shadow: 0 0 18px rgba(0, 255, 200, 0.12);
     border: 1px solid rgba(0, 255, 200, 0.25);
-    max-width: 560px;
+    max-width: 680px;
     margin: 0 auto;
   }
   .mode-debutant-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem 1.25rem;
+    gap: 1rem 1.6rem;
     align-items: center;
   }
   .mode-debutant-grid .field-label {
@@ -1260,16 +1260,16 @@ body.theme-light {
   .mode-debutant-card {
     background: rgba(3, 10, 25, 0.9);
     border-radius: 18px;
-    padding: 1rem 1.1rem;
+    padding: 1.4rem 1.6rem;
     box-shadow: 0 0 18px rgba(0, 255, 200, 0.12);
     border: 1px solid rgba(0, 255, 200, 0.25);
-    max-width: 560px;
+    max-width: 680px;
     margin: 0 auto;
   }
   .mode-debutant-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem 1.25rem;
+    gap: 1rem 1.6rem;
     align-items: center;
   }
   .mode-debutant-grid .field-label {
@@ -1615,7 +1615,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V5.3.4";
+const APP_VERSION = "V5.3.5";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -3000,6 +3000,14 @@ function calcDebutant() {
   if (typeof scuLightInput !== "undefined" && scuLightInput) {
     scuLightInput.value = String(scuHull);
   }
+  if (typeof scuRecInput !== "undefined" && scuRecInput) {
+    scuRecInput.value = String(scuCs);
+  }
+  if (typeof recalc === "function") {
+    recalc();
+  }
+}
+
   if (typeof scuRecInput !== "undefined" && scuRecInput) {
     scuRecInput.value = String(scuCs);
   }
