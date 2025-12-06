@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V5.3.5 -->
+<!-- Version : V5.3.6 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -1220,17 +1220,6 @@ body.theme-light {
     font-weight: 600;
     font-size: 1rem;
   }
-  .mode-debutant-extra {
-    margin-top: 0.4rem;
-    font-size: 0.85rem;
-    opacity: 0.9;
-  }
-  .mode-debutant-focus {
-    margin-top: 0.15rem;
-    font-style: italic;
-    opacity: 0.85;
-  }
-
   .btn-calc {
     padding: 0.45rem 1.2rem;
     border-radius: 12px;
@@ -1372,10 +1361,6 @@ body.theme-light {
           <div>Hull Scraping → RMC vendu : <span id="debResRmc">–</span> aUEC</div>
           <div>Construction Salvage → CMAT raffiné : <span id="debResCmat">–</span> aUEC</div>
           <div class="mode-debutant-total neon-total">Total (vente salvage) : <span id="debResTotal">–</span> aUEC</div>
-        </div>
-        <div class="mode-debutant-extra">
-          <div>Total SCU traitées : <span id="debResScu">–</span> SCU</div>
-          <div id="debResFocus" class="mode-debutant-focus">Source principale : —</div>
         </div>
 
         <div style="margin-top:0.5rem; font-size:0.8rem; opacity:0.8;">
@@ -1615,7 +1600,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V5.3.5";
+const APP_VERSION = "V5.3.6";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -2969,45 +2954,19 @@ function calcDebutant() {
   const cmatScu  = scuCs * REND_RECLAIMER;
   const valCmat  = cmatScu * prixCMAT;
   const total    = valRmc + valCmat;
-  const totalScu = scuHull + scuCs;
 
   const debResRmcEl   = document.getElementById("debResRmc");
   const debResCmatEl  = document.getElementById("debResCmat");
   const debResTotalEl = document.getElementById("debResTotal");
-  const debResScuEl   = document.getElementById("debResScu");
-  const debResFocusEl = document.getElementById("debResFocus");
 
   if (debResRmcEl)   debResRmcEl.textContent   = format(valRmc);
   if (debResCmatEl)  debResCmatEl.textContent  = format(valCmat);
   if (debResTotalEl) debResTotalEl.textContent = format(total);
-  if (debResScuEl)   debResScuEl.textContent   = totalScu ? format(totalScu) : "–";
-
-  if (debResFocusEl) {
-    let focusText = "Source principale : —";
-    if (total > 0) {
-      if (valRmc > valCmat) {
-        focusText = "Source principale : Hull Scraping (RMC)";
-      } else if (valCmat > valRmc) {
-        focusText = "Source principale : Construction Salvage (CMAT)";
-      } else {
-        focusText = "Sources équilibrées : RMC et CMAT";
-      }
-    }
-    debResFocusEl.textContent = focusText;
-  }
 
   // Synchronise avec le mode avancé
   if (typeof scuLightInput !== "undefined" && scuLightInput) {
     scuLightInput.value = String(scuHull);
   }
-  if (typeof scuRecInput !== "undefined" && scuRecInput) {
-    scuRecInput.value = String(scuCs);
-  }
-  if (typeof recalc === "function") {
-    recalc();
-  }
-}
-
   if (typeof scuRecInput !== "undefined" && scuRecInput) {
     scuRecInput.value = String(scuCs);
   }
