@@ -1199,7 +1199,7 @@ body.theme-light {
   }
   .mode-debutant-grid select,
   .mode-debutant-grid input[type="number"] {
-    width: 100%;
+    width: calc(100% - 0.75rem);
   }
   .mode-debutant-grid .field-label {
     font-size: 0.85rem;
