@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V5.6.10 -->
+<!-- Version : V5.6.11 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -1499,7 +1499,7 @@ body.theme-light {
         <div class="panel">
           <div id="rmcPanelTitle" class="panel-title">Loop RMC – Vendre en Recycled Material Composite</div>
 
-          <div class="result-block">
+          <div id="loopRmcLightPanel" class="result-block">
             <div id="rmcLightHead" class="result-head">
               Salvation / Vulture / Fortune (RMC uniquement)
             </div>
@@ -1508,7 +1508,7 @@ body.theme-light {
             <div class="decision" id="rmcLightDecision"></div>
           </div>
 
-          <div class="result-block">
+          <div id="loopRmcReclaimerPanel" class="result-block">
             <div id="rmcRecHead" class="result-head">
               Reclaimer – Loop Reclaimer : raffinage obligatoire (RMC désactivé)
             </div>
@@ -1521,7 +1521,7 @@ body.theme-light {
         <div class="panel">
           <div id="cmatPanelTitle" class="panel-title">Loop CMAT – Transformer en Construction Materials</div>
 
-          <div class="result-block">
+          <div id="loopCmatLightPanel" class="result-block">
             <div id="cmatLightHead" class="result-head">
               Salvation / Vulture / Fortune
             </div>
@@ -1530,7 +1530,7 @@ body.theme-light {
             <div class="decision" id="cmatLightDecision"></div>
           </div>
 
-          <div class="result-block">
+          <div id="loopCmatReclaimerPanel" class="result-block">
             <div id="cmatRecHead" class="result-head">
               Reclaimer (15 % de conversion en CMAT)
             </div>
@@ -1700,7 +1700,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V5.6.10";
+const APP_VERSION = "V5.6.11";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -1761,7 +1761,6 @@ const i18n = {
     leaderboardLine: (nickname, runs, profit, favShip, totalRmc, isAdmin) =>
       `<span class="leaderboard-line-main">${nickname} – ${profit} aUEC</span><span class="leaderboard-line-meta">${runs} runs · Ship fav : ${favShip} · Total RMC : ${totalRmc} SCU</span>`,
     leaderboardYou: "Vous",
-    leaderboardSub: "Leaderboard global en ligne basé sur les runs envoyés par les joueurs (Top 3 ci-dessous, classement complet via la coupe 🏆).",
     labelShipSelect: "Vaisseau utilisé pour ce run",
     saveRunBtn: "Envoyer ce run au leaderboard en ligne",
     saveRunSuccess: "Run envoyé au leaderboard en ligne.",
@@ -1839,7 +1838,6 @@ const i18n = {
     leaderboardLine: (nickname, runs, profit, favShip, totalRmc, isAdmin) =>
       `<span class="leaderboard-line-main">${nickname} – ${profit} aUEC</span><span class="leaderboard-line-meta">${runs} runs · Fav ship: ${favShip} · Total RMC: ${totalRmc} SCU</span>`,
     leaderboardYou: "You",
-    leaderboardSub: "Global online leaderboard based on runs sent by players (Top 3 below, full ranking via the 🏆 button).",
     labelShipSelect: "Ship used for this run",
     saveRunBtn: "Send this run to the online leaderboard",
     saveRunSuccess: "Run sent to the online leaderboard.",
@@ -1968,6 +1966,10 @@ const saveRunMessageEl = document.getElementById("saveRunMessage");
 const labelShipSelectEl = document.getElementById("labelShipSelect");
 const advancedScuLightGroupEl = document.getElementById("advancedScuLightGroup");
 const advancedScuReclaimerGroupEl = document.getElementById("advancedScuReclaimerGroup");
+const loopRmcLightPanelEl = document.getElementById("loopRmcLightPanel");
+const loopRmcReclaimerPanelEl = document.getElementById("loopRmcReclaimerPanel");
+const loopCmatLightPanelEl = document.getElementById("loopCmatLightPanel");
+const loopCmatReclaimerPanelEl = document.getElementById("loopCmatReclaimerPanel");
 
 let currentUser = null;
 
@@ -2379,6 +2381,19 @@ function updateScuAdvancedVisibility() {
   }
   if (advancedScuReclaimerGroupEl) {
     advancedScuReclaimerGroupEl.style.display = isReclaimer ? "" : "none";
+  }
+
+  if (loopRmcLightPanelEl) {
+    loopRmcLightPanelEl.style.display = isReclaimer ? "none" : "";
+  }
+  if (loopRmcReclaimerPanelEl) {
+    loopRmcReclaimerPanelEl.style.display = isReclaimer ? "" : "none";
+  }
+  if (loopCmatLightPanelEl) {
+    loopCmatLightPanelEl.style.display = isReclaimer ? "none" : "";
+  }
+  if (loopCmatReclaimerPanelEl) {
+    loopCmatReclaimerPanelEl.style.display = isReclaimer ? "" : "none";
   }
 }
 
