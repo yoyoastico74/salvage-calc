@@ -1,5 +1,6 @@
-/* Salvage Calculator 4.4 - Styles V5.6.14 */
-:root {
+/* Salvage Calculator 4.4 - Styles V5.6.15 (polish) */
+
+    :root {
       --bg: #020710;
       --overlay: rgba(3, 10, 20, 0.78);
       --panel-bg: linear-gradient(160deg, #071625, #020912);
@@ -1187,9 +1188,15 @@ body.theme-light {
   .mode-debutant-card {
     background: rgba(3, 10, 25, 0.9);
     border-radius: 18px;
-    padding: 1rem 1.1rem;
-    box-shadow: 0 0 18px rgba(0, 255, 200, 0.12);
-    border: 1px solid rgba(0, 255, 200, 0.25);
+    padding: 1.2rem 1.4rem 1.3rem;
+    box-shadow: 0 0 18px rgba(0, 255, 200, 0.18);
+    border: 1px solid rgba(0, 255, 200, 0.3);
+    animation: fadeInDebutant 0.25s ease-out;
+  }
+
+  @keyframes fadeInDebutant {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   .mode-debutant-grid {
     display: grid;
@@ -1201,7 +1208,6 @@ body.theme-light {
   .mode-debutant-grid input[type="number"] {
     width: calc(100% - 0.75rem);
   }
-
   .mode-debutant-grid select {
     margin-top: 4px;
     margin-left: 4px;
@@ -1218,7 +1224,7 @@ body.theme-light {
     opacity: 0.85;
   }
   .mode-debutant-grid .field-value {
-    font-size: 0.9rem;
+    font-size: 1rem;
     text-align: center;
     opacity: 0.9;
   }
@@ -1233,6 +1239,12 @@ body.theme-light {
     font-weight: 600;
     font-size: 1rem;
   }
+  .mode-debutant-calc-wrapper {
+    margin-top: 1.2rem;
+    display: flex;
+    justify-content: center;
+  }
+
   .btn-calc {
     padding: 0.45rem 1.2rem;
     border-radius: 12px;
@@ -1262,9 +1274,15 @@ body.theme-light {
   .mode-debutant-card {
     background: rgba(3, 10, 25, 0.9);
     border-radius: 18px;
-    padding: 1rem 1.1rem;
-    box-shadow: 0 0 18px rgba(0, 255, 200, 0.12);
-    border: 1px solid rgba(0, 255, 200, 0.25);
+    padding: 1.2rem 1.4rem 1.3rem;
+    box-shadow: 0 0 18px rgba(0, 255, 200, 0.18);
+    border: 1px solid rgba(0, 255, 200, 0.3);
+    animation: fadeInDebutant 0.25s ease-out;
+  }
+
+  @keyframes fadeInDebutant {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   .mode-debutant-grid {
     display: grid;
@@ -1277,7 +1295,7 @@ body.theme-light {
     opacity: 0.85;
   }
   .mode-debutant-grid .field-value {
-    font-size: 0.9rem;
+    font-size: 1rem;
     text-align: center;
     opacity: 0.9;
   }
