@@ -1,4 +1,4 @@
-/* Salvage Calculator 4.4 - Styles V5.6.16 (polish) */
+/* Salvage Calculator 4.4 - Styles V6.0.0 (polish) */
 
     :root {
       --bg: #020710;
@@ -1343,3 +1343,188 @@ body.theme-light {
     box-shadow: 0 0 18px rgba(0, 255, 200, 0.9);
     transform: translateY(-1px);
   }
+
+
+/* =========================================================
+   LEADERBOARD V6.0.0 – mobiGlas + neon
+   ========================================================= */
+
+#onlineLeaderboardModal .modal-leaderboard {
+  max-width: 720px;
+  width: 100%;
+  background: radial-gradient(
+      circle at top left,
+      rgba(0, 255, 198, 0.14),
+      transparent 55%
+    ),
+    rgba(2, 10, 24, 0.96);
+  border-radius: 20px;
+  border: 1px solid rgba(0, 255, 198, 0.45);
+  box-shadow:
+    0 0 24px rgba(0, 0, 0, 0.8),
+    0 0 32px rgba(0, 255, 198, 0.25);
+  backdrop-filter: blur(8px);
+  padding: 1.4rem 1.6rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+#onlineLeaderboardModal .modal-leaderboard .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(0, 255, 198, 0.25);
+  padding-bottom: 0.5rem;
+}
+
+#onlineLeaderboardModal .modal-leaderboard .modal-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-main, #e9f7ff);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+#onlineLeaderboardModal .modal-leaderboard .modal-header h2::after {
+  content: "V6.0.0";
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 255, 198, 0.6);
+  color: #00ffc6;
+  text-transform: none;
+  opacity: 0.9;
+}
+
+#onlineLeaderboardModal .modal-leaderboard .modal-body {
+  margin-top: 0.3rem;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+#onlineLeaderboardModal .modal-leaderboard .modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+#onlineLeaderboardModal .modal-leaderboard .modal-body::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+#onlineLeaderboardModal .modal-leaderboard .modal-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 198, 0.55);
+  border-radius: 999px;
+}
+
+#onlineLeaderboardModal .modal-leaderboard .leaderboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+#onlineLeaderboardModal .modal-leaderboard .leaderboard-list li {
+  position: relative;
+  padding: 0.65rem 0.75rem 0.65rem 2.4rem;
+  border-radius: 12px;
+  background: rgba(4, 20, 38, 0.9);
+  border: 1px solid rgba(0, 255, 198, 0.22);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    transform 0.16s ease;
+}
+
+#onlineLeaderboardModal .modal-leaderboard .leaderboard-list li:hover {
+  border-color: rgba(0, 255, 198, 0.7);
+  background: rgba(7, 30, 52, 0.98);
+  transform: translateY(-1px);
+}
+
+#onlineLeaderboardModal .modal-leaderboard .leaderboard-sub {
+  margin-bottom: 0.35rem;
+  font-size: 0.82rem;
+  opacity: 0.85;
+  color: var(--text-secondary, #9fb8cc);
+}
+
+#onlineLeaderboardModal .modal-leaderboard .leaderboard-line-main {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-main, #e9f7ff);
+}
+
+#onlineLeaderboardModal .modal-leaderboard .leaderboard-line-meta {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  color: var(--text-secondary, #a5bed4);
+}
+
+/* Podium – trophées par rang (1,2,3) */
+#onlineLeaderboardModal .modal-leaderboard .leaderboard-list li::before {
+  content: attr(data-rank);
+  position: absolute;
+  left: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: rgba(0, 255, 198, 0.9);
+}
+
+#onlineLeaderboardModal .modal-leaderboard .leaderboard-list li:nth-child(1)::before {
+  content: "🥇";
+  font-size: 1.05rem;
+}
+#onlineLeaderboardModal .modal-leaderboard .leaderboard-list li:nth-child(2)::before {
+  content: "🥈";
+  font-size: 1.02rem;
+}
+#onlineLeaderboardModal .modal-leaderboard .leaderboard-list li:nth-child(3)::before {
+  content: "🥉";
+  font-size: 1rem;
+}
+
+/* Entrées suivantes : simple puce SC */
+#onlineLeaderboardModal .modal-leaderboard .leaderboard-list li:nth-child(n + 4)::before {
+  content: "●";
+  font-size: 0.6rem;
+  color: rgba(0, 255, 198, 0.7);
+}
+
+/* État vide / message */
+#onlineLeaderboardModal .modal-leaderboard .leaderboard-empty {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  text-align: center;
+  opacity: 0.85;
+  color: var(--text-secondary, #9fb8cc);
+}
+
+/* Bouton de fermeture – léger polish */
+#onlineLeaderboardModal .modal-leaderboard .modal-close-btn {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.12s ease;
+}
+#onlineLeaderboardModal .modal-leaderboard .modal-close-btn:hover {
+  background: rgba(0, 255, 198, 0.12);
+  border-color: rgba(0, 255, 198, 0.6);
+  transform: scale(1.03);
+}
