@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V5.6.9 -->
+<!-- Version : V5.6.10 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -1700,7 +1700,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V5.6.9";
+const APP_VERSION = "V5.6.10";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -1761,6 +1761,7 @@ const i18n = {
     leaderboardLine: (nickname, runs, profit, favShip, totalRmc, isAdmin) =>
       `<span class="leaderboard-line-main">${nickname} – ${profit} aUEC</span><span class="leaderboard-line-meta">${runs} runs · Ship fav : ${favShip} · Total RMC : ${totalRmc} SCU</span>`,
     leaderboardYou: "Vous",
+    leaderboardSub: "Leaderboard global en ligne basé sur les runs envoyés par les joueurs (Top 3 ci-dessous, classement complet via la coupe 🏆).",
     labelShipSelect: "Vaisseau utilisé pour ce run",
     saveRunBtn: "Envoyer ce run au leaderboard en ligne",
     saveRunSuccess: "Run envoyé au leaderboard en ligne.",
@@ -1838,6 +1839,7 @@ const i18n = {
     leaderboardLine: (nickname, runs, profit, favShip, totalRmc, isAdmin) =>
       `<span class="leaderboard-line-main">${nickname} – ${profit} aUEC</span><span class="leaderboard-line-meta">${runs} runs · Fav ship: ${favShip} · Total RMC: ${totalRmc} SCU</span>`,
     leaderboardYou: "You",
+    leaderboardSub: "Global online leaderboard based on runs sent by players (Top 3 below, full ranking via the 🏆 button).",
     labelShipSelect: "Ship used for this run",
     saveRunBtn: "Send this run to the online leaderboard",
     saveRunSuccess: "Run sent to the online leaderboard.",
