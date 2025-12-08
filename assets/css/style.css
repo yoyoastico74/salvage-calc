@@ -1394,7 +1394,7 @@ body.theme-light {
 }
 
 #onlineLeaderboardModal .modal-leaderboard .modal-header h2::after {
-  content: "V6.0.0";
+  content: "LB 6.4.3";
   font-size: 0.7rem;
   padding: 2px 6px;
   border-radius: 999px;
@@ -1696,11 +1696,17 @@ body.theme-light {
 }
 
 
-/* V6.4.2 Anti-spam */
+/* V6.4.3 Anti-spam */
 .anti-spam-message {
   margin-top: 6px;
   font-size: 0.85rem;
   opacity: 0.9;
   font-style: italic;
   color: #f7d36b;
+}
+/* ===== Patch lisibilité Mode Avancé (Safe) ===== */
+#modeAvance .hint {
+  font-size: 0.90rem !important;
+  line-height: 1.35;
+  opacity: 0.95;
 }
