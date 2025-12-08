@@ -1,4 +1,4 @@
-/* Salvage Calculator 4.4 - Styles V6.2.0 (leaderboard polish) */
+/* Salvage Calculator 4.4 - Styles V6.2.1 (leaderboard + form polish) */
 
     :root {
       --bg: #020710;
@@ -1223,8 +1223,8 @@ body.theme-light {
     font-size: 14px;
   }
   .mode-debutant-grid .field-label {
-    font-size: 0.85rem;
-    opacity: 0.85;
+    font-size: 0.9rem;
+    opacity: 0.88;
   }
   .mode-debutant-grid .field-value {
     font-size: 1rem;
@@ -1294,8 +1294,8 @@ body.theme-light {
     align-items: center;
   }
   .mode-debutant-grid .field-label {
-    font-size: 0.85rem;
-    opacity: 0.85;
+    font-size: 0.9rem;
+    opacity: 0.88;
   }
   .mode-debutant-grid .field-value {
     font-size: 1rem;
@@ -1569,4 +1569,10 @@ body.theme-light {
     font-size: 0.6rem;
     padding: 1px 5px;
   }
+}
+
+/* V6.2.1 – Debutant SCU CS input width tweak */
+#scuCsDeb {
+  width: 260px;
+  max-width: 100%;
 }
