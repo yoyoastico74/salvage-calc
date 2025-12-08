@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V6.4.6 -->
+<!-- Version : V6.4.4 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -116,12 +116,6 @@
 
           <div class="field-label">Point de vente CMAT</div>
           <div id="debCmatTerminal" class="field-value">—</div>
-
-          <div class="field-label" id="debTopRmcLabel">Meilleur spot RMC (Top 1 global)</div>
-          <div id="debTopRmc" class="field-value">—</div>
-
-          <div class="field-label" id="debTopCmatLabel">Meilleur spot CMAT (Top 1 global)</div>
-          <div id="debTopCmat" class="field-value">—</div>
         </div>
 
         <div style="margin-top:1rem; text-align:center;">
@@ -167,14 +161,6 @@
         <div class="sellpoints">
           <div><span id="sellRmcLabel" class="label">Point de vente RMC :</span> <span id="rmcTerminal">—</span></div>
           <div><span id="sellCmatLabel" class="label">Point de vente CMAT :</span> <span id="cmatTerminal">—</span></div>
-        </div>
-
-        <ul id="top3RmcList" class="top3-list"></ul>
-          </div>
-          <div class="top3-mini-col">
-            <div id="top3CmatTitle" class="top3-mini-title">Top 3 – CMAT</div>
-            <ul id="top3CmatList" class="top3-list"></ul>
-          </div>
         </div>
 
         <label for="shipSelect" id="labelShipSelect">Vaisseau utilisé pour ce run</label>
@@ -272,20 +258,28 @@
         </div>
 
         <div class="panel" id="sellZonesPanel">
-          <div id="sellZonesTitle" class="panel-title">Top 3 ventes RMC &amp; CMAT</div>
+          <div id="sellZonesTitle" class="panel-title">Zones recommandées pour vendre RMC &amp; CMAT</div>
 
           <div class="result-block">
-            <div class="result-head">Top 3 – RMC</div>
-            <ul id="marketTop3RmcList" class="top3-list"></ul>
+            <div id="rmcSellHead" class="result-head">Top 3 zones – Vente RMC</div>
+            <div class="result-values" id="rmcSellList">
+              1. Commodity Terminal – Seer's Canyon (Daymar)<br>
+              2. Autres terminaux de marchandises selon ta route<br>
+              3. Points de vente industriels RMC (stations Lagrange / avant-postes)
+            </div>
           </div>
 
           <div class="result-block">
-            <div class="result-head">Top 3 – CMAT</div>
-            <ul id="marketTop3CmatList" class="top3-list"></ul>
+            <div id="cmatSellHead" class="result-head">Top 3 zones – Vente CMAT</div>
+            <div class="result-values" id="cmatSellList">
+              1. Admin – Port Tressler (microTech)<br>
+              2. Autres terminaux Admin gérant les matériaux de construction<br>
+              3. Hubs orbitaux avec forte demande de matériaux
+            </div>
           </div>
 
           <div class="small-note" id="sellZonesNote">
-            Ces informations proviennent en temps réel de ton Worker (UEX) et reflètent les meilleurs terminaux de vente actuels.
+            Ces recommandations sont indicatives et peuvent varier en fonction des patchs et des équilibrages économiques.
           </div>
         </div>
 
@@ -487,7 +481,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V6.4.6";
+const APP_VERSION = "V6.4.4";
 const ACTIVITY_VERSIONS = {
   salvage: { label: "Salvage", version: "V6.4.4" },
   hauling: { label: "Hauling", version: "V0.0" },
@@ -800,18 +794,6 @@ const graphMessage  = document.getElementById("graphMessage");
 const chartCanvas   = document.getElementById("cmatChart");
 const rmcTerminalEl = document.getElementById("rmcTerminal");
 const cmatTerminalEl = document.getElementById("cmatTerminal");
-const debTopRmcLabelEl = document.getElementById("debTopRmcLabel");
-const debTopCmatLabelEl = document.getElementById("debTopCmatLabel");
-const debTopRmcEl = document.getElementById("debTopRmc");
-const debTopCmatEl = document.getElementById("debTopCmat");
-const top3RmcTitleEl = document.getElementById("top3RmcTitle");
-const top3CmatTitleEl = document.getElementById("top3CmatTitle");
-const top3RmcListEl = document.getElementById("top3RmcList");
-const top3CmatListEl = document.getElementById("top3CmatList");
-const marketTop3RmcTitleEl = document.getElementById("marketTop3RmcTitle");
-const marketTop3CmatTitleEl = document.getElementById("marketTop3CmatTitle");
-const marketTop3RmcListEl = document.getElementById("marketTop3RmcList");
-const marketTop3CmatListEl = document.getElementById("marketTop3CmatList");
 
 const titleMainEl = document.getElementById("titleMain");
 const subTextEl = document.getElementById("subText");
@@ -2154,137 +2136,6 @@ function renderChart(rmcHist, cmatHist) {
   });
 }
 
-
-let lastTop3Rmc = [];
-let lastTop3Cmat = [];
-
-function classifyTerminalType(terminal) {
-  const typeRaw = (terminal && terminal.type ? String(terminal.type) : "").toLowerCase();
-  const locRaw = (terminal && terminal.location ? String(terminal.location) : "").toLowerCase();
-  let icon = "📍";
-  let cssClass = "terminal-generic";
-
-  if (typeRaw.includes("commodity")) {
-    icon = "📦";
-    cssClass = "terminal-commodity";
-  } else if (typeRaw.includes("refinery")) {
-    icon = "🏭";
-    cssClass = "terminal-refinery";
-  } else if (typeRaw.includes("admin")) {
-    icon = "🏢";
-    cssClass = "terminal-admin";
-  } else if (typeRaw.includes("outpost") || typeRaw.includes("mining") || locRaw.includes("outpost")) {
-    icon = "⛏️";
-    cssClass = "terminal-outpost";
-  }
-
-  return { icon, cssClass };
-}
-
-function renderTop3List(listEl, items) {
-  if (!listEl) return;
-  listEl.innerHTML = "";
-
-  if (!items || !items.length) {
-    const li = document.createElement("li");
-    li.className = "top3-item";
-    li.textContent = "—";
-    listEl.appendChild(li);
-    return;
-  }
-
-  items.slice(0, 3).forEach((terminal, idx) => {
-    const li = document.createElement("li");
-    const info = classifyTerminalType(terminal);
-    li.className = "top3-item " + info.cssClass;
-
-    const row = document.createElement("div");
-    row.className = "top3-row-inner";
-
-    const left = document.createElement("div");
-    left.className = "top3-main";
-
-    const iconSpan = document.createElement("span");
-    iconSpan.className = "top3-icon";
-    iconSpan.textContent = info.icon;
-
-    const rankSpan = document.createElement("span");
-    rankSpan.className = "top3-rank";
-    rankSpan.textContent = (idx + 1) + ".";
-
-    const nameSpan = document.createElement("span");
-    nameSpan.className = "top3-name";
-    nameSpan.textContent = terminal.name || "—";
-
-    const mainLine = document.createElement("div");
-    mainLine.className = "top3-name-line";
-    mainLine.appendChild(rankSpan);
-    mainLine.appendChild(nameSpan);
-
-    if (terminal.location) {
-      const locSpan = document.createElement("div");
-      locSpan.className = "top3-location";
-      locSpan.textContent = terminal.location;
-      left.appendChild(locSpan);
-    }
-
-    left.insertBefore(mainLine, left.firstChild);
-
-    const priceDiv = document.createElement("div");
-    priceDiv.className = "top3-meta";
-    const sellVal = typeof terminal.sell === "number" ? terminal.sell : 0;
-    priceDiv.textContent = sellVal ? (format(sellVal) + " aUEC / SCU") : "—";
-
-    left.insertBefore(iconSpan, left.firstChild);
-    row.appendChild(left);
-    row.appendChild(priceDiv);
-
-    li.appendChild(row);
-    listEl.appendChild(li);
-  });
-}
-
-function updateTop3UIFromData(data) {
-  const rmcTop = (data && data.rmc && Array.isArray(data.rmc.topTerminals))
-    ? data.rmc.topTerminals.slice(0, 3)
-    : [];
-  const cmatTop = (data && data.cmat && Array.isArray(data.cmat.topTerminals))
-    ? data.cmat.topTerminals.slice(0, 3)
-    : [];
-
-  lastTop3Rmc = rmcTop;
-  lastTop3Cmat = cmatTop;
-
-  if (top3RmcListEl) renderTop3List(top3RmcListEl, rmcTop);
-  if (top3CmatListEl) renderTop3List(top3CmatListEl, cmatTop);
-  if (marketTop3RmcListEl) renderTop3List(marketTop3RmcListEl, rmcTop);
-  if (marketTop3CmatListEl) renderTop3List(marketTop3CmatListEl, cmatTop);
-
-  if (debTopRmcEl) {
-    if (rmcTop.length > 0) {
-      const t1 = rmcTop[0];
-      const val = typeof t1.sell === "number" ? t1.sell : 0;
-      debTopRmcEl.textContent = t1.name
-        ? t1.name + (val ? " (" + format(val) + " aUEC / SCU)" : "")
-        : "—";
-    } else {
-      debTopRmcEl.textContent = "—";
-    }
-  }
-
-  if (debTopCmatEl) {
-    if (cmatTop.length > 0) {
-      const t1 = cmatTop[0];
-      const val = typeof t1.sell === "number" ? t1.sell : 0;
-      debTopCmatEl.textContent = t1.name
-        ? t1.name + (val ? " (" + format(val) + " aUEC / SCU)" : "")
-        : "—";
-    } else {
-      debTopCmatEl.textContent = "—";
-    }
-  }
-}
-
 async function fetchUexPrices() {
   const t = i18n[currentLang] || i18n.fr;
   try {
@@ -2312,8 +2163,6 @@ async function fetchUexPrices() {
 
     rmcTerminalEl.textContent  = data.rmc.bestTerminal?.name  ?? "N/A";
     cmatTerminalEl.textContent = data.cmat.bestTerminal?.name ?? "N/A";
-
-    updateTop3UIFromData(data);
 
     if (!rmcHist.length && !cmatHist.length) {
       graphMessage.textContent = t.graphNoData;
