@@ -1394,7 +1394,7 @@ body.theme-light {
 }
 
 #onlineLeaderboardModal .modal-leaderboard .modal-header h2::after {
-  content: "LB 6.4.3";
+  content: "LB 6.4.4";
   font-size: 0.7rem;
   padding: 2px 6px;
   border-radius: 999px;
@@ -1696,7 +1696,7 @@ body.theme-light {
 }
 
 
-/* V6.4.3 Anti-spam */
+/* V6.4.4 Anti-spam */
 .anti-spam-message {
   margin-top: 6px;
   font-size: 0.85rem;
@@ -1709,4 +1709,11 @@ body.theme-light {
   font-size: 0.90rem !important;
   line-height: 1.35;
   opacity: 0.95;
+}
+
+
+/* V6.4.4 – Lisibilité notes Salvage avancé */
+#modeAvance .small-note {
+  font-size: 1rem;
+  line-height: 1.45;
 }
