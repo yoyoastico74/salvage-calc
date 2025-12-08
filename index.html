@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V6.4.0 -->
+<!-- Version : V6.3.1 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -425,21 +425,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V6.4.0";
-
-const SCApp = (window.SCApp = window.SCApp || {});
-SCApp.core = SCApp.core || {};
-SCApp.salvage = SCApp.salvage || {};
-SCApp.mining = SCApp.mining || {};
-SCApp.hauling = SCApp.hauling || {};
-
-SCApp.mining.init = SCApp.mining.init || function () {
-  // Mining module placeholder – à implémenter plus tard
-};
-
-SCApp.hauling.init = SCApp.hauling.init || function () {
-  // Hauling module placeholder – à implémenter plus tard
-};
+const APP_VERSION = "V6.3.1";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -2209,7 +2195,7 @@ function calcDebutant() {
   }
 }
 
-SCApp.salvage.init = function () {
+document.addEventListener("DOMContentLoaded", () => {
   const btnDeb = document.getElementById("btnModeDebutant");
   const btnAdv = document.getElementById("btnModeAvance");
   const btnCalcDeb = document.getElementById("btnCalcDebutant");
@@ -2279,17 +2265,6 @@ const verPill = document.getElementById("app-version-pill");
   setModeDebutant(true);
   updateScuAdvancedVisibility();
   refreshDebutantPrices();
-
-};
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  if (SCApp.core && typeof SCApp.core.bootstrap === "function") {
-    SCApp.core.bootstrap();
-  } else if (SCApp.salvage && typeof SCApp.salvage.init === "function") {
-    SCApp.salvage.init();
-  }
-});
 });
 </script>
 
