@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V6.4.6 -->
+<!-- Version : V6.4.2 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -18,7 +18,54 @@
   <meta name="twitter:description" content="Determine your salvage value per RMC or CMAT loop with live UEX prices.">
   <meta name="twitter:image" content="https://shog-sc.github.io/salvage-calc/icon.png">
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js">
+// --- Anti-spam Save Run (30s) ---
+const SUBMIT_COOLDOWN_MS = 30000;
+let lastRunSubmitTime = 0;
+let antiSpamIntervalId = null;
+
+function updateAntiSpamMessage(remainingMs) {
+  const el = document.getElementById("antiSpamMessage");
+  if (!el) return;
+  if (remainingMs <= 0) { el.textContent = ""; return; }
+  const s = Math.ceil(remainingMs / 1000);
+  el.textContent = `⚠ Anti-Spam : ${s}s restantes`;
+}
+
+function startAntiSpamCountdown() {
+  if (antiSpamIntervalId) clearInterval(antiSpamIntervalId);
+  const target = lastRunSubmitTime + SUBMIT_COOLDOWN_MS;
+  antiSpamIntervalId = setInterval(() => {
+    const rem = target - Date.now();
+    if (rem <= 0) {
+      clearInterval(antiSpamIntervalId);
+      antiSpamIntervalId = null;
+      updateAntiSpamMessage(0);
+    } else updateAntiSpamMessage(rem);
+  }, 1000);
+}
+
+// Wrap existing saveRunBtn action
+const originalSaveRun = typeof onSaveRun === 'function' ? onSaveRun : null;
+async function onSaveRunWrapped() {
+  const now = Date.now();
+  const elapsed = now - lastRunSubmitTime;
+  if (elapsed < SUBMIT_COOLDOWN_MS) {
+    const remaining = SUBMIT_COOLDOWN_MS - elapsed;
+    updateAntiSpamMessage(remaining);
+    startAntiSpamCountdown();
+    return;
+  }
+  lastRunSubmitTime = now;
+  updateAntiSpamMessage(0);
+  if (antiSpamIntervalId) { clearInterval(antiSpamIntervalId); antiSpamIntervalId = null; }
+  if (originalSaveRun) return originalSaveRun();
+}
+
+// attach
+document.getElementById("saveRunBtn")?.addEventListener("click", onSaveRunWrapped);
+
+</script>
 
   
   <link rel="stylesheet" href="assets/css/style.css">
@@ -193,7 +240,8 @@
         <button id="saveRunBtn" class="save-run-btn" type="button">
           Envoyer ce run au leaderboard en ligne
         </button>
-        <div id="antiSpamMessage" class="anti-spam-message"></div>
+<div id="antiSpamMessage" class="anti-spam-message"></div>
+
         <div id="saveRunMessage" class="small-note"></div>
 
         <div class="tag-row">
@@ -228,8 +276,10 @@
             <div class="result-extra" id="rmcRecExtra"></div>
             <div class="decision" id="rmcRecDecision"></div>
           </div>
+        </div>
 
-          <div id="cmatPanelTitle" class="panel-title panel-title-sub">Loop CMAT – Transformer en Construction Materials</div>
+        <div class="panel">
+          <div id="cmatPanelTitle" class="panel-title">Loop CMAT – Transformer en Construction Materials</div>
 
           <div id="loopCmatLightPanel" class="result-block">
             <div id="cmatLightHead" class="result-head">
@@ -252,38 +302,11 @@
           <div class="reclaimer-flow">
             <div class="reclaimer-flow-title">Schéma de la boucle Reclaimer :</div>
             <div class="reclaimer-flow-steps">
-              <span>Reclaimer</span> → <span>Construction Salvage (CS)</span> → <span>Raffinage</span> → <span>Construction Materials (CMAT)</span> → <span>Vente</span>
+              <span>Reclaimer</span> → <span>Construction Salvage</span> → <span>Raffinerie</span> → <span>Construction Materials (CMAT)</span> → <span>Vente</span>
             </div>
           </div>
         </div>
-
-        <div class="panel" id="sellZonesPanel">
-          <div id="sellZonesTitle" class="panel-title">Zones recommandées pour vendre RMC &amp; CMAT</div>
-
-          <div class="result-block">
-            <div id="rmcSellHead" class="result-head">Top 3 zones – Vente RMC</div>
-            <div class="result-values" id="rmcSellList">
-              1. Commodity Terminal – Seer's Canyon (Daymar)<br>
-              2. Autres terminaux de marchandises selon ta route<br>
-              3. Points de vente industriels RMC (stations Lagrange / avant-postes)
-            </div>
-          </div>
-
-          <div class="result-block">
-            <div id="cmatSellHead" class="result-head">Top 3 zones – Vente CMAT</div>
-            <div class="result-values" id="cmatSellList">
-              1. Admin – Port Tressler (microTech)<br>
-              2. Autres terminaux Admin gérant les matériaux de construction<br>
-              3. Hubs orbitaux avec forte demande de matériaux
-            </div>
-          </div>
-
-          <div class="small-note" id="sellZonesNote">
-            Ces recommandations sont indicatives et peuvent varier en fonction des patchs et des équilibrages économiques.
-          </div>
-        </div>
-
-      </div></div>
+      </div>
     </div>
 
     <div class="market-panel">
@@ -368,7 +391,7 @@
   <div class="coming-soon-card">
     <div class="coming-soon-title">Mining – module à venir</div>
     <div class="coming-soon-text">
-      Ce module couvrira le ROC, les vaisseaux de minage, les ratios de raffinage.
+      Ce module couvrira le ROC, les vaisseaux de minage laser et les futures mécaniques d’extraction.
     </div>
   </div>
 </section>
@@ -481,13 +504,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V6.4.4";
-const ACTIVITY_VERSIONS = {
-  salvage: { label: "Salvage", version: "V6.4.4" },
-  hauling: { label: "Hauling", version: "V0.0" },
-  mining:  { label: "Mining",  version: "V0.0" },
-};
-
+const APP_VERSION = "V6.4.2";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -496,46 +513,6 @@ let lastOnlineRunTs = Number(localStorage.getItem("salvageCalcLastOnlineRunTs") 
 let lastLeaderboardFetch = 0;
 let cachedLeaderboardUsers = [];
 
-
-
-let antiSpamIntervalId = null;
-
-function updateAntiSpamMessage(remainingMs) {
-  const el = document.getElementById("antiSpamMessage");
-  if (!el) return;
-  if (!remainingMs || remainingMs <= 0) {
-    el.textContent = "";
-    return;
-  }
-  const seconds = Math.ceil(remainingMs / 1000);
-  el.textContent = `⚠ Anti-Spam : ${seconds}s restantes`;
-}
-
-function startAntiSpamCountdown() {
-  if (!LEADERBOARD_RUN_COOLDOWN_MS) return;
-  if (!lastOnlineRunTs) return;
-  if (antiSpamIntervalId) {
-    clearInterval(antiSpamIntervalId);
-    antiSpamIntervalId = null;
-  }
-  const target = lastOnlineRunTs + LEADERBOARD_RUN_COOLDOWN_MS;
-
-  function tick() {
-    const remaining = target - Date.now();
-    if (remaining <= 0) {
-      updateAntiSpamMessage(0);
-      if (antiSpamIntervalId) {
-        clearInterval(antiSpamIntervalId);
-        antiSpamIntervalId = null;
-      }
-      return;
-    }
-    updateAntiSpamMessage(remaining);
-  }
-
-  tick();
-  antiSpamIntervalId = setInterval(tick, 1000);
-}
 
 let leaderboardSortKey = localStorage.getItem("salvageLbSort") || "profit";
 let leaderboardShipFilterKey = localStorage.getItem("salvageLbShipFilter") || "all";
@@ -608,7 +585,7 @@ const i18n = {
     smallNote: "Pour chaque SCU saisie:\n- Light ships : RMC uniquement (hull scraping).\n- Reclaimer : RMC pour le hull scraping, CMAT (~15 %) pour le Construction Salvage (raffinage obligatoire, pas de vente directe du RMC CS).",
     apiFetching: "Récupération des prix UEX…",
     apiErrorPrefix: "Erreur API : ",
-    apiUpdated: () => "",
+    apiUpdated: (rmcName, cmatName) => `Prix mis à jour (RMC: ${rmcName} / CMAT: ${cmatName}).`,
     rmcPanelTitle: "Loop RMC – Vendre en Recycled Material Composite",
     cmatPanelTitle: "Loop CMAT – Transformer en Construction Materials",
     rmcLightHead: "Salvation / Vulture / Fortune (RMC uniquement)",
@@ -701,7 +678,7 @@ labelShipSelect: "Vaisseau utilisé pour ce run",
     smallNote: "For each SCU value:\n- Light ships: RMC only (hull scraping).\n- Reclaimer: RMC for hull scraping, CMAT (~15%) for Construction Salvage (refining required, no direct sale of CS RMC).",
     apiFetching: "Fetching UEX prices…",
     apiErrorPrefix: "API error: ",
-    apiUpdated: () => "",
+    apiUpdated: (rmcName, cmatName) => `Prices updated (RMC: ${rmcName} / CMAT: ${cmatName}).`,
     rmcPanelTitle: "RMC loop – Selling as Recycled Material Composite",
     cmatPanelTitle: "CMAT loop – Processing into Construction Materials",
     rmcLightHead: "Salvation / Vulture / Fortune (RMC only)",
@@ -1275,7 +1252,6 @@ async function pushRunToOnlineLeaderboard(run) {
       if (saveRunMessageEl) {
         saveRunMessageEl.textContent = t.saveRunCooldown || "Tu viens d'envoyer un run. Merci d'attendre quelques secondes avant de renvoyer un nouveau run.";
       }
-      startAntiSpamCountdown();
       return;
     }
 
@@ -1285,7 +1261,6 @@ async function pushRunToOnlineLeaderboard(run) {
     } catch (e) {
       // ignore storage errors
     }
-    startAntiSpamCountdown();
 
     const payload = {
       nickname: run.nickname,
@@ -2314,37 +2289,7 @@ document.addEventListener("DOMContentLoaded", () => {
     activityPills.forEach((pill) => {
       pill.classList.toggle("active", pill.dataset.activity === activityKey);
     });
-
-    // Show main Salvage header & intro only on Salvage activity
-    const titleEl = document.getElementById("titleMain");
-    const subEl = document.getElementById("subText");
-    if (titleEl && subEl) {
-      if (activityKey === "salvage") {
-        const t = i18n[currentLang] || i18n.fr;
-        titleEl.textContent = t.titleMain || "SALVAGE CALCULATOR 4.4";
-        subEl.textContent = t.subText || "Détermine la valeur générée par ton salvage selon la boucle de ton vaisseau (RMC ou CMAT).";
-        titleEl.style.display = "";
-        subEl.style.display = "";
-      } else {
-        titleEl.style.display = "none";
-        subEl.style.display = "none";
-      }
-    }
-
-    
-    // Update version display per activity
-    const versionInfo = ACTIVITY_VERSIONS[activityKey] || ACTIVITY_VERSIONS.salvage;
-    const versionText = `VERSION ${versionInfo.label.toUpperCase()} ${versionInfo.version}`;
-    const verPill = document.getElementById("app-version-pill");
-    if (verPill) {
-      verPill.textContent = versionText;
-    }
-    const footerSpan = document.querySelector("#appVersion span");
-    if (footerSpan) {
-      footerSpan.textContent = versionText;
-    }
-
-try {
+    try {
       localStorage.setItem("scActivity", activityKey);
     } catch (err) {
       console.warn("Unable to persist activity selection", err);
@@ -2360,15 +2305,6 @@ try {
   } catch (err) {}
 
   setActivity(initialActivity);
-
-  // Anti-spam UI restore on reload
-  if (LEADERBOARD_RUN_COOLDOWN_MS > 0 && lastOnlineRunTs) {
-    const remaining = LEADERBOARD_RUN_COOLDOWN_MS - (Date.now() - lastOnlineRunTs);
-    if (remaining > 0) {
-      updateAntiSpamMessage(remaining);
-      startAntiSpamCountdown();
-    }
-  }
 
   if (activitySalvageBtn) {
     activitySalvageBtn.addEventListener("click", () => setActivity("salvage"));
@@ -2450,6 +2386,53 @@ const verPill = document.getElementById("app-version-pill");
   updateScuAdvancedVisibility();
   refreshDebutantPrices();
 });
+
+// --- Anti-spam Save Run (30s) ---
+const SUBMIT_COOLDOWN_MS = 30000;
+let lastRunSubmitTime = 0;
+let antiSpamIntervalId = null;
+
+function updateAntiSpamMessage(remainingMs) {
+  const el = document.getElementById("antiSpamMessage");
+  if (!el) return;
+  if (remainingMs <= 0) { el.textContent = ""; return; }
+  const s = Math.ceil(remainingMs / 1000);
+  el.textContent = `⚠ Anti-Spam : ${s}s restantes`;
+}
+
+function startAntiSpamCountdown() {
+  if (antiSpamIntervalId) clearInterval(antiSpamIntervalId);
+  const target = lastRunSubmitTime + SUBMIT_COOLDOWN_MS;
+  antiSpamIntervalId = setInterval(() => {
+    const rem = target - Date.now();
+    if (rem <= 0) {
+      clearInterval(antiSpamIntervalId);
+      antiSpamIntervalId = null;
+      updateAntiSpamMessage(0);
+    } else updateAntiSpamMessage(rem);
+  }, 1000);
+}
+
+// Wrap existing saveRunBtn action
+const originalSaveRun = typeof onSaveRun === 'function' ? onSaveRun : null;
+async function onSaveRunWrapped() {
+  const now = Date.now();
+  const elapsed = now - lastRunSubmitTime;
+  if (elapsed < SUBMIT_COOLDOWN_MS) {
+    const remaining = SUBMIT_COOLDOWN_MS - elapsed;
+    updateAntiSpamMessage(remaining);
+    startAntiSpamCountdown();
+    return;
+  }
+  lastRunSubmitTime = now;
+  updateAntiSpamMessage(0);
+  if (antiSpamIntervalId) { clearInterval(antiSpamIntervalId); antiSpamIntervalId = null; }
+  if (originalSaveRun) return originalSaveRun();
+}
+
+// attach
+document.getElementById("saveRunBtn")?.addEventListener("click", onSaveRunWrapped);
+
 </script>
 
 </body>
