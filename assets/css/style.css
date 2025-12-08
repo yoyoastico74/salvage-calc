@@ -1,4 +1,4 @@
-/* Salvage Calculator 4.4 - Styles V6.2.3 (leaderboard + form inputs align fix) */
+/* Salvage Calculator 4.4 - Styles V6.3.0 (leaderboard + form inputs align fix) */
 
     :root {
       --bg: #020710;
@@ -1582,7 +1582,7 @@ body.theme-light {
   width: 280px;
   max-width: 100%;
 }
-/* V6.2.3 – Force fixed width for Entrées inputs */
+/* V6.3.0 – Force fixed width for Entrées inputs */
 .panel-block input.input-standard,
 .panel-block select.input-standard {
   display: inline-block !important;
@@ -1591,3 +1591,36 @@ body.theme-light {
   flex: none !important;
 }
 
+
+/* V6.2.x – Leaderboard controls */
+.leaderboard-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.leaderboard-control-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.leaderboard-control-group label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.leaderboard-control-group select {
+  background: rgba(5, 34, 46, 0.9);
+  border-radius: 999px;
+  border: 1px solid rgba(0, 255, 200, 0.4);
+  padding: 2px 10px;
+  font-size: 0.8rem;
+  color: var(--text-main);
+}
