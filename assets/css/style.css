@@ -1,4 +1,4 @@
-/* Salvage Calculator 4.4 - Styles V6.4.6 (leaderboard + form inputs align fix) */
+/* Salvage Calculator 4.4 - Styles V6.4.1 (leaderboard + form inputs align fix) */
 
     :root {
       --bg: #020710;
@@ -1851,4 +1851,16 @@ body.theme-light .top3-item {
 
 body.theme-light .market-top3-legend {
   color: #4b657b;
+}
+
+
+/* === V6.4.6 — Top 3 panel font increase (20%) === */
+#sellZonesPanel .result-head {
+    font-size: 1.2em !important;
+}
+#sellZonesPanel .top3-list .top3-item,
+#sellZonesPanel .top3-list .top3-name,
+#sellZonesPanel .top3-list .top3-location,
+#sellZonesPanel .top3-list .top3-meta {
+    font-size: 1.2em !important;
 }
