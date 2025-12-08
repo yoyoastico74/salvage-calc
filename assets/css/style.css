@@ -1725,3 +1725,130 @@ body.theme-light {
   font-size: 1.05rem;
   opacity: 0.95;
 }
+
+/* Top 3 RMC / CMAT blocks – V6.4.6 */
+.top3-mini {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+  background: rgba(0, 10, 20, 0.65);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  font-size: 11px;
+}
+
+body.theme-light .top3-mini {
+  background: rgba(240, 248, 255, 0.96);
+}
+
+.top3-mini-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-strong);
+  margin-bottom: 4px;
+}
+
+.top3-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.top3-item {
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.10);
+}
+
+body.theme-light .top3-item {
+  border-bottom-color: #d3e3f2;
+}
+
+.top3-row-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.top3-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.top3-name-line {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.top3-icon {
+  margin-right: 4px;
+}
+
+.top3-rank {
+  font-weight: 600;
+  color: var(--accent-alt);
+}
+
+.top3-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.top3-location {
+  font-size: 10px;
+  color: var(--text-soft);
+}
+
+.top3-meta {
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--text-soft);
+}
+
+.terminal-commodity .top3-icon {
+  filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.7));
+}
+.terminal-outpost .top3-icon {
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.7));
+}
+.terminal-refinery .top3-icon {
+  filter: drop-shadow(0 0 4px rgba(255, 120, 80, 0.7));
+}
+.terminal-admin .top3-icon {
+  filter: drop-shadow(0 0 4px rgba(140, 255, 210, 0.7));
+}
+
+.market-top3 {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.18);
+}
+
+.market-top3-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.market-top3-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-strong);
+  margin-bottom: 4px;
+}
+
+.market-top3-legend {
+  margin-top: 6px;
+  font-size: 10px;
+  color: var(--text-soft);
+}
+
+body.theme-light .market-top3-legend {
+  color: #4b657b;
+}
