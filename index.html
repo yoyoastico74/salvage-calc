@@ -163,9 +163,13 @@
         <div id="hintPrixCmat" class="hint">
           CMAT = Construction Materials (issu du Construction Salvage, Reclaimer uniquement).
         </div>
-</div>
 
-        <label for="shipSelect" id="labelShipSelect">Vaisseau utilisé pour ce run</label>
+        <div class="sellpoints">
+          <div><span id="sellRmcLabel" class="label">Point de vente RMC :</span> <span id="rmcTerminal">—</span></div>
+          <div><span id="sellCmatLabel" class="label">Point de vente CMAT :</span> <span id="cmatTerminal">—</span></div>
+        </div>
+
+        <label for="shipSelect" id="labelShipSelect">Vaisseau utilisé pour ce run</label>        <label for="shipSelect" id="labelShipSelect">Vaisseau utilisé pour ce run</label>
         <select id="shipSelect" class="input-standard">
           <option value="Vulture">Vulture</option>
           <option value="Salvation">Salvation</option>
@@ -477,7 +481,7 @@ function toggleMoreInfo() {
 const REND_RECLAIMER = 0.15;
 const APP_VERSION = "V6.4.6";
 const ACTIVITY_VERSIONS = {
-  salvage: { label: "Salvage", version: "V6.4.6" },
+  salvage: { label: "Salvage", version: "V6.4.4" },
   hauling: { label: "Hauling", version: "V0.0" },
   mining:  { label: "Mining",  version: "V0.0" },
 };
@@ -1798,8 +1802,8 @@ function applyLanguage() {
   hintPrixRmcEl.textContent = t.hintPrixRmc;
   labelPrixCmatEl.textContent = t.labelPrixCmat;
   hintPrixCmatEl.textContent = t.hintPrixCmat;
-  if (sellRmcLabelEl) sellRmcLabelEl.textContent = t.sellRmcLabel;
-  if (sellCmatLabelEl) sellCmatLabelEl.textContent = t.sellCmatLabel;
+  sellRmcLabelEl.textContent = t.sellRmcLabel;
+  sellCmatLabelEl.textContent = t.sellCmatLabel;
   labelScuLightEl.textContent = t.labelScuLight;
   labelScuReclaimerEl.textContent = t.labelScuReclaimer;
   tagLightEl.textContent = t.tagLight;
@@ -2298,12 +2302,8 @@ async function fetchUexPrices() {
     prixRmcInput.value  = rmcPrice;
     prixCmatInput.value = cmatPrice;
 
-    if (rmcTerminalEl) {
-      rmcTerminalEl.textContent = data.rmc.bestTerminal?.name ?? "N/A";
-    }
-    if (cmatTerminalEl) {
-      cmatTerminalEl.textContent = data.cmat.bestTerminal?.name ?? "N/A";
-    }
+    rmcTerminalEl.textContent  = data.rmc.bestTerminal?.name  ?? "N/A";
+    cmatTerminalEl.textContent = data.cmat.bestTerminal?.name ?? "N/A";
 
     updateTop3UIFromData(data);
 
