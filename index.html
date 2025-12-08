@@ -70,8 +70,8 @@
     </div>
 
     <div class="user-box">
-      <span id="userInfo">Non connecté</span>
-      <button id="discordLoginBtn" type="button">Se connecter avec Discord</button>
+      <span id="userInfo">Profil : —</span>
+      <button id="changeUserBtn" type="button">Gérer mon profil</button>
     </div>
 
     
@@ -415,6 +415,50 @@
   </div>
 </div>
 
+<div id="profileModal" class="modal-backdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h2>Profil Salvage Calculator</h2>
+      <button id="modalCloseBtn" class="modal-close-btn" type="button">×</button>
+    </div>
+    <div class="modal-tabs">
+      <button id="tabCreateProfile" class="active" type="button">Créer un profil</button>
+      <button id="tabImportProfile" type="button">Importer un profil</button>
+    </div>
+
+    <div id="modalCreateSection" class="modal-section active">
+      <label for="createNickname">Pseudo</label>
+      <input id="createNickname" type="text" placeholder="Ex : Salvager_001" />
+      <div class="modal-small">
+        Un profil utilisera ce pseudo et une clé privée générée automatiquement.
+      </div>
+      <button id="createProfileBtn" class="action" type="button">
+        Créer le profil
+      </button>
+      <div id="createdKeyDisplay" class="key-display" style="display:none;"></div>
+    </div>
+
+    <div id="modalImportSection" class="modal-section">
+      <label for="importNickname">Pseudo</label>
+      <input id="importNickname" type="text" placeholder="Ton pseudo" />
+      <label for="importSecret">Clé privée (6 chiffres)</label>
+      <input id="importSecret" type="text" maxlength="6" placeholder="123456" />
+      <div class="modal-small">
+        Utilise le pseudo + la clé fournie lors de la création de ton profil.
+      </div>
+      <button id="importProfileBtn" class="action" type="button">
+        Importer ce profil
+      </button>
+    </div>
+
+    <div id="modalMessage" class="modal-message"></div>
+
+    <div class="app-version"><span id="app-version-pill"></span></div>
+    <div class="app-footer-brand">Powered by <span>Shog Salvage Tools</span></div>
+  </div>
+</div>
+
+
   <div id="leaderboardSideTab" class="leaderboard-side-tab">
     <button
       id="openOnlineLeaderboardBtn"
@@ -610,7 +654,7 @@ const i18n = {
 labelShipSelect: "Vaisseau utilisé pour ce run",
     saveRunBtn: "Envoyer ce run au leaderboard en ligne",
     saveRunSuccess: "Run envoyé au leaderboard en ligne.",
-    saveRunNoUser: "Merci de te connecter avec Discord avant d'enregistrer un run.",
+    saveRunNoUser: "Crée ou importe un profil avant d'enregistrer un run.",
     saveRunNoScu: "Merci de saisir au moins une SCU de salvage avant d'enregistrer un run.",
     clearMyRunsBtn: "Supprimer mes runs",
     clearAllRunsBtn: "Reset de mes données locales",
@@ -697,11 +741,11 @@ labelShipSelect: "Vaisseau utilisé pour ce run",
 labelShipSelect: "Ship used for this run",
     saveRunBtn: "Send this run to the online leaderboard",
     saveRunSuccess: "Run sent to the online leaderboard.",
-    saveRunNoUser: "Please log in with Discord before saving a run.",
+    saveRunNoUser: "Please create/import a profile before saving a run.",
     saveRunNoScu: "Please enter at least one salvage SCU before saving a run.",
     clearMyRunsBtn: "Delete my runs",
     clearAllRunsBtn: "Reset my local data",
-    clearMyRunsNoUser: "No user loaded. Please log in with Discord to manage your runs.",
+    clearMyRunsNoUser: "No profile loaded. Create or import a profile to delete only your runs.",
     clearMyRunsDone: "Your local runs have been removed from this list (online leaderboard unchanged).",
     clearAllRunsDone: "All your local data has been reset (online leaderboard unchanged).",
     leaderboardAdminOnly: "This action is reserved for admin.",
@@ -880,17 +924,26 @@ function updateAdminUI() {
   }
 }
 
-= (hash * 31 + base.charCodeAt(i)) >>> 0;
+function generateSecret() {
+  const n = Math.floor(Math.random() * 1000000);
+  return String(n).padStart(6, "0");
+}
+
+function computeUserId(nickname, secret) {
+  const base = (nickname || "").trim() + "#" + secret;
+  let hash = 0;
+  for (let i = 0; i < base.length; i++) {
+    hash = (hash * 31 + base.charCodeAt(i)) >>> 0;
   }
   return "user_" + hash.toString(16);
 }
 
 function loadUserProfile() {
   try {
-    const raw = localStorage.getItem("salvageDiscordUser");
+    const raw = localStorage.getItem("salvageCalcUser");
     if (!raw) return null;
     const u = JSON.parse(raw);
-    if (!u || !u.id || !u.nickname) return null;
+    if (!u || !u.id || !u.nickname || !u.secret) return null;
     return u;
   } catch (_) {
     return null;
@@ -900,7 +953,7 @@ function loadUserProfile() {
 function saveUserProfile(user) {
   currentUser = user;
   try {
-    localStorage.setItem("salvageDiscordUser", JSON.stringify(user));
+    localStorage.setItem("salvageCalcUser", JSON.stringify(user));
   } catch (_) {}
   updateUserUI();
   updateAdminUI();
@@ -911,10 +964,10 @@ function saveUserProfile(user) {
 function updateUserUI() {
   if (!userInfoEl) return;
   if (!currentUser) {
-    userInfoEl.textContent = "Non connecté";
+    userInfoEl.textContent = "Profil : —";
   } else {
     userInfoEl.textContent =
-      "Connecté via Discord : " + (currentUser.nickname || currentUser.username || "Salvager");
+      "Profil : " + currentUser.nickname + " (clé : " + currentUser.secret + ")";
   }
 }
 
@@ -1965,13 +2018,34 @@ themeSelectEl.addEventListener("change", () => {
   saveState();
 });
 
-const discordLoginBtn = document.getElementById("discordLoginBtn");
+if (changeUserBtn) {
+  changeUserBtn.addEventListener("click", () => openProfileModal("create"));
+}
 
+const discordLoginBtn = document.getElementById("discordLoginBtn");
 if (discordLoginBtn) {
   discordLoginBtn.addEventListener("click", () => {
     window.location.href = "https://salvage-auth.yoyoastico74.workers.dev/auth/discord/login";
   });
 }
+
+if (modalCloseBtn) {
+  modalCloseBtn.addEventListener("click", closeProfileModal);
+}
+
+if (profileModal) {
+  profileModal.addEventListener("click", (e) => {
+    if (e.target === profileModal) {
+      closeProfileModal();
+    }
+  });
+}
+
+tabCreateProfile.addEventListener("click", () => setActiveModalTab("create"));
+tabImportProfile.addEventListener("click", () => setActiveModalTab("import"));
+
+createProfileBtn.addEventListener("click", handleCreateProfile);
+importProfileBtn.addEventListener("click", handleImportProfile);
 
 if (saveRunBtnEl) {
   saveRunBtnEl.addEventListener("click", handleSaveRun);
