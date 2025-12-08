@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V6.0.0 -->
+<!-- Version : V6.1.0 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -403,7 +403,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V6.0.0";
+const APP_VERSION = "V6.1.0";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -461,8 +461,14 @@ const i18n = {
     leaderboardEmpty: "Aucun joueur dans le leaderboard en ligne pour l'instant.",
     leaderboardLoading: "Chargement du leaderboard en ligne…",
     leaderboardErrorPrefix: "Erreur leaderboard : ",
-    leaderboardLine: (nickname, runs, profit, favShip, totalRmc, isAdmin) =>
-      `<span class="leaderboard-line-main">${nickname} – ${profit} aUEC</span><span class="leaderboard-line-meta">${runs} runs · Ship fav : ${favShip} · Total RMC : ${totalRmc} SCU</span>`,
+    leaderboardLine: (nickname, runs, profit, favShip, totalRmc, badgesHtml, isAdmin) =>
+      `<span class="leaderboard-line-main">
+        ${nickname} – ${profit} aUEC${isAdmin ? " (ADMIN)" : ""} 
+        ${badgesHtml ? `<span class="leaderboard-badges">${badgesHtml}</span>` : ""}
+      </span>
+      <span class="leaderboard-line-meta">
+        ${runs} runs · Ship fav : ${favShip} · Total RMC : ${totalRmc} SCU
+      </span>`,
     leaderboardYou: "Vous",
     labelShipSelect: "Vaisseau utilisé pour ce run",
     saveRunBtn: "Envoyer ce run au leaderboard en ligne",
@@ -894,6 +900,60 @@ async function updateLocalLeaderboard(force = false) {
   }
 }
 
+
+function computeBadges(user) {
+  if (!user) return [];
+  const badges = [];
+  const totalProfit = user.totalProfit || 0;
+  const runs = user.totalRuns || 0;
+  const favShip = (user.favShip || "").toLowerCase();
+
+  // Profit-based badges
+  if (totalProfit >= 500000000) {
+    badges.push("🚀 Galactic Salvager");
+  } else if (totalProfit >= 100000000) {
+    badges.push("💎 Platinum Salvager");
+  } else if (totalProfit >= 50000000) {
+    badges.push("🥇 Gold Salvager");
+  } else if (totalProfit >= 10000000) {
+    badges.push("🥈 Silver Salvager");
+  } else if (totalProfit >= 1000000) {
+    badges.push("🥉 Bronze Salvager");
+  }
+
+  // Runs-based badges
+  if (runs >= 500) {
+    badges.push("🏭 Mega Salvager");
+  } else if (runs >= 250) {
+    badges.push("🚨 Industrial Scrapper");
+  } else if (runs >= 100) {
+    badges.push("🛠️ Salvage Engineer");
+  } else if (runs >= 25) {
+    badges.push("⚙️ Senior Operator");
+  } else if (runs >= 5) {
+    badges.push("🔧 Junior Operator");
+  }
+
+  // Favourite ship badges
+  if (favShip.includes("vulture")) {
+    badges.push("🦅 Vulture Master");
+  } else if (favShip.includes("salvation")) {
+    badges.push("☀️ Salvation Specialist");
+  } else if (favShip.includes("fortune")) {
+    badges.push("🌀 Fortune Operator");
+  } else if (favShip.includes("reclaimer")) {
+    badges.push("👑 Reclaimer Commander");
+  }
+
+  return badges;
+}
+
+function computeBadgesHtml(user) {
+  const badges = computeBadges(user);
+  if (!badges || !badges.length) return "";
+  return badges.map(label => `<span class="lb-badge">${label}</span>`).join(" ");
+}
+
 function renderOnlineLeaderboard(users, t) {
   if (!leaderboardListEl || !leaderboardEmptyEl) return;
 
@@ -953,6 +1013,7 @@ function renderOnlineLeaderboard(users, t) {
       profitStr,
       favShip,
       totalRmcStr,
+      computeBadgesHtml(u),
       false
     );
 
@@ -994,6 +1055,7 @@ function renderOnlineLeaderboard(users, t) {
         profitStr,
         favShip,
         totalRmcStr,
+        computeBadgesHtml(u),
         false
       );
 
