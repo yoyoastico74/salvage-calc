@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V6.2.1 -->
+<!-- Version : V6.2.2 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -137,7 +137,7 @@
         <label for="prixRmc">
           <span id="labelPrixRmc">Prix RMC (aUEC / SCU)</span>
         </label>
-        <input id="prixRmc" type="number" value="0" readonly />
+        <input id="prixRmc" class="input-standard" type="number" value="0" readonly />
         <div id="hintPrixRmc" class="hint">
           RMC : matériau recyclé issu du hull scraping.
         </div>
@@ -145,7 +145,7 @@
         <label for="prixCmat">
           <span id="labelPrixCmat">Prix CMAT (aUEC / SCU)</span>
         </label>
-        <input id="prixCmat" type="number" value="0" readonly />
+        <input id="prixCmat" class="input-standard" type="number" value="0" readonly />
         <div id="hintPrixCmat" class="hint">
           CMAT = Construction Materials (issu du Construction Salvage, Reclaimer uniquement).
         </div>
@@ -156,7 +156,7 @@
         </div>
 
         <label for="shipSelect" id="labelShipSelect">Vaisseau utilisé pour ce run</label>
-        <select id="shipSelect">
+        <select id="shipSelect" class="input-standard">
           <option value="Vulture">Vulture</option>
           <option value="Salvation">Salvation</option>
           <option value="Fortune">Fortune</option>
@@ -170,7 +170,7 @@
               (ces vaisseaux ne produisent que du RMC)
             </span>
           </label>
-          <input id="scuLight" type="number" value="0" />
+          <input id="scuLight" class="input-standard" type="number" value="0" />
         </div>
 
         <div id="advancedScuReclaimerGroup" style="margin-top: 0.75rem;">
@@ -179,7 +179,7 @@
               SCU de salvage traitées – Reclaimer (valeur BRUTE récoltée, avant raffinage RMC → CMAT)
             </span>
           </label>
-          <input id="scuReclaimer" type="number" value="0" />
+          <input id="scuReclaimer" class="input-standard" type="number" value="0" />
         </div>
 
         <button id="saveRunBtn" class="save-run-btn" type="button">
@@ -403,7 +403,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V6.2.1";
+const APP_VERSION = "V6.2.2";
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
