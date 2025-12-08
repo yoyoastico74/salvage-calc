@@ -457,6 +457,12 @@ function toggleMoreInfo() {
 
 const REND_RECLAIMER = 0.15;
 const APP_VERSION = "V6.4.3";
+const ACTIVITY_VERSIONS = {
+  salvage: { label: "Salvage", version: "V6.4.3" },
+  hauling: { label: "Hauling", version: "V0.0" },
+  mining:  { label: "Mining",  version: "V0.0" },
+};
+
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -2300,7 +2306,20 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    try {
+    
+    // Update version display per activity
+    const versionInfo = ACTIVITY_VERSIONS[activityKey] || ACTIVITY_VERSIONS.salvage;
+    const versionText = `VERSION ${versionInfo.label.toUpperCase()} ${versionInfo.version}`;
+    const verPill = document.getElementById("app-version-pill");
+    if (verPill) {
+      verPill.textContent = versionText;
+    }
+    const footerSpan = document.querySelector("#appVersion span");
+    if (footerSpan) {
+      footerSpan.textContent = versionText;
+    }
+
+try {
       localStorage.setItem("scActivity", activityKey);
     } catch (err) {
       console.warn("Unable to persist activity selection", err);
