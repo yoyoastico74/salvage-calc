@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V6.4.2 -->
+<!-- Version : V6.4.3 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -18,54 +18,7 @@
   <meta name="twitter:description" content="Determine your salvage value per RMC or CMAT loop with live UEX prices.">
   <meta name="twitter:image" content="https://shog-sc.github.io/salvage-calc/icon.png">
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js">
-// --- Anti-spam Save Run (30s) ---
-const SUBMIT_COOLDOWN_MS = 30000;
-let lastRunSubmitTime = 0;
-let antiSpamIntervalId = null;
-
-function updateAntiSpamMessage(remainingMs) {
-  const el = document.getElementById("antiSpamMessage");
-  if (!el) return;
-  if (remainingMs <= 0) { el.textContent = ""; return; }
-  const s = Math.ceil(remainingMs / 1000);
-  el.textContent = `⚠ Anti-Spam : ${s}s restantes`;
-}
-
-function startAntiSpamCountdown() {
-  if (antiSpamIntervalId) clearInterval(antiSpamIntervalId);
-  const target = lastRunSubmitTime + SUBMIT_COOLDOWN_MS;
-  antiSpamIntervalId = setInterval(() => {
-    const rem = target - Date.now();
-    if (rem <= 0) {
-      clearInterval(antiSpamIntervalId);
-      antiSpamIntervalId = null;
-      updateAntiSpamMessage(0);
-    } else updateAntiSpamMessage(rem);
-  }, 1000);
-}
-
-// Wrap existing saveRunBtn action
-const originalSaveRun = typeof onSaveRun === 'function' ? onSaveRun : null;
-async function onSaveRunWrapped() {
-  const now = Date.now();
-  const elapsed = now - lastRunSubmitTime;
-  if (elapsed < SUBMIT_COOLDOWN_MS) {
-    const remaining = SUBMIT_COOLDOWN_MS - elapsed;
-    updateAntiSpamMessage(remaining);
-    startAntiSpamCountdown();
-    return;
-  }
-  lastRunSubmitTime = now;
-  updateAntiSpamMessage(0);
-  if (antiSpamIntervalId) { clearInterval(antiSpamIntervalId); antiSpamIntervalId = null; }
-  if (originalSaveRun) return originalSaveRun();
-}
-
-// attach
-document.getElementById("saveRunBtn")?.addEventListener("click", onSaveRunWrapped);
-
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   
   <link rel="stylesheet" href="assets/css/style.css">
@@ -240,8 +193,7 @@ document.getElementById("saveRunBtn")?.addEventListener("click", onSaveRunWrappe
         <button id="saveRunBtn" class="save-run-btn" type="button">
           Envoyer ce run au leaderboard en ligne
         </button>
-<div id="antiSpamMessage" class="anti-spam-message"></div>
-
+        <div id="antiSpamMessage" class="anti-spam-message"></div>
         <div id="saveRunMessage" class="small-note"></div>
 
         <div class="tag-row">
@@ -504,7 +456,13 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V6.4.2";
+const APP_VERSION = "V6.4.3";
+const ACTIVITY_VERSIONS = {
+  salvage: { label: "Salvage", version: "V6.4.3" },
+  hauling: { label: "Hauling", version: "V0.0" },
+  mining:  { label: "Mining",  version: "V0.0" },
+};
+
 
 const LEADERBOARD_API_BASE = "https://salvage-leaderboard.yoyoastico74.workers.dev";
 const LEADERBOARD_REFRESH_MS = 60000;
@@ -513,6 +471,46 @@ let lastOnlineRunTs = Number(localStorage.getItem("salvageCalcLastOnlineRunTs") 
 let lastLeaderboardFetch = 0;
 let cachedLeaderboardUsers = [];
 
+
+
+let antiSpamIntervalId = null;
+
+function updateAntiSpamMessage(remainingMs) {
+  const el = document.getElementById("antiSpamMessage");
+  if (!el) return;
+  if (!remainingMs || remainingMs <= 0) {
+    el.textContent = "";
+    return;
+  }
+  const seconds = Math.ceil(remainingMs / 1000);
+  el.textContent = `⚠ Anti-Spam : ${seconds}s restantes`;
+}
+
+function startAntiSpamCountdown() {
+  if (!LEADERBOARD_RUN_COOLDOWN_MS) return;
+  if (!lastOnlineRunTs) return;
+  if (antiSpamIntervalId) {
+    clearInterval(antiSpamIntervalId);
+    antiSpamIntervalId = null;
+  }
+  const target = lastOnlineRunTs + LEADERBOARD_RUN_COOLDOWN_MS;
+
+  function tick() {
+    const remaining = target - Date.now();
+    if (remaining <= 0) {
+      updateAntiSpamMessage(0);
+      if (antiSpamIntervalId) {
+        clearInterval(antiSpamIntervalId);
+        antiSpamIntervalId = null;
+      }
+      return;
+    }
+    updateAntiSpamMessage(remaining);
+  }
+
+  tick();
+  antiSpamIntervalId = setInterval(tick, 1000);
+}
 
 let leaderboardSortKey = localStorage.getItem("salvageLbSort") || "profit";
 let leaderboardShipFilterKey = localStorage.getItem("salvageLbShipFilter") || "all";
@@ -1252,6 +1250,7 @@ async function pushRunToOnlineLeaderboard(run) {
       if (saveRunMessageEl) {
         saveRunMessageEl.textContent = t.saveRunCooldown || "Tu viens d'envoyer un run. Merci d'attendre quelques secondes avant de renvoyer un nouveau run.";
       }
+      startAntiSpamCountdown();
       return;
     }
 
@@ -1261,6 +1260,7 @@ async function pushRunToOnlineLeaderboard(run) {
     } catch (e) {
       // ignore storage errors
     }
+    startAntiSpamCountdown();
 
     const payload = {
       nickname: run.nickname,
@@ -2289,7 +2289,37 @@ document.addEventListener("DOMContentLoaded", () => {
     activityPills.forEach((pill) => {
       pill.classList.toggle("active", pill.dataset.activity === activityKey);
     });
-    try {
+
+    // Show main Salvage header & intro only on Salvage activity
+    const titleEl = document.getElementById("titleMain");
+    const subEl = document.getElementById("subText");
+    if (titleEl && subEl) {
+      if (activityKey === "salvage") {
+        const t = i18n[currentLang] || i18n.fr;
+        titleEl.textContent = t.titleMain || "SALVAGE CALCULATOR 4.4";
+        subEl.textContent = t.subText || "Détermine la valeur générée par ton salvage selon la boucle de ton vaisseau (RMC ou CMAT).";
+        titleEl.style.display = "";
+        subEl.style.display = "";
+      } else {
+        titleEl.style.display = "none";
+        subEl.style.display = "none";
+      }
+    }
+
+    
+    // Update version display per activity
+    const versionInfo = ACTIVITY_VERSIONS[activityKey] || ACTIVITY_VERSIONS.salvage;
+    const versionText = `VERSION ${versionInfo.label.toUpperCase()} ${versionInfo.version}`;
+    const verPill = document.getElementById("app-version-pill");
+    if (verPill) {
+      verPill.textContent = versionText;
+    }
+    const footerSpan = document.querySelector("#appVersion span");
+    if (footerSpan) {
+      footerSpan.textContent = versionText;
+    }
+
+try {
       localStorage.setItem("scActivity", activityKey);
     } catch (err) {
       console.warn("Unable to persist activity selection", err);
@@ -2305,6 +2335,15 @@ document.addEventListener("DOMContentLoaded", () => {
   } catch (err) {}
 
   setActivity(initialActivity);
+
+  // Anti-spam UI restore on reload
+  if (LEADERBOARD_RUN_COOLDOWN_MS > 0 && lastOnlineRunTs) {
+    const remaining = LEADERBOARD_RUN_COOLDOWN_MS - (Date.now() - lastOnlineRunTs);
+    if (remaining > 0) {
+      updateAntiSpamMessage(remaining);
+      startAntiSpamCountdown();
+    }
+  }
 
   if (activitySalvageBtn) {
     activitySalvageBtn.addEventListener("click", () => setActivity("salvage"));
@@ -2386,53 +2425,6 @@ const verPill = document.getElementById("app-version-pill");
   updateScuAdvancedVisibility();
   refreshDebutantPrices();
 });
-
-// --- Anti-spam Save Run (30s) ---
-const SUBMIT_COOLDOWN_MS = 30000;
-let lastRunSubmitTime = 0;
-let antiSpamIntervalId = null;
-
-function updateAntiSpamMessage(remainingMs) {
-  const el = document.getElementById("antiSpamMessage");
-  if (!el) return;
-  if (remainingMs <= 0) { el.textContent = ""; return; }
-  const s = Math.ceil(remainingMs / 1000);
-  el.textContent = `⚠ Anti-Spam : ${s}s restantes`;
-}
-
-function startAntiSpamCountdown() {
-  if (antiSpamIntervalId) clearInterval(antiSpamIntervalId);
-  const target = lastRunSubmitTime + SUBMIT_COOLDOWN_MS;
-  antiSpamIntervalId = setInterval(() => {
-    const rem = target - Date.now();
-    if (rem <= 0) {
-      clearInterval(antiSpamIntervalId);
-      antiSpamIntervalId = null;
-      updateAntiSpamMessage(0);
-    } else updateAntiSpamMessage(rem);
-  }, 1000);
-}
-
-// Wrap existing saveRunBtn action
-const originalSaveRun = typeof onSaveRun === 'function' ? onSaveRun : null;
-async function onSaveRunWrapped() {
-  const now = Date.now();
-  const elapsed = now - lastRunSubmitTime;
-  if (elapsed < SUBMIT_COOLDOWN_MS) {
-    const remaining = SUBMIT_COOLDOWN_MS - elapsed;
-    updateAntiSpamMessage(remaining);
-    startAntiSpamCountdown();
-    return;
-  }
-  lastRunSubmitTime = now;
-  updateAntiSpamMessage(0);
-  if (antiSpamIntervalId) { clearInterval(antiSpamIntervalId); antiSpamIntervalId = null; }
-  if (originalSaveRun) return originalSaveRun();
-}
-
-// attach
-document.getElementById("saveRunBtn")?.addEventListener("click", onSaveRunWrapped);
-
 </script>
 
 </body>
