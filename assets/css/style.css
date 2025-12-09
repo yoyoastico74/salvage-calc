@@ -1876,7 +1876,7 @@ body.theme-light .market-top3-legend {
 
 /* V6.4.15: reduce vertical space of Loop RMC/CMAT panel from bottom */
 .results-grid .panel {
-  padding-bottom: 10px !important;
+  padding-bottom: 4px !important;
 }
 
 .results-grid .result-block {
