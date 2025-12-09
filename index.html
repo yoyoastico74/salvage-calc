@@ -668,6 +668,9 @@ const i18n = {
     graphError: "Impossible de charger l'historique.",
     langSwitchLabel: "Langue :",
     themeLabel: "Thème :",
+    nav_salvage: "Recyclage",
+    nav_hauling: "Fret",
+    nav_mining: "Mining",
     lightShipsInfo: "ℹ Vaisseaux légers : RMC uniquement (pas de CMAT).",
     lightShipsNoCmatText: "Les vaisseaux légers ne génèrent pas de Construction Materials (CMAT). Seul le Reclaimer (et futurs heavy salvage) peuvent produire du CMAT via Construction Salvage.",
     loopCmatBetter: diff => `🟢 Loop CMAT (Construction Materials) plus rentable que RMC (+${diff} aUEC).`,
@@ -761,6 +764,9 @@ labelShipSelect: "Vaisseau utilisé pour ce run",
     graphError: "Unable to load history.",
     langSwitchLabel: "Language:",
     themeLabel: "Theme:",
+    nav_salvage: "Salvage",
+    nav_hauling: "Hauling",
+    nav_mining: "Mining",
     lightShipsInfo: "ℹ Light ships: RMC only (no CMAT).",
     lightShipsNoCmatText: "Light ships do not generate Construction Materials (CMAT). Only the Reclaimer (and future heavy salvage) can produce CMAT via Construction Salvage.",
     loopCmatBetter: diff => `🟢 CMAT loop (Construction Materials) is more profitable than RMC (+${diff} aUEC).`,
@@ -880,6 +886,9 @@ const langSwitchLabelEl = document.getElementById("langSwitchLabel");
 const themeSelectEl = document.getElementById("themeSelect");
 const langSelectEl = document.getElementById("langSelect");
 const appVersionEl = document.getElementById("appVersion");
+const activitySalvageBtn = document.getElementById("activitySalvageBtn");
+const activityHaulingBtn = document.getElementById("activityHaulingBtn");
+const activityMiningBtn = document.getElementById("activityMiningBtn");
 
 const leaderboardListEl = document.getElementById("leaderboardList");
 const leaderboardEmptyEl = document.getElementById("leaderboardEmpty");
@@ -1960,6 +1969,16 @@ function applyLanguage() {
   }
   if (myRunsSoldEmptyEl) {
     myRunsSoldEmptyEl.textContent = t.myRunsSoldEmpty;
+  }
+
+  if (activitySalvageBtn) {
+    activitySalvageBtn.textContent = (t.nav_salvage || "Salvage");
+  }
+  if (activityHaulingBtn) {
+    activityHaulingBtn.textContent = (t.nav_hauling || "Hauling");
+  }
+  if (activityMiningBtn) {
+    activityMiningBtn.textContent = (t.nav_mining || "Mining");
   }
 
   if (appVersionEl) {
