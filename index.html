@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V6.4.8g -->
+<!-- Version : V6.4.8h -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -279,7 +279,19 @@
           Light ships → RMC. Reclaimer → CMAT (~15 %, raffinage obligatoire).
         </div>
         <div id="apiStatus" class="api-status">Récupération des prix UEX…</div>
-      </div>
+
+
+
+          <div id="leaderboardTop3Box" class="leaderboard-top3-box">
+            <div id="leaderboardTop3Title" class="leaderboard-top3-title">Top 3 global (en ligne)</div>
+            <ul id="leaderboardList" class="leaderboard-list leaderboard-top3-list"></ul>
+            <div id="leaderboardEmpty" class="leaderboard-empty" style="display:none;">
+              Aucun run en ligne pour l'instant.
+            </div>
+            
+          </div>
+
+                </div>
 
 <div class="leaderboard-panel">
           <div class="leaderboard-title-row">
@@ -308,17 +320,7 @@
               <div id="myRunsSoldEmpty" class="my-runs-empty">Aucun run vendu pour l'instant.</div>
             </div>
           </div>
-
-          <div id="leaderboardTop3Box" class="leaderboard-top3-box">
-            <div id="leaderboardTop3Title" class="leaderboard-top3-title">Top 3 global (en ligne)</div>
-            <ul id="leaderboardList" class="leaderboard-list leaderboard-top3-list"></ul>
-            <div id="leaderboardEmpty" class="leaderboard-empty" style="display:none;">
-              Aucun run en ligne pour l'instant.
-            </div>
-            
-          </div>
-
-          <div class="leaderboard-actions">
+<div class="leaderboard-actions">
             <button id="clearMyRunsBtn" type="button">Supprimer mes runs</button>
             <button id="clearAllRunsBtn" type="button">Reset complet (local)</button>
             <button id="resetOnlineBtn" type="button" style="display:none; width:100%; margin-top:0.35rem;">
@@ -551,7 +553,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V6.4.8g";
+const APP_VERSION = "V6.4.8h";
 const ACTIVITY_VERSIONS = {
   salvage: { label: "Salvage", version: "V6.4.4" },
   hauling: { label: "Hauling", version: "V0.0" },
