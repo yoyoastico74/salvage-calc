@@ -1,4 +1,4 @@
-/* Salvage Calculator 4.4 - Styles V6.4.18 (leaderboard + form inputs align fix) */
+/* Salvage Calculator 4.4 - Styles V6.4.19 (leaderboard + form inputs align fix) */
 
     :root {
       --bg: #020710;
@@ -1870,11 +1870,11 @@ body.theme-light .market-top3-legend {
   display: none !important;
 }
 
-/* V6.4.18: reduce chart height */
+/* V6.4.19: reduce chart height */
 #cmatChart { height: 300px !important; }
 
 
-/* V6.4.18: reduce vertical space of Loop RMC/CMAT panel from bottom */
+/* V6.4.19: reduce vertical space of Loop RMC/CMAT panel from bottom */
 .results-grid .panel {
   padding-bottom: 10px !important;
 }
@@ -1888,13 +1888,13 @@ body.theme-light .market-top3-legend {
 }
 
 
-/* V6.4.18: prevent Loop RMC/CMAT panel from stretching full height */
+/* V6.4.19: prevent Loop RMC/CMAT panel from stretching full height */
 .results-grid .panel {
   align-self: start !important;
 }
 
 
-/* V6.4.18: Reduce height of Top 3 leaderboard block */
+/* V6.4.19: Reduce height of Top 3 leaderboard block */
 #leaderboardTop3Box {
   max-height: 160px !important;
   overflow: hidden !important;
@@ -1904,4 +1904,40 @@ body.theme-light .market-top3-legend {
 #leaderboardTop3Box .leaderboard-list li {
   margin-bottom: 4px !important;
   padding: 4px 0 !important;
+}
+
+
+/* V6.4.19: compact Leaderboard – Salvage (online) panel */
+#leaderboardMainPanel {
+  padding: 8px 10px 8px !important;
+}
+
+#leaderboardMainPanel .leaderboard-panel {
+  padding: 8px 10px 8px !important;
+}
+
+#leaderboardMainPanel .leaderboard-title-row {
+  margin-bottom: 4px !important;
+}
+
+#toggleMyRunsBtn {
+  margin: 4px 0 !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+
+#leaderboardTop3Box {
+  margin-top: 4px !important;
+  margin-bottom: 4px !important;
+  max-height: 150px !important;
+  overflow: hidden !important;
+}
+
+#leaderboardTop3Box .leaderboard-list li {
+  margin-bottom: 2px !important;
+  padding: 2px 0 !important;
+}
+
+#leaderboardMainPanel .leaderboard-actions {
+  margin-top: 4px !important;
 }
