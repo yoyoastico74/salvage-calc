@@ -1,4 +1,4 @@
-/* Salvage Calculator 4.4 - Styles V6.4.13 (leaderboard + form inputs align fix) */
+/* Salvage Calculator 4.4 - Styles V6.4.14 (leaderboard + form inputs align fix) */
 
     :root {
       --bg: #020710;
@@ -1869,3 +1869,6 @@ body.theme-light .market-top3-legend {
 #cmatTerminal {
   display: none !important;
 }
+
+/* V6.4.14: reduce chart height */
+#cmatChart { height: 300px !important; }
