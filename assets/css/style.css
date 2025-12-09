@@ -1,4 +1,4 @@
-/* Salvage Calculator 4.4 - Styles V6.4.8i (leaderboard + form inputs align fix) */
+/* Salvage Calculator 4.4 - Styles V6.4.1 (leaderboard + form inputs align fix) */
 
     :root {
       --bg: #020710;
@@ -92,7 +92,7 @@ body.theme-light {
     }
 
     h1 {
-      margin: 0 0 10px;
+      margin: 0 0 8px;
       text-align: center;
       font-size: 30px;
       text-transform: uppercase;
@@ -100,61 +100,6 @@ body.theme-light {
       color: var(--accent-strong);
       text-shadow: 0 0 8px rgba(0,255,255,0.5);
     }
-    /* Header layout V6.4.8b */
-    .header-main {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 8px;
-    }
-    .header-main #titleMain {
-      flex: 0 0 auto;
-      text-align: center;
-      margin: 0 auto;
-    }
-    .header-right {
-      position: absolute;
-      top: 0;
-      right: 0;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    /* Neon labels for header controls */
-    .neon-label {
-      color: var(--text-main);
-      text-shadow: 0 0 10px rgba(0, 255, 255, 0.85),
-                   0 0 18px rgba(0, 255, 255, 0.55);
-      font-weight: 500;
-    }
-    body.theme-light .neon-label {
-      text-shadow: none;
-      color: var(--text-soft);
-    }
-
-    /* Discord connected badge */
-    .user-connected-badge {
-      background: rgba(0, 255, 180, 0.15);
-      border: 1px solid rgba(0, 255, 180, 0.5);
-      padding: 4px 12px;
-      border-radius: 999px;
-      color: #00ffcc;
-      font-weight: 600;
-      text-shadow: 0 0 6px rgba(0, 255, 200, 0.7);
-      box-shadow: 0 0 12px rgba(0, 255, 200, 0.4);
-    }
-    body.theme-light .user-connected-badge {
-      background: rgba(230, 250, 245, 0.95);
-      border-color: var(--accent-alt);
-      color: #0b5040;
-      text-shadow: none;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
-    }
-
 
     body.theme-light h1 {
       text-shadow: none;
@@ -164,7 +109,7 @@ body.theme-light {
       text-align: center;
       font-size: 13px;
       color: var(--text-soft);
-      margin-bottom: 22px;
+      margin-bottom: 18px;
     }
 
     .top-bar {
@@ -210,23 +155,6 @@ body.theme-light {
       outline: none;
       cursor: pointer;
     }
-    .lang-switch select {
-      background: #021019;
-      border: 1px solid var(--accent);
-      border-radius: 999px;
-      padding: 2px 10px;
-      color: var(--text-soft);
-      font-size: 11px;
-      outline: none;
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-    }
-    .lang-switch select:focus {
-      border-color: var(--accent-strong);
-      box-shadow: 0 0 6px rgba(0,255,255,0.6);
-    }
-
 
     body.theme-light .top-bar select {
       background: #f3f8ff;
@@ -626,7 +554,7 @@ body.theme-light {
 
     .market-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
       gap: 16px;
       align-items: flex-start;
       margin-top: 8px;
@@ -638,40 +566,13 @@ body.theme-light {
 
     .leaderboard-panel {
       padding: 10px 12px 12px;
-      border-radius: 0 0 10px 10px;
+      border-radius: 10px;
       border: 1px solid var(--border-strong);
       background: linear-gradient(160deg, #020b14, #030812);
       box-shadow: 0 0 18px rgba(0,0,0,0.7);
       font-size: 12px;
       color: var(--text-main);
     }
-    .leaderboard-top3-box {
-      margin-top: 12px;
-      margin-bottom: 0;
-      padding: 8px 12px 10px;
-      border-radius: 10px 10px 0 0;
-      border: 1px solid var(--border-strong);
-      background: linear-gradient(160deg, #020b14, #030812);
-      box-shadow: 0 0 18px rgba(0,0,0,0.7);
-    }
-    .leaderboard-top3-title {
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--text-main);
-    }
-    .leaderboard-top3-list {
-      margin: 0;
-      padding-left: 1.1rem;
-      font-size: 12px;
-      color: var(--text-soft);
-    }
-    .leaderboard-empty {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
 
     body.theme-light .leaderboard-panel {
       background: linear-gradient(160deg, #f6fbff, #e5f2ff);
@@ -1736,7 +1637,7 @@ body.theme-light {
   display: flex;
   justify-content: center;
   gap: 0.75rem;
-  margin: 1rem 0 1.5rem;
+  margin: 0.75rem 0 1.25rem;
 }
 
 .activity-pill {
@@ -1750,16 +1651,6 @@ body.theme-light {
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.12s ease, box-shadow 0.12s ease;
 }
-.activity-pill:hover {
-  box-shadow: 0 0 14px rgba(0,255,255,0.7);
-  transform: translateY(-1px);
-}
-
-.activity-pill:active {
-  transform: translateY(0);
-  box-shadow: 0 0 6px rgba(0,255,255,0.5);
-}
-
 
 .activity-pill.active {
   background: radial-gradient(circle at top, rgba(0,255,200,0.45), rgba(0,0,0,0.9));
@@ -1981,22 +1872,3 @@ body.theme-light .market-top3-legend {
 #cmatTerminal {
   display: none !important;
 }
-    /* Force main layout columns: left content + right results */
-    .grid-main {
-      display: grid;
-      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-      gap: 20px;
-      align-items: flex-start;
-    }
-    .grid-main-left {
-      grid-column: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-    .grid-main > .panel:first-child {
-      grid-column: 1;
-    }
-    .grid-main .results-grid {
-      grid-column: 2;
-    }
