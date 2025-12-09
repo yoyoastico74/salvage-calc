@@ -1,4 +1,4 @@
-/* Salvage Calculator 4.4 - Styles V6.4.19 (leaderboard + form inputs align fix) */
+/* Salvage Calculator 4.4 - Styles V6.4.21 (leaderboard + form inputs align fix) */
 
     :root {
       --bg: #020710;
@@ -1870,11 +1870,11 @@ body.theme-light .market-top3-legend {
   display: none !important;
 }
 
-/* V6.4.19: reduce chart height */
+/* V6.4.21: reduce chart height */
 #cmatChart { height: 300px !important; }
 
 
-/* V6.4.19: reduce vertical space of Loop RMC/CMAT panel from bottom */
+/* V6.4.21: reduce vertical space of Loop RMC/CMAT panel from bottom */
 .results-grid .panel {
   padding-bottom: 10px !important;
 }
@@ -1888,13 +1888,13 @@ body.theme-light .market-top3-legend {
 }
 
 
-/* V6.4.19: prevent Loop RMC/CMAT panel from stretching full height */
+/* V6.4.21: prevent Loop RMC/CMAT panel from stretching full height */
 .results-grid .panel {
   align-self: start !important;
 }
 
 
-/* V6.4.19: Reduce height of Top 3 leaderboard block */
+/* V6.4.21: Reduce height of Top 3 leaderboard block */
 #leaderboardTop3Box {
   max-height: 160px !important;
   overflow: hidden !important;
@@ -1907,7 +1907,7 @@ body.theme-light .market-top3-legend {
 }
 
 
-/* V6.4.19: compact Leaderboard – Salvage (online) panel */
+/* V6.4.21: compact Leaderboard – Salvage (online) panel */
 #leaderboardMainPanel {
   padding: 8px 10px 8px !important;
 }
@@ -1940,4 +1940,22 @@ body.theme-light .market-top3-legend {
 
 #leaderboardMainPanel .leaderboard-actions {
   margin-top: 4px !important;
+}
+
+
+/* V6.4.21: force Leaderboard – Salvage (online) panel to be more compact */
+#leaderboardMainPanel {
+  padding: 8px 10px 8px !important;
+  max-height: 260px !important;
+  overflow: hidden !important;
+}
+
+#leaderboardMainPanel .leaderboard-panel {
+  padding: 8px 10px 8px !important;
+}
+
+
+/* V6.4.21: prevent panels in Mode Avancé grid from stretching full height */
+.modeAvance-grid .panel {
+  align-self: start !important;
 }
