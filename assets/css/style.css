@@ -1,4 +1,4 @@
-/* Salvage Calculator 4.4 - Styles V6.4.1 (leaderboard + form inputs align fix) */
+/* Salvage Calculator 4.4 - Styles V6.4.8b (leaderboard + form inputs align fix) */
 
     :root {
       --bg: #020710;
@@ -100,6 +100,58 @@ body.theme-light {
       color: var(--accent-strong);
       text-shadow: 0 0 8px rgba(0,255,255,0.5);
     }
+    /* Header layout V6.4.8b */
+    .header-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .header-main #titleMain {
+      flex: 1;
+      text-align: center;
+      margin: 0;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-left: auto;
+    }
+
+    /* Neon labels for header controls */
+    .neon-label {
+      color: var(--text-main);
+      text-shadow: 0 0 8px rgba(0, 255, 255, 0.65),
+                   0 0 14px rgba(0, 255, 255, 0.45);
+      font-weight: 500;
+    }
+    body.theme-light .neon-label {
+      text-shadow: none;
+      color: var(--text-soft);
+    }
+
+    /* Discord connected badge */
+    .user-connected-badge {
+      background: rgba(0, 255, 180, 0.15);
+      border: 1px solid rgba(0, 255, 180, 0.5);
+      padding: 4px 12px;
+      border-radius: 999px;
+      color: #00ffcc;
+      font-weight: 600;
+      text-shadow: 0 0 6px rgba(0, 255, 200, 0.7);
+      box-shadow: 0 0 12px rgba(0, 255, 200, 0.4);
+    }
+    body.theme-light .user-connected-badge {
+      background: rgba(230, 250, 245, 0.95);
+      border-color: var(--accent-alt);
+      color: #0b5040;
+      text-shadow: none;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
+    }
+
 
     body.theme-light h1 {
       text-shadow: none;
