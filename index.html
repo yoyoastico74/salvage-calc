@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V6.4.8c -->
+<!-- Version : V6.4.8f -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -325,6 +325,13 @@
 
           <div class="reclaimer-flow">
             <div class="reclaimer-flow-title">Schéma de la boucle Reclaimer :</div>
+
+          <div class="result-block">
+            <div class="result-head">Top 3 – CMAT</div>
+            <ul id="marketTop3CmatList" class="top3-list"></ul>
+          </div>
+
+        </div>
             <div class="reclaimer-flow-steps">
               <span>Reclaimer</span> → <span>Construction Salvage (CS)</span> → <span>Raffinage</span> → <span>Construction Materials (CMAT)</span> → <span>Vente</span>
             </div>
@@ -339,10 +346,6 @@
             <ul id="marketTop3RmcList" class="top3-list"></ul>
           </div>
 
-          <div class="result-block">
-            <div class="result-head">Top 3 – CMAT</div>
-            <ul id="marketTop3CmatList" class="top3-list"></ul>
-          </div>
 
           <div class="small-note" id="sellZonesNote">
             Ces informations proviennent en temps réel de ton Worker (UEX) et reflètent les meilleurs terminaux de vente actuels.
@@ -547,7 +550,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V6.4.8c";
+const APP_VERSION = "V6.4.8f";
 const ACTIVITY_VERSIONS = {
   salvage: { label: "Salvage", version: "V6.4.4" },
   hauling: { label: "Hauling", version: "V0.0" },
