@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V6.4.6 -->
+<!-- Version : V6.4.7 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -55,7 +55,6 @@
     #discordLoginBtn.connected {
       background: #16a34a;
       box-shadow: 0 0 8px rgba(22,163,74,0.7);
-      cursor: default;
     }
   </style>
 
@@ -74,13 +73,6 @@
 <div class="overlay">
   <div class="container">
     <div class="top-bar">
-      <div class="theme-switch">
-        <label for="themeSelect">Thème :</label>
-        <select id="themeSelect">
-          <option value="neon">Neon</option>
-                    <option value="light">Light</option>
-        </select>
-      </div>
       <div class="lang-switch">
         <span id="langSwitchLabel">Langue :</span>
         <select id="langSelect">
@@ -98,9 +90,9 @@
       Détermine la valeur générée par ton salvage selon la boucle de ton vaisseau (RMC ou CMAT).
     </div>
     <div class="activity-switcher">
-      <button class="activity-pill active" data-activity="salvage" id="activitySalvageBtn">Salvage</button>
-      <button class="activity-pill" data-activity="hauling" id="activityHaulingBtn">Hauling</button>
-      <button class="activity-pill" data-activity="mining" id="activityMiningBtn">Mining</button>
+      <button class="activity-pill active" data-activity="salvage" id="activitySalvageBtn">Recyclage</button>
+      <button class="activity-pill" data-activity="hauling" id="activityHaulingBtn">Fret</button>
+      <button class="activity-pill" data-activity="mining" id="activityMiningBtn">Minage</button>
     </div>
 
     <section id="activity-salvage" class="activity-panel active">
@@ -528,7 +520,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V6.4.6";
+const APP_VERSION = "V6.4.7";
 const ACTIVITY_VERSIONS = {
   salvage: { label: "Salvage", version: "V6.4.4" },
   hauling: { label: "Hauling", version: "V0.0" },
@@ -1032,11 +1024,11 @@ function updateUserUI() {
     // Affichage dans la zone profil
     userInfoEl.textContent = "Connecté via Discord : " + discordUser.nickname;
 
-    // Mise à jour du bouton dans la top-bar
+    // Mise à jour du bouton dans la top-bar (reste cliquable pour permettre la déconnexion)
     if (discordBtn) {
-      discordBtn.textContent = "Connecté : " + discordUser.nickname;
+      discordBtn.textContent = "Connecté via Discord";
       discordBtn.classList.add("connected");
-      discordBtn.disabled = true;
+      discordBtn.disabled = false;
     }
     return;
   }
@@ -1873,7 +1865,7 @@ function applyTheme() {
     body.classList.add("theme-neon");
     currentTheme = "neon";
   }
-  themeSelectEl.value = currentTheme;
+  if (themeSelectEl) themeSelectEl.value = currentTheme;
 }
 
 function applyLanguage() {
@@ -2096,12 +2088,14 @@ langSelectEl.addEventListener("change", () => {
   myRunsPanelEl.classList.remove("open");
 });
 
-themeSelectEl.addEventListener("change", () => {
+if (themeSelectEl) {
+  themeSelectEl.addEventListener("change", () => {
   currentTheme = themeSelectEl.value || "neon";
   if (currentTheme === "dark") currentTheme = "neon";
   applyTheme();
   saveState();
 });
+}
 
 if (changeUserBtn) {
   changeUserBtn.addEventListener("click", () => openProfileModal("create"));
@@ -2462,7 +2456,7 @@ window.addEventListener("load", () => {
   currentTheme = localStorage.getItem("salvageCalcTheme") || currentTheme;
 
   langSelectEl.value = currentLang;
-  themeSelectEl.value = currentTheme;
+  if (themeSelectEl) themeSelectEl.value = currentTheme;
 
   applyTheme();
   ensureUserProfile();
