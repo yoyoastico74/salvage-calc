@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V6.4.8n -->
+<!-- Version : V6.4.8o -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -384,6 +384,25 @@
           </div>
         </div>
 
+
+        <div class="panel" id="sellZonesPanel">
+          <div id="sellZonesTitle" class="panel-title">Top 3 ventes RMC &amp; CMAT</div>
+
+          <div class="result-block">
+            <div class="result-head">Top 3 – RMC</div>
+            <ul id="marketTop3RmcList" class="top3-list"></ul>
+          </div>
+
+          <div class="result-block">
+            <div class="result-head">Top 3 – CMAT</div>
+            <ul id="marketTop3CmatList" class="top3-list"></ul>
+          </div>
+
+          <div class="small-note" id="sellZonesNote">
+            Ces informations proviennent en temps réel de ton Worker (UEX) et reflètent les meilleurs terminaux de vente actuels.
+          </div>
+        </div>
+
         <div class="panel" id="sellZonesPanel">
           <div id="sellZonesTitle" class="panel-title">Top 3 ventes RMC &amp; CMAT</div>
 
@@ -555,7 +574,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V6.4.8n";
+const APP_VERSION = "V6.4.8o";
 const ACTIVITY_VERSIONS = {
   salvage: { label: "Salvage", version: "V6.4.4" },
   hauling: { label: "Hauling", version: "V0.0" },
