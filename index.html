@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V6.4.8 -->
+<!-- Version : V6.4.8b -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -57,7 +57,23 @@
       box-shadow: 0 0 8px rgba(22,163,74,0.7);
       cursor: default;
     }
-  </style>
+  
+    .neon-label {
+      color: var(--text-primary);
+      text-shadow: 0 0 8px rgba(0, 255, 255, 0.65), 0 0 14px rgba(0, 255, 255, 0.45);
+      font-weight: 500;
+    }
+    .user-connected-badge {
+      background: rgba(0, 255, 180, 0.15);
+      border: 1px solid rgba(0, 255, 180, 0.5);
+      padding: 4px 12px;
+      border-radius: 999px;
+      color: #00ffcc;
+      font-weight: 600;
+      text-shadow: 0 0 6px rgba(0, 255, 200, 0.7);
+      box-shadow: 0 0 12px rgba(0, 255, 200, 0.4);
+    }
+</style>
 
 
   <style>
@@ -87,7 +103,7 @@
   <div class="container">
     <div class="header-main">
       <div class="theme-switch">
-        <label for="themeSelect">Thème :</label>
+        <label for="themeSelect" class="neon-label">Thème :</label>
         <select id="themeSelect">
           <option value="neon">Neon</option>
                     <option value="light">Light</option>
@@ -98,7 +114,7 @@
 
       <div class="header-right">
         <div class="lang-switch">
-          <span id="langSwitchLabel">Langue :</span>
+          <span id="langSwitchLabel" class="neon-label">Langue :</span>
           <select id="langSelect">
             <option value="fr">FR</option>
             <option value="en">EN</option>
@@ -543,7 +559,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V6.4.8";
+const APP_VERSION = "V6.4.8b";
 const ACTIVITY_VERSIONS = {
   salvage: { label: "Salvage", version: "V6.4.4" },
   hauling: { label: "Hauling", version: "V0.0" },
@@ -1050,14 +1066,17 @@ function updateUserUI() {
   const discordBtn = typeof discordLoginBtn !== "undefined" ? discordLoginBtn : null;
 
   if (discordUser && discordUser.nickname) {
-    // Affichage dans la zone profil
-    userInfoEl.textContent = "Connecté via Discord : " + discordUser.nickname;
+    // Affichage dans la zone profil (si présent)
+    if (userInfoEl) {
+      userInfoEl.textContent = "Connecté via Discord : " + discordUser.nickname;
+    }
 
     // Mise à jour du bouton dans la top-bar
     if (discordBtn) {
       discordBtn.textContent = "Connecté : " + discordUser.nickname;
       discordBtn.classList.add("connected");
-      discordBtn.disabled = true;
+      discordBtn.classList.add("user-connected-badge");
+      discordBtn.disabled = false;
     }
     return;
   }
@@ -1066,11 +1085,12 @@ function updateUserUI() {
   if (discordBtn) {
     discordBtn.textContent = "Connexion Discord";
     discordBtn.classList.remove("connected");
+    discordBtn.classList.remove("user-connected-badge");
     discordBtn.disabled = false;
   }
 
   // Fallback : ancien système de profil local
-  if (!currentUser) {
+  if (!currentUser && userInfoEl) {
     userInfoEl.textContent = "Profil : —";
   } else {
     userInfoEl.textContent =
