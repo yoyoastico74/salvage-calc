@@ -1,4 +1,4 @@
-/* Salvage Calculator 4.4 - Styles V6.4.15 (leaderboard + form inputs align fix) */
+/* Salvage Calculator 4.4 - Styles V6.4.16 (leaderboard + form inputs align fix) */
 
     :root {
       --bg: #020710;
@@ -1870,13 +1870,13 @@ body.theme-light .market-top3-legend {
   display: none !important;
 }
 
-/* V6.4.15: reduce chart height */
+/* V6.4.16: reduce chart height */
 #cmatChart { height: 300px !important; }
 
 
-/* V6.4.15: reduce vertical space of Loop RMC/CMAT panel from bottom */
+/* V6.4.16: reduce vertical space of Loop RMC/CMAT panel from bottom */
 .results-grid .panel {
-  padding-bottom: 4px !important;
+  padding-bottom: 10px !important;
 }
 
 .results-grid .result-block {
@@ -1885,4 +1885,10 @@ body.theme-light .market-top3-legend {
 
 #loopCmatReclaimerPanel {
   margin-bottom: 0 !important;
+}
+
+
+/* V6.4.16: prevent Loop RMC/CMAT panel from stretching full height */
+.results-grid .panel {
+  align-self: start !important;
 }
