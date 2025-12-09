@@ -1,4 +1,4 @@
-/* Salvage Calculator 4.4 - Styles V6.4.8c (leaderboard + form inputs align fix) */
+/* Salvage Calculator 4.4 - Styles V6.4.8d (leaderboard + form inputs align fix) */
 
     :root {
       --bg: #020710;
@@ -1723,6 +1723,16 @@ body.theme-light {
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.12s ease, box-shadow 0.12s ease;
 }
+.activity-pill:hover {
+  box-shadow: 0 0 14px rgba(0,255,255,0.7);
+  transform: translateY(-1px);
+}
+
+.activity-pill:active {
+  transform: translateY(0);
+  box-shadow: 0 0 6px rgba(0,255,255,0.5);
+}
+
 
 .activity-pill.active {
   background: radial-gradient(circle at top, rgba(0,255,200,0.45), rgba(0,0,0,0.9));
