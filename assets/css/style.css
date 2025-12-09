@@ -1,4 +1,4 @@
-/* Salvage Calculator 4.4 - Styles V6.4.8d (leaderboard + form inputs align fix) */
+/* Salvage Calculator 4.4 - Styles V6.4.8e (leaderboard + form inputs align fix) */
 
     :root {
       --bg: #020710;
@@ -92,7 +92,7 @@ body.theme-light {
     }
 
     h1 {
-      margin: 0 0 8px;
+      margin: 0 0 10px;
       text-align: center;
       font-size: 30px;
       text-transform: uppercase;
@@ -164,7 +164,7 @@ body.theme-light {
       text-align: center;
       font-size: 13px;
       color: var(--text-soft);
-      margin-bottom: 18px;
+      margin-bottom: 22px;
     }
 
     .top-bar {
@@ -1709,7 +1709,7 @@ body.theme-light {
   display: flex;
   justify-content: center;
   gap: 0.75rem;
-  margin: 0.75rem 0 1.25rem;
+  margin: 1rem 0 1.5rem;
 }
 
 .activity-pill {
