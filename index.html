@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Version : V6.4.20 -->
+<!-- Version : V6.4.21 -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -41,7 +41,7 @@
       cursor: pointer;
       box-shadow: 0 0 6px rgba(88,101,242,0.5);
       white-space: nowrap;
-      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease, opacity 0.1s ease;
+      transition: transform 0.1s ease,  box-shadow 0.1s ease, background 0.1s ease, opacity 0.1s ease;
     }
     #discordLoginBtn:hover {
       background: #4752c4;
@@ -55,6 +55,7 @@
     #discordLoginBtn.connected {
       background: #16a34a;
       box-shadow: 0 0 8px rgba(22,163,74,0.7);
+      cursor: default;
     }
   </style>
 
@@ -73,6 +74,13 @@
 <div class="overlay">
   <div class="container">
     <div class="top-bar">
+      <div class="theme-switch">
+        <label for="themeSelect">Thème :</label>
+        <select id="themeSelect">
+          <option value="neon">Neon</option>
+                    <option value="light">Light</option>
+        </select>
+      </div>
       <div class="lang-switch">
         <span id="langSwitchLabel">Langue :</span>
         <select id="langSelect">
@@ -90,9 +98,9 @@
       Détermine la valeur générée par ton salvage selon la boucle de ton vaisseau (RMC ou CMAT).
     </div>
     <div class="activity-switcher">
-      <button class="activity-pill active" data-activity="salvage" id="activitySalvageBtn">Recyclage</button>
-      <button class="activity-pill" data-activity="hauling" id="activityHaulingBtn">Fret</button>
-      <button class="activity-pill" data-activity="mining" id="activityMiningBtn">Minage</button>
+      <button class="activity-pill active" data-activity="salvage" id="activitySalvageBtn">Salvage</button>
+      <button class="activity-pill" data-activity="hauling" id="activityHaulingBtn">Hauling</button>
+      <button class="activity-pill" data-activity="mining" id="activityMiningBtn">Mining</button>
     </div>
 
     <section id="activity-salvage" class="activity-panel active">
@@ -110,6 +118,12 @@
       </div>
     </div>
 
+    <div class="user-box">
+      <span id="userInfo">Profil : —</span>
+      <button id="changeUserBtn" type="button">Gérer mon profil</button>
+    </div>
+
+    
     <div class="mode-toggle">
       <button id="btnModeDebutant" class="mode-btn active">Mode Débutant</button>
       <button id="btnModeAvance" class="mode-btn">Mode Avancé</button>
@@ -290,57 +304,12 @@
             <div class="decision" id="cmatRecDecision"></div>
           </div>
 
-          
+          <div class="reclaimer-flow">
+            <div class="reclaimer-flow-title">Schéma de la boucle Reclaimer :</div>
+            <div class="reclaimer-flow-steps">
+              <span>Reclaimer</span> → <span>Construction Salvage (CS)</span> → <span>Raffinage</span> → <span>Construction Materials (CMAT)</span> → <span>Vente</span>
+            </div>
           </div>
-        </div>
-
-                <div class="panel" id="leaderboardMainPanel">
-<div class="leaderboard-panel">
-                    <div class="leaderboard-title-row">
-                      <div class="leaderboard-title">Leaderboard – Salvage (online)</div>
-                      <div class="leaderboard-badges">
-                        <span class="badge-local-beta">Online Beta</span>
-                      </div>
-                    </div>
-                    <div id="leaderboardSub" class="leaderboard-sub">
-                      Classement basé sur le nombre de runs et les bénéfices théoriques (local au navigateur pour l’instant).
-                    </div>
-          
-                    <button id="toggleMyRunsBtn" type="button" class="my-runs-btn">Voir mes runs détaillés</button>
-                    <div id="myRunsPanel" class="my-runs-panel">
-                      <div id="myRunsTitle" class="my-runs-title">Mes runs enregistrés</div>
-          
-                      <div class="my-runs-section">
-                        <div id="myRunsActiveTitle" class="my-runs-subtitle">En attente de vente</div>
-                        <ul id="myRunsActiveList" class="my-runs-list"></ul>
-                        <div id="myRunsActiveEmpty" class="my-runs-empty">Aucun run en attente de vente.</div>
-                      </div>
-          
-                      <div class="my-runs-section">
-                        <div id="myRunsSoldTitle" class="my-runs-subtitle">Runs vendus</div>
-                        <ul id="myRunsSoldList" class="my-runs-list"></ul>
-                        <div id="myRunsSoldEmpty" class="my-runs-empty">Aucun run vendu pour l'instant.</div>
-                      </div>
-                    </div>
-          
-                    <div id="leaderboardTop3Box" class="leaderboard-top3-box">
-                      <div id="leaderboardTop3Title" class="leaderboard-top3-title">Top 3 global (en ligne)</div>
-                      <ul id="leaderboardList" class="leaderboard-list leaderboard-top3-list"></ul>
-                      <div id="leaderboardEmpty" class="leaderboard-empty" style="display:none;">
-                        Aucun run en ligne pour l'instant.
-                      </div>
-                      
-                    </div>
-          
-                    <div class="leaderboard-actions">
-                      <button id="clearMyRunsBtn" type="button">Supprimer mes runs</button>
-                      <button id="clearAllRunsBtn" type="button">Reset complet (local)</button>
-                      <button id="resetOnlineBtn" type="button" style="display:none; width:100%; margin-top:0.35rem;">
-                        Reset leaderboard online (admin)
-                      </button>
-                      <div id="leaderboardActionMsg" class="leaderboard-action-msg"></div>
-                    </div>
-                  </div>
         </div>
 
         <div class="panel" id="sellZonesPanel">
@@ -376,7 +345,52 @@
           <div id="graphMessage"></div>
         </div>
 
-        
+        <div class="leaderboard-panel">
+          <div class="leaderboard-title-row">
+            <div class="leaderboard-title">Leaderboard – Salvage (online)</div>
+            <div class="leaderboard-badges">
+              <span class="badge-local-beta">Online Beta</span>
+            </div>
+          </div>
+          <div id="leaderboardSub" class="leaderboard-sub">
+            Classement basé sur le nombre de runs et les bénéfices théoriques (local au navigateur pour l’instant).
+          </div>
+
+          <button id="toggleMyRunsBtn" type="button" class="my-runs-btn">Voir mes runs détaillés</button>
+          <div id="myRunsPanel" class="my-runs-panel">
+            <div id="myRunsTitle" class="my-runs-title">Mes runs enregistrés</div>
+
+            <div class="my-runs-section">
+              <div id="myRunsActiveTitle" class="my-runs-subtitle">En attente de vente</div>
+              <ul id="myRunsActiveList" class="my-runs-list"></ul>
+              <div id="myRunsActiveEmpty" class="my-runs-empty">Aucun run en attente de vente.</div>
+            </div>
+
+            <div class="my-runs-section">
+              <div id="myRunsSoldTitle" class="my-runs-subtitle">Runs vendus</div>
+              <ul id="myRunsSoldList" class="my-runs-list"></ul>
+              <div id="myRunsSoldEmpty" class="my-runs-empty">Aucun run vendu pour l'instant.</div>
+            </div>
+          </div>
+
+          <div id="leaderboardTop3Box" class="leaderboard-top3-box">
+            <div id="leaderboardTop3Title" class="leaderboard-top3-title">Top 3 global (en ligne)</div>
+            <ul id="leaderboardList" class="leaderboard-list leaderboard-top3-list"></ul>
+            <div id="leaderboardEmpty" class="leaderboard-empty" style="display:none;">
+              Aucun run en ligne pour l'instant.
+            </div>
+            
+          </div>
+
+          <div class="leaderboard-actions">
+            <button id="clearMyRunsBtn" type="button">Supprimer mes runs</button>
+            <button id="clearAllRunsBtn" type="button">Reset complet (local)</button>
+            <button id="resetOnlineBtn" type="button" style="display:none; width:100%; margin-top:0.35rem;">
+              Reset leaderboard online (admin)
+            </button>
+            <div id="leaderboardActionMsg" class="leaderboard-action-msg"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -514,7 +528,7 @@ function toggleMoreInfo() {
 }
 
 const REND_RECLAIMER = 0.15;
-const APP_VERSION = "V6.4.20";
+const APP_VERSION = "V6.4.21";
 const ACTIVITY_VERSIONS = {
   salvage: { label: "Salvage", version: "V6.4.4" },
   hauling: { label: "Hauling", version: "V0.0" },
@@ -691,6 +705,7 @@ labelShipSelect: "Vaisseau utilisé pour ce run",
     saveRunSuccess: "Run envoyé au leaderboard en ligne.",
     saveRunNoUser: "Crée ou importe un profil avant d'enregistrer un run.",
     saveRunNoScu: "Merci de saisir au moins une SCU de salvage avant d'enregistrer un run.",
+    saveRunNoDiscord: "Connecte-toi via Discord avant d'envoyer un run en ligne.",
     clearMyRunsBtn: "Supprimer mes runs",
     clearAllRunsBtn: "Reset de mes données locales",
     clearMyRunsNoUser: "Aucun profil chargé. Crée ou importe un profil pour supprimer uniquement tes runs.",
@@ -778,6 +793,7 @@ labelShipSelect: "Ship used for this run",
     saveRunSuccess: "Run sent to the online leaderboard.",
     saveRunNoUser: "Please create/import a profile before saving a run.",
     saveRunNoScu: "Please enter at least one salvage SCU before saving a run.",
+    saveRunNoDiscord: "Please log in with Discord before sending a run online.",
     clearMyRunsBtn: "Delete my runs",
     clearAllRunsBtn: "Reset my local data",
     clearMyRunsNoUser: "No profile loaded. Create or import a profile to delete only your runs.",
@@ -941,13 +957,15 @@ function isAdminUser(user) {
 
 function updateAdminUI() {
   const isAdmin = isAdminUser(currentUser);
+  const discordUser = getDiscordUser();
+  const canUseOnlineAdmin = isAdmin && !!discordUser;
 
   if (clearAllRunsBtnEl) {
     clearAllRunsBtnEl.style.display = isAdmin ? "block" : "none";
   }
 
   if (resetOnlineBtnEl) {
-    resetOnlineBtnEl.style.display = isAdmin ? "block" : "none";
+    resetOnlineBtnEl.style.display = canUseOnlineAdmin ? "block" : "none";
   }
 
   if (userInfoEl && currentUser && isAdmin) {
@@ -959,6 +977,7 @@ function updateAdminUI() {
     }
   }
 }
+
 
 function generateSecret() {
   const n = Math.floor(Math.random() * 1000000);
@@ -985,6 +1004,18 @@ function loadUserProfile() {
     return null;
   }
 }
+function getDiscordUser() {
+  try {
+    const rawDiscord = localStorage.getItem("salvageDiscordUser");
+    if (!rawDiscord) return null;
+    const du = JSON.parse(rawDiscord);
+    if (!du || !du.id) return null;
+    return du;
+  } catch (_) {
+    return null;
+  }
+}
+
 
 function saveUserProfile(user) {
   currentUser = user;
@@ -998,6 +1029,8 @@ function saveUserProfile(user) {
 }
 
 function updateUserUI() {
+  if (!userInfoEl) return;
+
   let discordUser = null;
 
   // Tente de récupérer l'utilisateur Discord depuis le localStorage
@@ -1013,16 +1046,14 @@ function updateUserUI() {
   const discordBtn = typeof discordLoginBtn !== "undefined" ? discordLoginBtn : null;
 
   if (discordUser && discordUser.nickname) {
-    // Affichage dans la zone profil (si présent dans le DOM)
-    if (userInfoEl) {
-      userInfoEl.textContent = "Connecté via Discord : " + discordUser.nickname;
-    }
+    // Affichage dans la zone profil
+    userInfoEl.textContent = "Connecté via Discord : " + discordUser.nickname;
 
-    // Mise à jour du bouton dans la top-bar (reste cliquable pour permettre la déconnexion)
+    // Mise à jour du bouton dans la top-bar
     if (discordBtn) {
-      discordBtn.textContent = "Connecté via Discord";
+      discordBtn.textContent = "Connecté : " + discordUser.nickname;
       discordBtn.classList.add("connected");
-      discordBtn.disabled = false;
+      discordBtn.disabled = true;
     }
     return;
   }
@@ -1034,9 +1065,7 @@ function updateUserUI() {
     discordBtn.disabled = false;
   }
 
-  // Fallback : ancien système de profil local, uniquement si la zone profil existe
-  if (!userInfoEl) return;
-
+  // Fallback : ancien système de profil local
   if (!currentUser) {
     userInfoEl.textContent = "Profil : —";
   } else {
@@ -1475,6 +1504,12 @@ function handleSaveRun() {
     return;
   }
 
+  const discordUser = getDiscordUser();
+  if (!discordUser || !discordUser.id) {
+    saveRunMessageEl.textContent = t.saveRunNoDiscord || "Connecte-toi via Discord avant d'envoyer un run en ligne.";
+    return;
+  }
+
   const prixRMC  = Number(prixRmcInput.value)  || 0;
   const prixCMAT = Number(prixCmatInput.value) || 0;
   const sl = Number(scuLightInput.value) || 0;
@@ -1541,6 +1576,7 @@ function handleSaveRun() {
       saveRunMessageEl.style.opacity = "";
     }, 400);
   }, 2500);
+}
 }
 
 function clearMyRuns() {
@@ -1861,7 +1897,7 @@ function applyTheme() {
     body.classList.add("theme-neon");
     currentTheme = "neon";
   }
-  if (themeSelectEl) themeSelectEl.value = currentTheme;
+  themeSelectEl.value = currentTheme;
 }
 
 function applyLanguage() {
@@ -2084,14 +2120,12 @@ langSelectEl.addEventListener("change", () => {
   myRunsPanelEl.classList.remove("open");
 });
 
-if (themeSelectEl) {
-  themeSelectEl.addEventListener("change", () => {
+themeSelectEl.addEventListener("change", () => {
   currentTheme = themeSelectEl.value || "neon";
   if (currentTheme === "dark") currentTheme = "neon";
   applyTheme();
   saveState();
 });
-}
 
 if (changeUserBtn) {
   changeUserBtn.addEventListener("click", () => openProfileModal("create"));
@@ -2452,7 +2486,7 @@ window.addEventListener("load", () => {
   currentTheme = localStorage.getItem("salvageCalcTheme") || currentTheme;
 
   langSelectEl.value = currentLang;
-  if (themeSelectEl) themeSelectEl.value = currentTheme;
+  themeSelectEl.value = currentTheme;
 
   applyTheme();
   ensureUserProfile();
