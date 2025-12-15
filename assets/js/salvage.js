@@ -1,4 +1,4 @@
-/* salvage.js - Version V1.4.18 HOTFIX
+/* salvage.js - Version V1.4.18b HOTFIX
    Objectif :
    - Corriger les erreurs JS (bind() cassé / await hors async / blocs hotfix incomplets)
    - Mode Avancé : garder uniquement "Où vendre maintenant (UEX)" (informatif) + graphique intact
@@ -8,7 +8,7 @@
 (() => {
   "use strict";
 
-  const LS_KEY  = "salvage.module.state.v1_4_16";
+  const LS_KEY  = "salvage.module.state.v1_4_18b";
   const CFG_KEY = "salvage.module.configs.v1_4_16";
 
   // Proxy Worker (UEX)
@@ -214,7 +214,12 @@
   // ---------------------------------------------------------------------------
   function extractPrice(o){
     if(!o || typeof o !== "object") return 0;
-    return num(o.sell ?? o.sell_price ?? o.sellPrice ?? o.price ?? o.value ?? o.unit_price ?? o.unitPrice ?? 0);
+    return num(
+      o.sell ?? o.sell_price ?? o.sellPrice ?? o.sell_per_unit ?? o.sellPerUnit ??
+      o.sell_per_scu ?? o.sellPerScu ?? o.sell_price_per_scu ?? o.sellPricePerScu ??
+      o.unit_price ?? o.unitPrice ?? o.unitPricePerScu ?? o.unit_price_per_scu ??
+      o.price ?? o.value ?? o.last ?? o.latest ?? 0
+    );
   }
 
   function pickFirst(it, keys){
@@ -253,8 +258,61 @@
   let lastBestCmatItem = null;
 
   function setBestSalesFromUex(data){
-    lastBestRmcItem = data?.rmc?.bestTerminal || null;
-    lastBestCmatItem = data?.cmat?.bestTerminal || null;
+    // Robust extraction: Worker payloads can change field names.
+    function pickBestFromArray(arr){
+      let best = null;
+      let bestP = 0;
+      for(const it of (Array.isArray(arr) ? arr : [])){
+        const p = extractPrice(it);
+        if(Number.isFinite(p) && p > bestP){
+          bestP = p;
+          best = it;
+        }
+      }
+      return best;
+    }
+
+    function resolveBest(node){
+      if(!node) return null;
+
+      // Direct object candidates
+      const direct =
+        (node.bestTerminal ?? node.best_terminal ?? node.best ?? node.bestSale ?? node.best_sale ??
+         node.bestPoint ?? node.best_point ?? node.best_location ?? null);
+
+      if(direct && typeof direct === "object") return direct;
+
+      // Array candidates (naming variants)
+      const arr =
+        (node.topTerminals ?? node.top_terminals ?? node.bestTerminals ?? node.best_terminals ??
+         node.topSales ?? node.top_sales ?? node.top ?? node.terminals ?? node.points ??
+         node.sellPoints ?? node.sell_points ?? node.sellZones ?? node.sell_zones ?? null);
+
+      if(Array.isArray(arr) && arr.length){
+        // Prefer highest sell price if present
+        return pickBestFromArray(arr) || arr[0];
+      }
+
+      // Sometimes the commodity node is itself an array
+      if(Array.isArray(node) && node.length){
+        return pickBestFromArray(node) || node[0];
+      }
+
+      // Fallback: try to infer from history entries if they include location fields
+      const hist = node.history;
+      if(Array.isArray(hist) && hist.length){
+        // If history items carry terminal/location fields + price, pick best
+        return pickBestFromArray(hist);
+      }
+
+      return null;
+    }
+
+    const rNode = data?.rmc ?? data?.RMC ?? null;
+    const cNode = data?.cmat ?? data?.CMAT ?? null;
+
+    lastBestRmcItem  = resolveBest(rNode);
+    lastBestCmatItem = resolveBest(cNode);
 
     const rPlace = $("advBestRmcSale");
     const cPlace = $("advBestCmatSale");
@@ -267,19 +325,13 @@
     const rBest = lastBestRmcItem ? extractPrice(lastBestRmcItem) : null;
     const cBest = lastBestCmatItem ? extractPrice(lastBestCmatItem) : null;
 
-    const rAvg = avgHistoryPrice(data?.rmc?.history);
-    const cAvg = avgHistoryPrice(data?.cmat?.history);
+    const rAvg = avgHistoryPrice(rNode?.history);
+    const cAvg = avgHistoryPrice(cNode?.history);
 
-    if(rMeta){
-      const d = formatDeltaPct(rBest, rAvg);
-      rMeta.textContent = Number.isFinite(rBest) ? `Prix: ${Math.round(rBest).toLocaleString("fr-FR")} aUEC/SCU${d ? " • " + d : ""}` : "—";
-    }
-    if(cMeta){
-      const d = formatDeltaPct(cBest, cAvg);
-      cMeta.textContent = Number.isFinite(cBest) ? `Prix: ${Math.round(cBest).toLocaleString("fr-FR")} aUEC/SCU${d ? " • " + d : ""}` : "—";
-    }
+    // Meta lines (delta vs avg)
+    if(rMeta) rMeta.textContent = (Number.isFinite(rBest) && Number.isFinite(rAvg)) ? formatDeltaPct(rBest, rAvg) : "—";
+    if(cMeta) cMeta.textContent = (Number.isFinite(cBest) && Number.isFinite(cAvg)) ? formatDeltaPct(cBest, cAvg) : "—";
   }
-
 
   function computeTrendLabel(history){
     const arr = Array.isArray(history) ? history : [];
@@ -499,7 +551,41 @@
     lastChartPoints = { padL, padT, W, H, vMin, vMax, rmc, cmat };
   }
 
+  
   // ---------------------------------------------------------------------------
+  // Beginner: Top ventes (UEX) - Top 3 RMC / CMAT
+  // ---------------------------------------------------------------------------
+  function escHtml(s){
+    return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+    }[c]));
+  }
+
+  function renderBeginnerTopSales(payload){
+    const elR = $("topRmc");
+    const elC = $("topCmat");
+    if(!elR && !elC) return;
+
+    const rArr = Array.isArray(payload?.rmc?.topTerminals) ? payload.rmc.topTerminals : [];
+    const cArr = Array.isArray(payload?.cmat?.topTerminals) ? payload.cmat.topTerminals : [];
+
+    const render = (arr) => {
+      const top = arr.slice(0,3);
+      if(!top.length) return `<div class="top-sales-empty">—</div>`;
+      return top.map((it) => {
+        const name = escHtml(it?.name || "—");
+        const loc  = escHtml(it?.location || "");
+        const sell = (typeof it?.sell === "number") ? Math.round(it.sell).toLocaleString("fr-FR") : "—";
+        const locPart = loc ? ` <span class="top-sales-loc">(${loc})</span>` : "";
+        return `<div class="top-sales-item"><span class="top-sales-term">${name}</span>${locPart}<span class="top-sales-price">${sell} aUEC/SCU</span></div>`;
+      }).join("");
+    };
+
+    if(elR) elR.innerHTML = render(rArr);
+    if(elC) elC.innerHTML = render(cArr);
+  }
+
+// ---------------------------------------------------------------------------
   // UEX refresh
   // ---------------------------------------------------------------------------
   async function refreshUex(){
@@ -513,6 +599,7 @@
 
       lastUexPayload = data;
       setBestSalesFromUex(data);
+      renderBeginnerTopSales(data);
       renderAdvPriceHistoryChart(data);
       updateMarketInsight(data);
 
@@ -557,6 +644,7 @@
       lastBestRmcItem = null;
       lastBestCmatItem = null;
       setBestSalesFromUex({});
+      renderBeginnerTopSales(null);
       renderAdvPriceHistoryChart(null);
       updateMarketInsight(null);
     }

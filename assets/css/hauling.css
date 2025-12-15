@@ -1,21 +1,683 @@
-/* hauling.css - Version V1.0.0 */
-.hauling-grid{
-  display:grid;
-  grid-template-columns: 1.05fr .95fr;
-  gap:14px;
-  align-items:start;
+/* assets/css/hauling.css — V1_6_3
+   Patch:
+   - Adjust Hauling brightness to match HUB/Recyclage (add vignette + slightly darker panels)
+   - Discord button filled cyan neon (Recyclage style)
+   - Remove number input spinners (+ / -)
+*/
+
+/* assets/css/hauling.css — V1_4_1
+   Scoped styles for FRET module (non-breaking).
+   Patch:
+   - Adjust Hauling brightness to match HUB/Recyclage (add vignette + slightly darker panels)
+   - Top actions (HUB / DISCORD / Support) styled like RECYCLAGE (HUB pill + grouped capsule).
+   - Custom ship picker dropdown (styled) to replace native select list rendering inconsistencies.
+   - Keeps: Beginner upgrades, version badge, fallback background.
+*/
+.page-hauling{
+  --neo-cyan: #00e6ff;
+  --neo-teal: #00e6c3;
+  --neo-text: rgba(231,236,255,.92);
+  --neo-muted: rgba(231,236,255,.70);
+
+  --panel-bg-strong: linear-gradient(180deg, rgba(10,18,28,.88), rgba(6,12,20,.92));
+  --panel-border: rgba(0,230,255,.22);
+  --panel-glow: rgba(0,230,255,.10);
+
+  background-color: #050b12;
+  min-height: 100vh;
 }
-@media (max-width:980px){
-  .hauling-grid{ grid-template-columns:1fr; }
+
+.page-hauling{ color: var(--neo-text); }
+
+.page-hauling .hauling-shell{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0 16px 28px;
 }
-.hauling-inputs,.hauling-results{ display:grid; gap:12px; }
-.route-entry{ border:1px solid var(--border); border-radius:16px; padding:12px; background: rgba(5,6,10,.25); }
-.route-rank{ font-weight:800; margin-bottom:8px; }
-.route-metrics{ display:flex; gap:12px; flex-wrap:wrap; margin-top:8px; color:rgba(231,236,255,.9); }
-.hauling-scu-row{ display:flex; gap:8px; }
-.hauling-scu-row input{ flex:1; }
-.btn-primary{
-  border-color:rgba(0,229,255,.35);
-  box-shadow: 0 0 0 2px rgba(0,229,255,.12) inset;
+.page-hauling .hauling-container{
+  width: min(980px, 100%);
+  position: relative;
 }
-.hauling-beg-market-chart canvas{ width:100% !important; max-height:180px; }
+
+/* Header zone */
+.page-hauling .page-hero{
+  position: relative;
+  padding: 22px 0 6px;
+  text-align: center;
+}
+.page-hauling .page-title{
+  margin: 0;
+  font-size: 38px;
+  letter-spacing: 1px;
+  color: var(--neo-cyan);
+  text-shadow: 0 0 18px rgba(0,230,255,.22);
+}
+.page-hauling .page-subtitle{
+  margin-top: 6px;
+  color: var(--neo-muted);
+  font-size: 13px;
+}
+
+/* Top actions — like RECYCLAGE */
+.page-hauling .top-actions{
+  position: absolute;
+  top: 10px;
+  right: 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.page-hauling .btn-pill{
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  color: var(--neo-text);
+  background: rgba(0,0,0,.18);
+}
+.page-hauling .top-actions-group{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  background: rgba(0,0,0,.18);
+}
+.page-hauling .top-actions-group a{
+  text-decoration: none;
+  color: var(--neo-text);
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+.page-hauling .top-actions-group a.is-strong{
+  font-weight: 800;
+}
+
+/* Mode bar */
+.page-hauling .mode-switch{
+  margin: 12px auto 14px;
+  width: min(980px, 100%);
+  padding: 6px;
+
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  background: rgba(0,0,0,.18);
+  box-shadow: 0 0 28px rgba(0,230,255,.06);
+}
+.page-hauling .mode-btn{
+  height: 44px;
+  padding: 0 26px;
+  border-radius: 999px;
+
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--neo-text);
+
+  cursor: pointer;
+  font-weight: 700;
+  letter-spacing: .2px;
+  white-space: nowrap;
+}
+.page-hauling .mode-btn.is-active{
+  background: rgba(0,230,255,.50);
+  border-color: rgba(0,230,255,.18);
+  box-shadow: 0 0 14px rgba(0,230,255,.10);
+}
+.page-hauling .mode-btn:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0,230,255,.10), 0 0 18px rgba(0,230,255,.10);
+}
+
+/* Panels */
+.page-hauling .panel{
+  background: var(--panel-bg-strong);
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+  box-shadow: 0 0 34px var(--panel-glow);
+  padding: 14px;
+  min-width: 0;
+}
+.page-hauling .panel-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.page-hauling .panel-title{
+  color: var(--neo-cyan);
+  font-weight: 700;
+}
+.page-hauling .panel-chip{
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,230,255,.18);
+  background: rgba(0,0,0,.22);
+  font-weight: 700;
+  font-size: 12px;
+}
+.page-hauling .panel-badge{
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(231,236,255,.14);
+  background: rgba(0,0,0,.18);
+  color: var(--neo-muted);
+  font-size: 12px;
+  display: none;
+}
+.page-hauling .panel-badge.is-on{ display: inline-flex; }
+
+/* Layout grid */
+.page-hauling .hauling-grid{
+  display: grid;
+  grid-template-columns: 520px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+/* Fields */
+.page-hauling .field{ margin-top: 10px; }
+.page-hauling label{
+  display: block;
+  color: var(--neo-muted);
+  margin-bottom: 6px;
+}
+.page-hauling .row-inline{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+.page-hauling input[type="number"],
+.page-hauling input[type="text"]{
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,230,255,.18);
+  background: rgba(0,0,0,.26);
+  color: var(--neo-text);
+  padding: 0 12px;
+  min-width: 0;
+}
+.page-hauling input:focus{
+  outline: none;
+  border-color: rgba(0,230,255,.32);
+  box-shadow: 0 0 0 2px rgba(0,230,255,.10), 0 0 18px rgba(0,230,255,.10);
+}
+.page-hauling .hint{
+  margin-top: 6px;
+  color: var(--neo-muted);
+  font-size: 12px;
+}
+
+/* Custom ship picker (dropdown) */
+.page-hauling .ship-picker{
+  position: relative;
+}
+.page-hauling .ship-picker-btn{
+  width: 100%;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,230,255,.18);
+  background: rgba(0,0,0,.26);
+  color: var(--neo-text);
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+.page-hauling .ship-picker-btn:focus-visible{
+  outline: none;
+  border-color: rgba(0,230,255,.32);
+  box-shadow: 0 0 0 2px rgba(0,230,255,.10), 0 0 18px rgba(0,230,255,.10);
+}
+.page-hauling .ship-picker-label{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.page-hauling .ship-picker-caret{
+  color: rgba(231,236,255,.55);
+  font-size: 12px;
+}
+.page-hauling .ship-picker-menu{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 40;
+
+  background: rgba(6,12,20,.96);
+  border: 1px solid rgba(0,230,255,.18);
+  border-radius: 14px;
+  box-shadow: 0 0 30px rgba(0,230,255,.08);
+
+  max-height: 380px;
+  overflow: auto;
+  padding: 8px;
+}
+.page-hauling .ship-group-title{
+  padding: 8px 10px 6px;
+  color: rgba(231,236,255,.75);
+  font-style: italic;
+  font-weight: 700;
+}
+.page-hauling .ship-item{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(231,236,255,.88);
+  cursor: pointer;
+  text-align: left;
+}
+.page-hauling .ship-item:hover{
+  background: rgba(0,230,255,.08);
+  border-color: rgba(0,230,255,.14);
+}
+.page-hauling .ship-item.is-active{
+  background: rgba(0,230,255,.12);
+  border-color: rgba(0,230,255,.18);
+}
+.page-hauling .ship-item-scu{
+  color: rgba(231,236,255,.60);
+  font-weight: 700;
+}
+.page-hauling .ship-divider{
+  height: 1px;
+  margin: 6px 0;
+  background: rgba(231,236,255,.10);
+}
+
+/* Time presets row */
+.page-hauling .preset-row{
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.page-hauling .btn-preset{
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,230,255,.18);
+  background: rgba(0,0,0,.18);
+  color: var(--neo-text);
+  cursor: pointer;
+  font-size: 12px;
+}
+.page-hauling .btn-preset:hover{
+  border-color: rgba(0,230,255,.32);
+  box-shadow: 0 0 12px rgba(0,230,255,.08);
+}
+
+/* Buttons */
+.page-hauling .btn-secondary{
+  height: 40px;
+  border-radius: 12px;
+  padding: 0 14px;
+  border: 1px solid rgba(0,230,255,.18);
+  background: rgba(0,0,0,.20);
+  color: var(--neo-text);
+  cursor: pointer;
+}
+.page-hauling .btn-secondary:hover{
+  border-color: rgba(0,230,255,.32);
+  box-shadow: 0 0 16px rgba(0,230,255,.10);
+}
+.page-hauling .actions-row{
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* KPI */
+.page-hauling .kpi-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.page-hauling .kpi{
+  background: rgba(0,0,0,.22);
+  border: 1px solid rgba(231,236,255,.12);
+  border-radius: 16px;
+  padding: 12px;
+}
+.page-hauling .kpi-strong{
+  border-color: rgba(0,230,255,.22);
+}
+.page-hauling .kpi-label{
+  color: var(--neo-muted);
+  font-size: 12px;
+}
+.page-hauling .kpi-value{
+  margin-top: 6px;
+  color: var(--neo-cyan);
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.page-hauling .divider{
+  margin: 14px 0 10px;
+  height: 1px;
+  background: rgba(231,236,255,.10);
+}
+.page-hauling .compact-note{
+  color: var(--neo-muted);
+  font-size: 12px;
+}
+
+/* Verdict line */
+.page-hauling .verdict{
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(0,0,0,.18);
+  border: 1px solid rgba(231,236,255,.10);
+}
+.page-hauling .verdict-label{
+  color: var(--neo-muted);
+  font-size: 12px;
+}
+.page-hauling .verdict-value{
+  margin-top: 6px;
+  font-weight: 800;
+  color: var(--neo-text);
+}
+
+/* Version badge — Recyclage-like (typo + zone only) */
+.page-hauling .module-version{
+  position: fixed;
+  right: 14px;
+  bottom: 10px;
+  z-index: 20;
+
+  padding: 4px 10px;
+
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: .2px;
+  color: rgba(231,236,255,.55);
+
+  background: rgba(0,0,0,.28);
+  border-radius: 6px;
+
+  pointer-events: none;
+}
+
+/* Visibility */
+.page-hauling .is-hidden{ display: none; }
+
+/* Responsive */
+@media (max-width: 980px){
+  .page-hauling .hauling-grid{ grid-template-columns: 1fr; }
+
+  .page-hauling .top-actions{
+    position: static;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+
+  .page-hauling .page-hero{ padding-top: 12px; }
+
+  .page-hauling .mode-switch{
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+
+/* === PATCH V1_4_4 OVERRIDES === */
+
+/* Discord button filled neon cyan */
+.page-hauling .top-actions-group a:first-child{
+  background: rgba(0,230,255,.18);
+  border: 1px solid rgba(0,230,255,.45);
+  box-shadow: 0 0 18px rgba(0,230,255,.25);
+  font-weight: 700;
+}
+
+/* Remove number input spinners (all browsers) */
+.page-hauling input[type=number]::-webkit-outer-spin-button,
+.page-hauling input[type=number]::-webkit-inner-spin-button{
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.page-hauling input[type=number]{
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+
+/* === PATCH V1_4_4 — Mode Débutant UX === */
+
+/* Preset actif (temps de boucle) */
+.page-hauling .btn-preset.is-active{
+  background: rgba(0,230,255,.14);
+  border-color: rgba(0,230,255,.38);
+  box-shadow: 0 0 16px rgba(0,230,255,.14);
+  font-weight: 800;
+}
+
+/* KPI Profit/h — encadré renforcé (option 2C) */
+.page-hauling .kpi.kpi-strong{
+  background: rgba(0,0,0,.24);
+  border-color: rgba(0,230,255,.32);
+  box-shadow: 0 0 22px rgba(0,230,255,.12);
+}
+.page-hauling .kpi.kpi-strong .kpi-value{
+  font-size: 20px;
+  letter-spacing: .2px;
+}
+
+/* Verdict — signal visuel léger (sans rouge/vert agressif) */
+.page-hauling .verdict.is-bad{ border-color: rgba(231,236,255,.10); }
+.page-hauling .verdict.is-bad .verdict-value{ color: rgba(231,236,255,.62); }
+
+.page-hauling .verdict.is-ok{ border-color: rgba(160,190,255,.22); }
+.page-hauling .verdict.is-ok .verdict-value{ color: rgba(160,190,255,.92); }
+
+.page-hauling .verdict.is-good{ border-color: rgba(0,230,255,.22); }
+.page-hauling .verdict.is-good .verdict-value{ color: rgba(0,230,255,.92); }
+
+.page-hauling .verdict.is-great{ border-color: rgba(0,230,255,.34); }
+.page-hauling .verdict.is-great .verdict-value{
+  color: rgba(0,230,255,.98);
+  text-shadow: 0 0 14px rgba(0,230,255,.18);
+}
+
+/* Micro-signal investissement élevé */
+.page-hauling .risk-note{
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(0,0,0,.14);
+  border: 1px solid rgba(231,236,255,.10);
+  color: rgba(231,236,255,.62);
+  font-size: 12px;
+}
+.page-hauling .risk-note.is-hidden{ display:none; }
+
+
+/* === PATCH V1_4_4 — Ship search in dropdown === */
+
+.page-hauling .ship-picker-menu{
+  padding-top: 10px;
+}
+
+.page-hauling .ship-search{
+  position: sticky;
+  top: 0;
+  z-index: 2;
+
+  padding: 6px 6px 10px;
+  background: rgba(6,12,20,.96);
+  border-bottom: 1px solid rgba(231,236,255,.10);
+  border-radius: 12px 12px 0 0;
+}
+
+.page-hauling .ship-search input{
+  width: 100%;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,230,255,.18);
+  background: rgba(0,0,0,.26);
+  color: rgba(231,236,255,.92);
+  padding: 0 12px;
+}
+
+.page-hauling .ship-search input::placeholder{
+  color: rgba(231,236,255,.45);
+}
+
+
+/* Ship counter (dropdown) */
+.page-hauling .ship-count{
+  margin-top: 8px;
+  color: rgba(231,236,255,.55);
+  font-size: 11px;
+  letter-spacing: .2px;
+}
+
+
+/* === PATCH V1_5_0 — Cargo type + Risk badge === */
+
+.page-hauling .field select{
+  width: 100%;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(231,236,255,.14);
+  background: rgba(0,0,0,.22);
+  color: rgba(231,236,255,.92);
+  padding: 0 12px;
+}
+
+.page-hauling .field select:focus{
+  outline: none;
+  border-color: rgba(0,230,255,.28);
+  box-shadow: 0 0 18px rgba(0,230,255,.10);
+}
+
+.page-hauling .verdict-sub{
+  margin-top: 6px;
+  color: rgba(231,236,255,.55);
+  font-size: 12px;
+}
+
+/* Risk badge: keep existing .risk-note styles, just ensure label feels like a badge */
+.page-hauling .risk-note{
+  display: inline-block;
+}
+
+
+/* ============================
+   Vignette overlay (V1.5.2)
+   Align Hauling page darkness with HUB/Recyclage
+   - Adds a soft, non-intrusive vignette layer
+============================ */
+
+.hauling-shell{
+  position: relative;
+}
+
+.hauling-shell::before{
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(120% 80% at 50% 20%, rgba(0,0,0,.10), rgba(0,0,0,.22) 70%),
+    linear-gradient(to bottom, rgba(0,0,0,.06), rgba(0,0,0,.16));
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hauling-shell > *{
+  position: relative;
+  z-index: 1;
+}
+
+
+/* === PATCH V1_5_6 — Type de cargo dropdown harmonisé + compat salvage chart bg ===
+   - Le <select>#cargoType reste source de vérité mais est caché (UI custom identique au ship-picker)
+   - Le dropdown custom respecte le style des vaisseaux et la largeur 50%
+   - Le fond du graphique (chart-wrap) est aligné sur salvage.css, scoped à .page-hauling
+*/
+
+.page-hauling .is-hidden{ display:none !important; }
+
+/* Cargo type picker (custom) */
+.page-hauling .cargo-type-picker{
+  width: 50%;
+  min-width: 220px;
+  position: relative;
+}
+@media (max-width: 520px){
+  .page-hauling .cargo-type-picker{ width: 100%; min-width: 0; }
+}
+.page-hauling #cargoTypePickerMenu{ z-index: 60; }
+
+/* Hide native select (still used by JS logic/state) */
+.page-hauling #cargoType.is-hidden{ display:none !important; }
+
+/* Align hauling chart bg with salvage.css */
+.page-hauling .chart-wrap{ background: rgba(0,0,0,.18) !important; }
+
+
+/* === PATCH V1_5_7 — Harmonisation bouton Discord (FRET) === */
+.page-hauling .btn-discord,
+.page-hauling .discord-btn,
+.page-hauling a[href*="discord"]{
+  font-family: var(--font-ui) !important;
+  font-weight: var(--font-ui-weight) !important;
+  letter-spacing: var(--font-ui-spacing) !important;
+}
+
+
+/* ============================
+   FRET subtitle — readability
+   Version: V1.6.1
+============================ */
+
+.page-hauling .subtitle{
+  color: rgba(240,245,255,.92);
+  font-weight: 500;
+  letter-spacing: .2px;
+  text-shadow: 0 1px 6px rgba(0,0,0,.45);
+}
+
+.page-hauling .subtitle::after{
+  content:"";
+  display:block;
+  width: 110px;
+  height: 2px;
+  margin: 6px auto 0;
+  background: rgba(0,230,255,.35);
+  border-radius: 2px;
+}
+
+
+/* === PATCH V1_6_2 — Risk badge toggle (show/hide) === */
+.page-hauling .badge-risk{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* V1.6.3 ensure is-hidden always hides */
+.page-hauling .is-hidden{display:none !important;}

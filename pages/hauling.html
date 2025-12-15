@@ -1,155 +1,182 @@
+<!-- pages/hauling.html — V1_4_1 -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hauling Calculator 4.4</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="../assets/css/core.css">
-  <link rel="stylesheet" href="../assets/css/hauling.css">
-  <style>
-    .top-bar-user { margin-left:auto; display:flex; align-items:center; gap:8px; }
-    #discordLoginBtn {
-      background:#5865f2; border:none; color:#fff; padding:6px 12px; border-radius:999px;
-      font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;
-      box-shadow:0 0 6px rgba(88,101,242,0.5);
-    }
-    #discordLoginBtn.connected { background:#16a34a; box-shadow:0 0 8px rgba(22,163,74,0.7); }
-    #uexSettingsBtn {
-      background:rgba(10,16,34,.75);
-      border:1px solid rgba(231,236,255,.20);
-      color:rgba(231,236,255,.9);
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      cursor:pointer;
-    }
-  </style>
+  <title>FRET — Calculateur</title>
+
+  <link rel="stylesheet" href="../assets/css/core.css" />
+  <link rel="stylesheet" href="../assets/css/hauling.css" />
 </head>
-<body class="theme-neon">
-<div class="overlay">
-  <div class="container">
 
-    
-      <header class="header">
-        <div class="header-tools"><div class="top-bar-user">
-        <button id="uexSettingsBtn" data-admin-only="1" type="button">UEX: Configurer</button>
-        <button id="discordLoginBtn" type="button">Connexion Discord</button>
-      </div></div>
-        <h1 class="page-title" id="titleMain">HAULING CALCULATOR 4.4</h1>
-        <div class="sub"></div>
-        <nav class="nav"></nav>
+<body class="page-hauling">
+  <div class="hauling-shell">
+    <div class="hauling-container">
+
+      <header class="page-hero">
+        <div class="top-actions">
+          <a class="btn-pill" href="../index.html">← HUB</a>
+
+          <div class="top-actions-group" aria-label="Discord actions">
+            <a href="https://discord.gg/d3Q5RJ35gr" target="_blank" rel="noopener">DISCORD</a>
+            <a class="is-strong" href="https://discord.gg/d3Q5RJ35gr" target="_blank" rel="noopener">Support</a>
+          </div>
+        </div>
+
+        <h1 class="page-title">FRET</h1>
+        <div class="page-subtitle">Routes et rentabilité fret (achat → vente) — PU 4.4</div>
       </header>
-<div class="top-bar-user">
-        <button id="uexSettingsBtn" data-admin-only="1" type="button">UEX: Configurer</button>
-        <button id="discordLoginBtn" type="button">Connexion Discord</button>
-      </div>
-    </div>
-<h1 class="page-title" id="titleMain">HAULING CALCULATOR 4.4</h1>
-    <div id="subText" class="sub">
-      Détermine la rentabilité de ton run de fret (profit/run et profit/heure) selon ton vaisseau, les prix d’achat/vente et le temps estimé.
-    </div>
 
-    <div class="panel">
-      <div class="panel-title">Hauling – Calcul de rentabilité</div>
-
-      <div class="mode-toggle hauling-mode-toggle">
-        <button type="button" class="mode-btn active" data-hauling-mode="beginner">Mode Débutant</button>
-        <button type="button" class="mode-btn" data-hauling-mode="expert">Mode Avancé</button>
+      <div class="mode-switch" role="tablist" aria-label="Modes">
+        <button id="tabBeginner" class="mode-btn is-active" role="tab" aria-selected="true" aria-controls="panelBeginner">Mode Débutant</button>
+        <button id="tabAdvanced" class="mode-btn" role="tab" aria-selected="false" aria-controls="panelAdvanced">Mode Avancé</button>
       </div>
 
-      <div id="haulingBeginnerMode" class="mode-section">
+      <section id="panelBeginner" class="mode-panel" role="tabpanel" aria-labelledby="tabBeginner">
         <div class="hauling-grid">
-          <div class="hauling-inputs">
-            <div class="field-label">Vaisseau (cargo)</div>
-            <div><select id="haulingBegShipSelect" class="input-standard"></select></div>
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Paramètres</div>
+              <div class="panel-badge" id="manualBadge" title="Le cargo a été modifié manuellement.">MANUEL</div>
+            </div>
 
-            <div class="field-label">Marchandise</div>
-            <div>
-              <select id="haulingBegCommoditySelect" class="input-standard">
-                <option value="manual">Sélection manuelle</option>
+            <div class="field">
+              <label for="shipPickerBtn">Vaisseau</label>
+              <div class="row-inline">
+                <div class="ship-picker">
+                  <button id="shipPickerBtn" class="ship-picker-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="ship-picker-label" id="shipPickerLabel">—</span>
+                    <span class="ship-picker-caret">▼</span>
+                  </button>
+                  <div id="shipPickerMenu" class="ship-picker-menu is-hidden" role="listbox" aria-label="Liste des vaisseaux"></div>
+                </div>
+
+                <button id="btnMaxScu" class="btn-secondary" type="button">Max SCU</button>
+              </div>
+              
+            </div>
+
+            <!-- Custom ship data -->
+            <div id="customShipBox" class="is-hidden">
+              <div class="field">
+                <label for="customShipName">Nom (Custom)</label>
+                <input id="customShipName" type="text" maxlength="40" placeholder="Ex: 400i (cargo run)" />
+              </div>
+              <div class="field">
+                <label for="customShipScu">Capacité (SCU)</label>
+                <input id="customShipScu" type="number" inputmode="numeric" min="0" step="1" value="0" />
+                <div class="hint">Astuce : “Max SCU” recale le cargo sur ta capacité custom.</div>
+              </div>
+              <div class="divider"></div>
+            </div>
+
+            <div class="field">
+              <label for="cargoScu">Cargo (SCU)</label>
+              <input id="cargoScu" type="number" inputmode="numeric" min="0" step="1" value="64" />
+            </div>
+            <div class="field">
+              <label for="cargoType">Type de cargo</label>
+              <select id="cargoType" class="is-hidden">
+                <option value="standard" selected>Standard</option>
+                <option value="highValue">Haute valeur</option>
+                <option value="risky">Risque élevé</option>
               </select>
+<div class="ship-picker cargo-type-picker">
+  <button id="cargoTypePickerBtn" class="ship-picker-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+    <span id="cargoTypePickerLabel">Standard</span>
+    <span class="chev">▾</span>
+  </button>
+  <div id="cargoTypePickerMenu" class="ship-picker-menu is-hidden" role="listbox"></div>
+</div>
             </div>
 
-            <div class="field-label">Meilleure route</div>
-            <div id="haulingBegRouteBox" class="route-entry">
-              <div class="route-rank" id="haulingBegRouteRank">Route 1 — Manuel</div>
 
-              <div class="small-note hauling-data-status" id="haulingDataStatusBeg">Chargement…</div>
-              <div class="route-steps" id="haulingBegRouteSteps">—</div>
-              <div class="route-commodity" id="haulingBegRouteCommodity">Marchandises : —</div>
-              <div class="route-metrics">
-                <span>Profit / run : <strong id="haulingBegRouteProfitRun">—</strong> aUEC</span>
-                <span>Profit / h : <strong id="haulingBegRouteProfitHour">—</strong> aUEC/h</span>
+            <div class="field">
+              <label for="loopMinutes">Temps (minutes)</label>
+              <input id="loopMinutes" type="number" inputmode="numeric" min="1" step="1" value="25" />
+              <div class="preset-row" aria-label="Presets temps">
+                <button class="btn-preset" type="button" data-min="15">15 min</button>
+                <button class="btn-preset" type="button" data-min="25">25 min</button>
+                <button class="btn-preset" type="button" data-min="40">40 min</button>
               </div>
-            </div>
-          </div>
-
-          <div class="hauling-results">
-            <div class="result-block">
-              <div class="result-head">Résumé rapide</div>
-              <div class="result-values">
-                <div>Profit / run : <span id="haulingBegProfitRun">—</span> aUEC</div>
-                <div>Profit / heure : <span id="haulingBegProfitHour">—</span> aUEC / h</div>
-              </div>
+              
             </div>
 
-            <div class="result-block">
-              <div class="result-head">Paramètres du run</div>
-
-              <div class="field-label">SCU chargées</div>
-              <div class="hauling-scu-row">
-                <input id="haulingBegScuInput" type="number" min="0" value="0" />
-                <button id="haulingBegFillMaxBtn" class="btn-ghost" type="button">Remplir max</button>
-              </div>
-
-              <div class="field-label">Prix d'achat (aUEC / SCU)</div>
-              <div>
-                <input id="haulingBegBuyPriceInput" type="number" min="0" value="0" placeholder="Manuel / UEX" />
-              </div>
-
-              <div class="field-label">Prix de vente (aUEC / SCU)</div>
-              <div>
-                <input id="haulingBegSellPriceInput" type="number" min="0" value="0" placeholder="Manuel / UEX" />
-              </div>
-
-              <div class="field-label">Durée du run (minutes)</div>
-              <div>
-                <input id="haulingBegTimeMinutesInput" type="number" min="0" value="0" />
-              </div>
-
-              <div class="small-note" style="margin-top:0.65rem;">
-                La rentabilité est calculée automatiquement à chaque modification.
-              </div>
+            <div class="field">
+              <label for="buyPrice">Prix d’achat (aUEC / SCU)</label>
+              <input id="buyPrice" type="number" inputmode="decimal" min="0" step="0.01" value="1" />
             </div>
 
-            <div class="small-note">
-              Mode manuel stable. L’intégration UEX (routes/prix auto) peut être ajoutée ensuite sans casser la page.
+            <div class="field">
+              <label for="sellPrice">Prix de vente (aUEC / SCU)</label>
+              <input id="sellPrice" type="number" inputmode="decimal" min="0" step="0.01" value="2" />
+            </div>
+
+            <div class="field">
+              <label for="targetProfitHour">Objectif (aUEC / h)</label>
+              <input id="targetProfitHour" type="number" inputmode="numeric" min="0" step="1000" value="80000" />
+              
+            </div>
+
+            <div class="actions-row">
+              <button id="btnReset" class="btn-secondary" type="button">Réinitialiser</button>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div id="haulingExpertMode" class="mode-section hidden">
-        <div class="result-block">
-          <div class="result-head">Mode Avancé (placeholder)</div>
-          <div class="small-note">
-            Ici, tu peux réintégrer ton Quantum Time Estimator + Top routes UEX une fois la base stabilisée.
-          </div>
-        </div>
-      </div>
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title">Résultats (live)</div>
+              <div class="panel-chip" id="statusChip">OK</div>
+            </div>
 
-    </div>
+            <div class="kpi-grid">
+              <div class="kpi">
+                <div class="kpi-label">Investissement</div>
+                <div class="kpi-value" id="kpiInvest">0 aUEC</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">Recette</div>
+                <div class="kpi-value" id="kpiRevenue">0 aUEC</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">Profit / run</div>
+                <div class="kpi-value" id="kpiProfit">0 aUEC</div>
+              </div>
+              <div class="kpi kpi-strong">
+                <div class="kpi-label">Profit / heure</div>
+                <div class="kpi-value" id="kpiProfitHour">0 aUEC/h</div>
+              </div>
+            </div>
 
-    <div class="app-footer-brand">
-      Powered by <span>Shog Salvage Tools</span>
-    </div>
-
-  </div>
+            <div class="verdict" aria-live="polite">
+              <div class="verdict-label">Verdict</div>
+              <div class="verdict-value" id="verdictText">—</div>
+              <div class="verdict-sub" id="cargoProfile"></div>
+            
+            <div id="riskNote" class="risk-note is-hidden" aria-live="polite">⚠ Risque</div>
 </div>
 
-<script src="../assets/js/core.js"></script>
-<script src="../assets/js/uex-token.js"></script>
-<script src="../assets/js/hauling.js"></script>
+            <div class="divider"></div>
+            <div class="compact-note">
+              
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="panelAdvanced" class="mode-panel is-hidden" role="tabpanel" aria-labelledby="tabAdvanced">
+        <div class="panel">
+          <div class="panel-title">Mode Avancé</div>
+          <div class="hint">En construction.</div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="module-version">Fret · V1.6.3 · MAJ : 15/12/2025</div>
+
+  <script src="../assets/js/hauling.js"></script>
 </body>
 </html>

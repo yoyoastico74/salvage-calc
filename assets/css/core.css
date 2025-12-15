@@ -1,23 +1,34 @@
-/* core.css - Version V1.3.6
+/* core.css - Version V1.3.7
    Global UI: Background image + Neon/Glass theme (theme-neon) + centered navigation under title.
-   This version is designed to work with your existing HTML structure (pages/*) with minimal changes.
+   Patch goals (V1.3.7):
+   - Increase background luminosity (less dark overlays)
+   - Remove heavy "shadow" look on panels/cards/buttons (flatter glass)
 */
 
 :root{
-  --bg:#05060a;
+  /* Slightly brighter base */
+  --bg:#0b0f18;
 
   --text:#e7ecff;
+  /* Fixed invalid rgba from previous version */
   --muted:rgba(231,236,255,.75);
 
   --border:rgba(231,236,255,.12);
   --accent:#00e5ff;
   --accent2:#a855f7;
 
-  --shadow:0 12px 34px rgba(0,0,0,.35);
+  /* Neutral shadow (kept for rare uses, but most components now disable it) */
+  --shadow:0 10px 24px rgba(0,0,0,.22);
 
   --radius:16px;
   --pill:999px;
+
+  /* UI typography (menus, dropdowns, controls) */
+  --font-ui: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+  --font-ui-weight: 650;
+  --font-ui-spacing: .2px;
 }
+
 
 *{ box-sizing:border-box; }
 
@@ -27,23 +38,27 @@ body{
   color:var(--text);
   min-height:100vh;
 
+  /* Brighter background:
+     - reduced vertical dark fade
+     - keep subtle neon radial accents
+  */
   background:
-    linear-gradient(180deg, rgba(0,0,0,.42), rgba(0,0,0,.62)),
+    linear-gradient(180deg, rgba(0,0,0,.14), rgba(0,0,0,.22)),
     url('../img/background_optimized.jpg') center/cover no-repeat fixed,
-    radial-gradient(1200px 700px at 20% 10%, rgba(168,85,247,.18), transparent 60%),
-    radial-gradient(1100px 700px at 80% 20%, rgba(34,211,238,.14), transparent 55%),
-    radial-gradient(900px 600px at 70% 85%, rgba(0,229,255,.12), transparent 60%),
+    radial-gradient(1200px 700px at 20% 10%, rgba(168,85,247,.14), transparent 60%),
+    radial-gradient(1100px 700px at 80% 20%, rgba(34,211,238,.12), transparent 55%),
+    radial-gradient(900px 600px at 70% 85%, rgba(0,229,255,.10), transparent 60%),
     var(--bg);
 }
 
 /* Your pages use <body class="theme-neon">: ensure theme does NOT override background */
 body.theme-neon{
   background:
-    linear-gradient(180deg, rgba(0,0,0,.42), rgba(0,0,0,.62)),
+    linear-gradient(180deg, rgba(0,0,0,.14), rgba(0,0,0,.22)),
     url('../img/background_optimized.jpg') center/cover no-repeat fixed,
-    radial-gradient(1200px 700px at 20% 10%, rgba(168,85,247,.18), transparent 60%),
-    radial-gradient(1100px 700px at 80% 20%, rgba(34,211,238,.14), transparent 55%),
-    radial-gradient(900px 600px at 70% 85%, rgba(0,229,255,.12), transparent 60%),
+    radial-gradient(1200px 700px at 20% 10%, rgba(168,85,247,.14), transparent 60%),
+    radial-gradient(1100px 700px at 80% 20%, rgba(34,211,238,.12), transparent 55%),
+    radial-gradient(900px 600px at 70% 85%, rgba(0,229,255,.10), transparent 60%),
     var(--bg);
 }
 
@@ -70,7 +85,8 @@ a:hover{ text-decoration:underline; }
   font-size: 34px;
   letter-spacing: .06em;
   color: var(--accent);
-  text-shadow: 0 0 18px rgba(0,229,255,.20);
+  /* Reduced glow */
+  text-shadow: 0 0 12px rgba(0,229,255,.16);
   font-weight: 900;
   text-transform: uppercase;
 }
@@ -121,80 +137,89 @@ a:hover{ text-decoration:underline; }
   padding: 9px 16px;
   border-radius: var(--pill);
   border: 1px solid rgba(0,229,255,.35);
-  background: rgba(4, 16, 30, 0.55);
-  box-shadow:
-    0 0 0 1px rgba(0,229,255,.10) inset,
-    0 0 18px rgba(0,229,255,.10);
+  background: rgba(4, 16, 30, 0.42);
+  /* Removed glow shadow */
+  box-shadow: none;
   letter-spacing: .02em;
   font-weight: 650;
   text-decoration:none;
 }
 .nav a:hover{
   border-color: rgba(0,229,255,.60);
-  box-shadow:
-    0 0 0 1px rgba(0,229,255,.18) inset,
-    0 0 22px rgba(0,229,255,.14);
+  box-shadow: none;
 }
 .nav a.active{
-  background: rgba(0, 229, 255, 0.16);
+  background: rgba(0, 229, 255, 0.14);
   border-color: rgba(0,229,255,.85);
-  box-shadow:
-    0 0 0 1px rgba(0,229,255,.22) inset,
-    0 0 26px rgba(0,229,255,.18);
+  box-shadow: none;
 }
 
 /* ---------- Controls ---------- */
+
+/* ============================
+   UI MENUS / DROPDOWNS — TYPO
+   Single source of truth
+============================ */
+
+.ship-picker,
+.ship-picker *,
+.nav a,
+button,
+select,
+input{
+  font-family: var(--font-ui);
+  font-weight: var(--font-ui-weight);
+  letter-spacing: var(--font-ui-spacing);
+}
+
+
 select, input, button{ font: inherit; }
 
 input, select{
-  background: rgba(0, 10, 20, 0.65);
-  border: 1px solid rgba(0,229,255,.45);
+  background: rgba(0, 10, 20, 0.55);
+  border: 1px solid rgba(0,229,255,.40);
   color: var(--text);
   padding: 10px 12px;
   border-radius: var(--pill);
   outline:none;
-  box-shadow: 0 0 0 1px rgba(0,229,255,.10) inset;
+  /* flatter */
+  box-shadow: none;
 }
 input:focus, select:focus{
   border-color: rgba(0,229,255,.85);
-  box-shadow:
-    0 0 0 1px rgba(0,229,255,.18) inset,
-    0 0 14px rgba(0,229,255,.12);
+  box-shadow: none;
 }
 
 button{
   cursor:pointer;
-  border: 1px solid rgba(0,229,255,.45);
-  background: rgba(0, 229, 255, 0.12);
+  border: 1px solid rgba(0,229,255,.40);
+  background: rgba(0, 229, 255, 0.10);
   color: var(--text);
   padding: 10px 12px;
   border-radius: var(--pill);
   font-weight: 650;
-  box-shadow:
-    0 0 0 1px rgba(0,229,255,.10) inset,
-    0 0 18px rgba(0,229,255,.10);
+  /* Removed glow shadow */
+  box-shadow: none;
 }
 button:hover{
   border-color: rgba(0,229,255,.70);
-  background: rgba(0, 229, 255, 0.16);
-  box-shadow:
-    0 0 0 1px rgba(0,229,255,.16) inset,
-    0 0 22px rgba(0,229,255,.14);
+  background: rgba(0, 229, 255, 0.14);
+  box-shadow: none;
 }
 button:disabled{ opacity:.55; cursor:not-allowed; }
 
 /* ---------- Panels ---------- */
 .panel{
+  /* Brighter glass */
   background:
-    linear-gradient(180deg, rgba(4, 16, 30, 0.72), rgba(3, 10, 18, 0.72));
-  border: 1px solid rgba(0,229,255,.30);
+    linear-gradient(180deg, rgba(8, 22, 40, 0.66), rgba(6, 16, 30, 0.60));
+  border: 1px solid rgba(0,229,255,.26);
   border-radius: var(--radius);
-  box-shadow:
-    0 0 0 1px rgba(0,229,255,.08) inset,
-    0 0 28px rgba(0,229,255,.10),
-    0 18px 40px rgba(0,0,0,.35);
+  /* Remove heavy shadows */
+  box-shadow: none;
   padding: 14px 16px 16px;
-  backdrop-filter: blur(6px);
+  /* Keep mild blur; set to 0 if you want totally crisp */
+  backdrop-filter: blur(4px);
 }
 .panel + .panel{ margin-top: 12px; }
 
@@ -216,18 +241,16 @@ button:disabled{ opacity:.55; cursor:not-allowed; }
   width: min(520px, 46%);
   border-radius: var(--pill);
   border: 1px solid rgba(0,229,255,.35);
-  background: rgba(4, 16, 30, 0.55);
+  background: rgba(4, 16, 30, 0.42);
   color: var(--text);
   padding: 10px 12px;
   font-weight: 750;
-  box-shadow: 0 0 0 1px rgba(0,229,255,.10) inset;
+  box-shadow: none;
 }
 .mode-btn.active{
-  background: rgba(0, 229, 255, 0.16);
+  background: rgba(0, 229, 255, 0.14);
   border-color: rgba(0,229,255,.85);
-  box-shadow:
-    0 0 0 1px rgba(0,229,255,.22) inset,
-    0 0 22px rgba(0,229,255,.14);
+  box-shadow: none;
 }
 
 /* Footer branding */
@@ -238,8 +261,8 @@ button:disabled{ opacity:.55; cursor:not-allowed; }
   z-index: 9998;
   pointer-events:none;
   font-size: 11px;
-  color: rgba(231,236,255,.75);
-  text-shadow: 0 0 12px rgba(0,0,0,.35);
+  color: rgba(231,236,255,.78);
+  text-shadow: 0 0 10px rgba(0,0,0,.28);
 }
 
 
@@ -255,23 +278,20 @@ button:disabled{ opacity:.55; cursor:not-allowed; }
   justify-content:center;
   gap:10px;
   border-radius: var(--pill, 999px);
-  border: 1px solid rgba(0,229,255,.55);
-  background: rgba(0, 229, 255, 0.14);
+  border: 1px solid rgba(0,229,255,.50);
+  background: rgba(0, 229, 255, 0.12);
   color: var(--text);
   padding: 10px 14px;
   font-weight: 800;
   letter-spacing: .01em;
-  box-shadow:
-    0 0 0 1px rgba(0,229,255,.12) inset,
-    0 0 20px rgba(0,229,255,.10);
+  /* Removed glow shadow */
+  box-shadow: none;
   text-decoration:none;
 }
 .btn-primary:hover{
   border-color: rgba(0,229,255,.80);
-  background: rgba(0, 229, 255, 0.18);
-  box-shadow:
-    0 0 0 1px rgba(0,229,255,.18) inset,
-    0 0 26px rgba(0,229,255,.14);
+  background: rgba(0, 229, 255, 0.16);
+  box-shadow: none;
   text-decoration:none;
 }
 
@@ -282,16 +302,18 @@ button:disabled{ opacity:.55; cursor:not-allowed; }
   gap:10px;
   border-radius: var(--pill, 999px);
   border: 1px solid rgba(231,236,255,.18);
-  background: rgba(255,255,255,.04);
+  background: rgba(255,255,255,.05);
   color: var(--text);
   padding: 10px 12px;
   font-weight: 650;
   text-decoration:none;
+  box-shadow: none;
 }
 .btn-ghost:hover{
   border-color: rgba(231,236,255,.28);
-  background: rgba(255,255,255,.06);
+  background: rgba(255,255,255,.07);
   text-decoration:none;
+  box-shadow: none;
 }
 
 .grid-2{
@@ -311,8 +333,8 @@ button:disabled{ opacity:.55; cursor:not-allowed; }
   padding: 6px 10px;
   border-radius: 999px;
   border: 1px solid rgba(231,236,255,.14);
-  background: rgba(0,10,20,.35);
-  color: var(--muted, rgba(231,236,255,.75));
+  background: rgba(0,10,20,.32);
+  color: rgba(231,236,255,.72);
   font-size: 12px;
 }
 
@@ -358,9 +380,10 @@ button:disabled{ opacity:.55; cursor:not-allowed; }
 
 .card{
   border: 1px solid rgba(231,236,255,.14);
-  background: rgba(0, 10, 20, 0.35);
+  background: rgba(0, 10, 20, 0.32);
   border-radius: 14px;
   padding: 12px 12px;
+  box-shadow: none;
 }
 .card-title{
   color: rgba(0,229,255,.90);
@@ -384,7 +407,8 @@ button:disabled{ opacity:.55; cursor:not-allowed; }
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid rgba(0,229,255,.25);
-  background: rgba(0,10,20,.35);
+  background: rgba(0,10,20,.32);
+  box-shadow: none;
 }
 .embed-frame iframe{
   display:block;
@@ -441,14 +465,16 @@ button:disabled{ opacity:.55; cursor:not-allowed; }
   padding: 8px 12px;
   border-radius: 999px;
   border: 1px solid rgba(231,236,255,.18);
-  background: rgba(255,255,255,.04);
+  background: rgba(255,255,255,.05);
   color: var(--text);
   font-weight:650;
   text-decoration:none;
+  box-shadow: none;
 }
 .collapsible-toggle:hover{
   border-color: rgba(231,236,255,.28);
-  background: rgba(255,255,255,.06);
+  background: rgba(255,255,255,.07);
+  box-shadow: none;
 }
 
 .collapse-icon{
@@ -483,7 +509,8 @@ button:disabled{ opacity:.55; cursor:not-allowed; }
   height: 8px;
   border-radius: 999px;
   background: rgba(0,229,255,.95);
-  box-shadow: 0 0 12px rgba(0,229,255,.35);
+  /* reduced glow */
+  box-shadow: 0 0 8px rgba(0,229,255,.24);
   display:inline-block;
 }
 .badge-off{
@@ -511,11 +538,10 @@ button:disabled{ opacity:.55; cursor:not-allowed; }
 /* Clickable cards */
 .card-clickable{
   cursor: pointer;
-  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  transition: transform .12s ease, border-color .12s ease;
 }
 .card-clickable:hover{
   border-color: rgba(0,229,255,.22);
-  box-shadow: 0 0 0 1px rgba(0,229,255,.10) inset, 0 0 22px rgba(0,229,255,.08);
   transform: translateY(-1px);
 }
 .card-clickable:focus{
@@ -560,9 +586,6 @@ a:focus-visible, button:focus-visible{
 
 /* ============================
    HUB Polish pack 3 (V1.3.3)
-   - Smoother collapsible animation
-   - Harmonized badges (optional class)
-   - Module micro-tags (chips)
 ============================ */
 
 /* Badge harmonization (use .badge-h to opt-in) */
@@ -602,7 +625,7 @@ a:focus-visible, button:focus-visible{
   padding: 5px 9px;
   border-radius: 999px;
   border: 1px solid rgba(231,236,255,.16);
-  background: rgba(255,255,255,.03);
+  background: rgba(255,255,255,.04);
   color: var(--muted);
   font-size: 12px;
   line-height: 1;
@@ -617,7 +640,7 @@ a:focus-visible, button:focus-visible{
 
 /* ============================
    Background dim fix (no banding)
-   Applied to background image only
+   Adjusted for brighter background (V1.3.7)
 ============================ */
 
 /* The overlay container already exists and holds the background */
@@ -625,14 +648,14 @@ a:focus-visible, button:focus-visible{
   position: relative;
 }
 
-/* Soft vignette + vertical fade, avoids hard horizontal cut */
+/* Softer vignette than V1.3.6 (less dark) */
 .overlay::before{
   content: "";
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(120% 80% at 50% 20%, rgba(0,0,0,.25), rgba(0,0,0,.55) 70%),
-    linear-gradient(to bottom, rgba(0,0,0,.15), rgba(0,0,0,.45));
+    radial-gradient(120% 80% at 50% 20%, rgba(0,0,0,.10), rgba(0,0,0,.22) 70%),
+    linear-gradient(to bottom, rgba(0,0,0,.06), rgba(0,0,0,.16));
   pointer-events: none;
   z-index: 0;
 }
@@ -642,4 +665,3 @@ a:focus-visible, button:focus-visible{
   position: relative;
   z-index: 1;
 }
-

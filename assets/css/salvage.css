@@ -21,7 +21,7 @@
 
 .mode-btn:hover{ border-color: rgba(0,229,255,.42); }
 .mode-btn.is-active{
-  background: rgba(0,229,255,.12);
+  background: rgba(0,229,255,.50);
   box-shadow: 0 0 18px rgba(0,229,255,.10);
 }
 
@@ -34,7 +34,7 @@
   .grid-2-salvage{ grid-template-columns: 1fr; }
 }
 
-.inner-panel{ background: rgba(0, 10, 20, 0.25); }
+.inner-panel{ background: rgba(0, 10, 20, 0.80); }
 .panel-title-sm{ font-size: 14px; opacity: .95; }
 
 .form-row{ display: grid; gap: 6px; margin-top: 10px; }
@@ -169,7 +169,8 @@
   background: rgba(0,10,20,.28);
 }
 .sale-terminal{ font-weight: 900; color: rgba(231,236,255,.95); }
-.sale-location{ font-size: 12px; color: var(--muted); margin-top: 2px; }
+.sale-location{ font-size: 11px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
 .sale-price{ font-weight: 900; color: rgba(0,229,255,.95); white-space: nowrap; }
 
 .sale-main{ display:flex; flex-direction:column; }
@@ -837,3 +838,47 @@
   line-height: 1.2;
   text-align: right;
 }
+
+
+/* -------------------------------------------------------------
+   Beginner - Top ventes (UEX) lists (Top 3 RMC / CMAT)
+------------------------------------------------------------- */
+#topRmc .top-sales-item,
+#topCmat .top-sales-item{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  justify-content:space-between;
+  padding:6px 0;
+  border-bottom:1px solid rgba(0,229,255,.10);
+}
+#topRmc .top-sales-item:last-child,
+#topCmat .top-sales-item:last-child{ border-bottom:none; }
+
+#topRmc .top-sales-term,
+#topCmat .top-sales-term{
+  font-weight:700;
+  color:var(--neo-text, #e7ecff);
+  flex:1 1 auto;
+}
+
+#topRmc .top-sales-loc,
+#topCmat .top-sales-loc{
+  color:rgba(231,236,255,.65);
+  font-size:12px;
+  margin-right:auto;
+}
+
+#topRmc .top-sales-price,
+#topCmat .top-sales-price{
+  color:var(--neo-accent, #00e5ff);
+  font-weight:700;
+  white-space:nowrap;
+}
+
+#topRmc .top-sales-empty,
+#topCmat .top-sales-empty{
+  color:rgba(231,236,255,.45);
+  padding:6px 0;
+}
+
