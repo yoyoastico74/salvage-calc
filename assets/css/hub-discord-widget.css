@@ -1,47 +1,135 @@
-/* hub-discord-widget.css — scoped styles for HUB Discord widget
-   Version: V1.0.0
-   Note: does NOT modify global layout/classes.
+/* assets/css/hub-discord-widget.css — Version V1.0.4
+   Objectif:
+   - Harmoniser l'UI du widget Discord (login + user box) avec le thème core.css (neon/glass)
+   - Avatar en rond
+   - Comportement propre dans la barre .top-actions (HUB)
 */
 
+/* --- Base wrapper --- */
 .shog-discord-auth{
-  display:flex;
-  align-items:center;
-  gap:10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.shog-discord-userbox{
-  display:flex;
-  align-items:center;
-  gap:10px;
+/* --- Login button (non connecté) --- */
+#shogDiscordLoginBtn{
+  /* On force un look "pill" cohérent avec core.css */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--pill);
+  border: 1px solid rgba(231,236,255,.16);
+  background: rgba(0,0,0,.22);
+  color: rgba(231,236,255,.92);
+  font-weight: 900;
+  letter-spacing: .02em;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+}
+
+#shogDiscordLoginBtn:hover{
+  border-color: rgba(0,229,255,.38);
+  background: rgba(0,0,0,.28);
+}
+
+#shogDiscordLoginBtn:active{
+  transform: translateY(1px);
+}
+
+/* --- User box (connecté) --- */
+#shogDiscordUserBox.shog-discord-userbox{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
   padding: 8px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(0,229,255,.18);
-  background: rgba(0,0,0,.18);
-  backdrop-filter: blur(8px);
+  border-radius: var(--pill);
+  border: 1px solid rgba(231,236,255,.16);
+  background: rgba(0,0,0,.22);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+
+  /* Evite que ça prenne trop de place */
+  max-width: 360px;
 }
 
-.shog-discord-avatar{
-  width:34px;
-  height:34px;
+/* Avatar rond + bordure accent */
+#shogDiscordAvatar.shog-discord-avatar{
+  width: 38px;
+  height: 38px;
   border-radius: 999px;
-  border: 1px solid rgba(231,236,255,.14);
   object-fit: cover;
+  flex: 0 0 auto;
+
+  border: 1px solid rgba(0,229,255,.40);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.06),
+    0 0 18px rgba(0,229,255,.10);
 }
 
+/* Zone texte */
 .shog-discord-usertext{
-  display:flex;
-  flex-direction:column;
-  line-height:1.1;
+  display: grid;
+  gap: 2px;
+  min-width: 0; /* permet ellipsis */
 }
 
 .shog-discord-userlabel{
-  font-size: 11px;
-  font-weight: 900;
-  opacity: .8;
+  font-size: var(--font-xs);
+  color: rgba(231,236,255,.70);
+  font-weight: 800;
+  line-height: 1.1;
 }
 
-.shog-discord-username{
-  font-size: 13px;
-  font-weight: 1000;
-  letter-spacing: .01em;
+#shogDiscordUsername.shog-discord-username{
+  font-size: var(--font-sm);
+  color: rgba(231,236,255,.94);
+  font-weight: 900;
+  line-height: 1.15;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+/* --- Logout button (pill) --- */
+#shogDiscordLogoutBtn{
+  margin-left: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 10px 14px;
+  border-radius: var(--pill);
+  border: 1px solid rgba(231,236,255,.14);
+  background: rgba(0,0,0,.18);
+  color: rgba(231,236,255,.90);
+  font-weight: 900;
+  letter-spacing: .02em;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+#shogDiscordLogoutBtn:hover{
+  border-color: rgba(0,229,255,.38);
+  background: rgba(0,0,0,.26);
+}
+
+#shogDiscordLogoutBtn:active{
+  transform: translateY(1px);
+}
+
+/* --- Mobile sanity: empilement si nécessaire --- */
+@media (max-width: 520px){
+  #shogDiscordUserBox.shog-discord-userbox{
+    max-width: 100%;
+  }
+  #shogDiscordUsername.shog-discord-username{
+    max-width: 120px;
+  }
 }

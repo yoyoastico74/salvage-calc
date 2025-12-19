@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <title>Artics Commu Tools — HUB</title>
-  <meta name="description" content="Outils Star Citizen pour le Fret, le Recyclage et le Minage (données UEX)." />
+  <meta name="description" content="Outil Star Citizen pour optimiser les activités de Fret, Recyclage et Minage, avec analyse des prix, graphiques interactifs et comparaisons basées sur les données UEX." />
 
   <!-- Favicon (navigateur) -->
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 
   <!-- Open Graph (Discord / Facebook) -->
   <meta property="og:title" content="Artics Commu Tools — HUB" />
-  <meta property="og:description" content="Outils Star Citizen pour le Fret, le Recyclage et le Minage (données UEX)." />
+  <meta property="og:description" content="Outil Star Citizen pour optimiser les activités de Fret, Recyclage et Minage, avec analyse des prix, graphiques interactifs et comparaisons basées sur les données UEX." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://shog-sc.github.io/Industriel-calc/" />
   <meta property="og:image" content="https://shog-sc.github.io/Industriel-calc/assets/img/og-image.png" />
@@ -22,12 +22,13 @@
   <!-- Twitter / X -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Artics Commu Tools — HUB" />
-  <meta name="twitter:description" content="Outils Star Citizen pour le Fret, le Recyclage et le Minage (données UEX)." />
+  <meta name="twitter:description" content="Outil Star Citizen pour optimiser les activités de Fret, Recyclage et Minage, avec analyse des prix, graphiques interactifs et comparaisons basées sur les données UEX." />
   <meta name="twitter:image" content="https://shog-sc.github.io/Industriel-calc/assets/img/og-image.png" />
-
-  <!-- Styles -->
+  <!-- Meta standard (fallback preview + SEO) -->
+  <!-- Open Graph (Discord / Facebook / LinkedIn, etc.) -->
+  <!-- Twitter / X -->
   <link rel="stylesheet" href="./assets/css/core.css" />
-  <link rel="stylesheet" href="./assets/css/hub.css" />
+  <link rel="stylesheet" href="./assets/css/hub-discord-widget.css" />
 </head>
 
 <body class="theme-neon">
@@ -35,11 +36,8 @@
     <div class="container">
 
       <!-- Header actions -->
-      <div class="header-actions">
-        <a class="btn-primary btn-discord" href="https://discord.gg/d3Q5RJ35gr" target="_blank" rel="noopener noreferrer">
-          <span class="badge badge-h">DISCORD</span>
-          Rejoindre Discord
-        </a>
+      <div class="top-actions">
+        <a class="btn-discord" href="https://discord.gg/d3Q5RJ35gr" target="_blank" rel="noopener noreferrer">DISCORD</a>
 <div id="shogDiscordAuth" class="shog-discord-auth" data-login-url="https://salvage-auth.yoyoastico74.workers.dev/auth/discord/login">
   <button id="shogDiscordLoginBtn" class="btn-ghost" type="button">Connexion Discord</button>
 
@@ -54,8 +52,10 @@
 </div>
 </div>
 
-      <h1 class="page-title">HUB</h1>
-      <div class="sub">Centre de contrôle des outils</div>
+      <header class="hero-card">
+        <h1 class="page-title">HUB</h1>
+        <div class="page-subtitle">Centre de contrôle des outils industriels — PU 4.5</div>
+      </header>
 
       
 
@@ -146,9 +146,9 @@
         <div class="panel-title">Version</div>
         <div class="panel-note">
           <div style="display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap;">
-            <span class="badge badge-h"><strong>HUB</strong> : V1.0.3</span>
-            <span class="badge badge-h" id="coreCssVersion" class="badge-tech badge-h">core.css : —</span>
-            <span class="badge badge-h">PU : 4.4 (support)</span>
+            <span class="badge badge-h"><strong>HUB</strong> : V1.0.4</span>
+            <span class="badge badge-h badge-tech" id="coreCssVersion">core.css : —</span>
+            <span class="badge badge-h">PU : 4.5</span>
           </div>
         </div>
       </div>
