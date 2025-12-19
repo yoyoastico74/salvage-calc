@@ -1,10 +1,6 @@
 <!-- pages/mining.html — Version V1.3.2
      Module: MINAGE (Mode Débutant)
-     Notes:
-     - UI Débutant + calculs simples (mining.js)
-     - Données vaisseaux Minage via miningShips.js
-     - Données minerais Ship via mining_ores_ship.json
-     - Utilise core.css comme source de vérité (panels/cards/controls)
+     Repo: https://shog-sc.github.io/Industriel-calc/
 -->
 
 <!doctype html>
@@ -14,155 +10,142 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MINAGE — Module Minage</title>
 
-  <link rel="stylesheet" href="/assets/css/core.css" />
-  <link rel="stylesheet" href="/assets/css/mining.css" />
+  <!-- CSS (RELATIF AU FICHIER) -->
+  <link rel="stylesheet" href="../assets/css/core.css" />
+  <link rel="stylesheet" href="../assets/css/mining.css" />
 </head>
 
 <body class="page-mining">
   <div class="mining-shell">
     <div class="mining-container">
 
+      <!-- HEADER -->
       <header class="page-hero">
         <div class="top-actions">
-          <a class="btn-pill" href="/index.html" aria-label="Retour HUB">← HUB</a>
+          <a class="btn-pill" href="../index.html" aria-label="Retour HUB">← HUB</a>
           <div class="top-actions-group">
-            <a class="btn-pill btn-discord" href="#" aria-label="Discord">DISCORD</a>
+            <a class="btn-pill btn-discord" href="https://discord.gg/d3Q5RJ35gr" target="_blank" rel="noopener noreferrer">
+              DISCORD
+            </a>
             <a class="btn-pill" href="#" aria-label="Support">Support</a>
           </div>
         </div>
 
-        <header class="hero-card">
+        <div class="hero-card">
           <h1 class="page-title">MINAGE</h1>
-          <p class="page-subtitle">Décision rapide : est-ce que ce run vaut le coup ? — PU 4.5</p>
-        </header>
+          <p class="page-subtitle">
+            Décision rapide : est-ce que ce run vaut le coup ? — PU 4.5
+          </p>
+        </div>
 
         <div class="mode-switch" role="tablist" aria-label="Modes du module">
-          <button class="mode-btn is-active" type="button" role="tab" aria-selected="true">Mode Débutant</button>
-          <button class="mode-btn" type="button" role="tab" aria-selected="false" disabled title="Bientôt disponible">Mode Avancé</button>
+          <button class="mode-btn is-active" type="button" role="tab" aria-selected="true">
+            Mode Débutant
+          </button>
+          <button class="mode-btn" type="button" role="tab" aria-selected="false" disabled>
+            Mode Avancé (bientôt)
+          </button>
         </div>
       </header>
 
+      <!-- MAIN -->
       <main class="mining-grid">
-        <!-- INPUTS -->
-        <section class="panel" aria-labelledby="miningInputsTitle">
+
+        <!-- PARAMÈTRES -->
+        <section class="panel">
           <div class="panel-head">
-            <div class="panel-title" id="miningInputsTitle">Paramètres</div>
+            <div class="panel-title">Paramètres</div>
             <span class="panel-chip">Débutant</span>
           </div>
 
-          <!-- Type de minage -->
+          <!-- TYPE DE MINAGE -->
           <div class="field">
-            <label for="miningTypePickerBtn">Type de minage</label>
+            <label>Type de minage</label>
 
-            <select id="miningType" class="is-hidden" aria-hidden="true" tabindex="-1">
+            <select id="miningType" class="is-hidden">
               <option value="roc">ROC</option>
               <option value="rocds">ROC-DS</option>
-<option value="ship">Vaisseau</option>
+              <option value="ship">Vaisseau</option>
             </select>
 
-            <div class="picker" id="miningTypePicker">
-              <button class="picker-btn" id="miningTypePickerBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                <span class="picker-label" id="miningTypePickerLabel">ROC</span>
+            <div class="picker">
+              <button class="picker-btn" id="miningTypePickerBtn" type="button">
+                <span id="miningTypePickerLabel">ROC</span>
                 <span class="picker-caret">▼</span>
               </button>
 
-              <div class="picker-menu is-hidden" id="miningTypePickerMenu" role="listbox" aria-label="Choisir le type de minage">
-                <button class="picker-item is-active" type="button" data-value="roc" role="option" aria-selected="true">ROC</button>
-                <button class="picker-item" type="button" data-value="rocds" role="option" aria-selected="false">ROC-DS</button>
-<button class="picker-item" type="button" data-value="ship" role="option" aria-selected="false">Vaisseau</button>
+              <div class="picker-menu is-hidden" id="miningTypePickerMenu">
+                <button class="picker-item is-active" data-value="roc">ROC</button>
+                <button class="picker-item" data-value="rocds">ROC-DS</button>
+                <button class="picker-item" data-value="ship">Vaisseau</button>
               </div>
             </div>
-
-            
           </div>
 
-          <!-- Vaisseau (mineurs uniquement) -->
+          <!-- VAISSEAU -->
           <div class="field is-hidden" id="miningShipField">
-            <label for="miningShipPickerBtn">Vaisseau de minage</label>
+            <label>Vaisseau de minage</label>
+            <input type="hidden" id="miningShip" />
 
-            <input type="hidden" id="miningShip" value="" />
-
-            <div class="picker" id="miningShipPicker">
-              <button class="picker-btn" id="miningShipPickerBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                <span class="picker-label" id="miningShipPickerLabel">Sélectionner un vaisseau</span>
+            <div class="picker">
+              <button class="picker-btn" id="miningShipPickerBtn" type="button">
+                <span id="miningShipPickerLabel">Sélectionner un vaisseau</span>
                 <span class="picker-caret">▼</span>
               </button>
-
-              <div class="picker-menu is-hidden" id="miningShipPickerMenu" role="listbox" aria-label="Choisir un vaisseau de minage">
-                <!-- injecté par JS -->
-              </div>
+              <div class="picker-menu is-hidden" id="miningShipPickerMenu"></div>
             </div>
 
             <div class="hint" id="shipCapacityHint"></div>
           </div>
 
-          <!-- Input mode -->
-          <div class="input-mode" role="tablist" aria-label="Mode de saisie">
-            <button class="input-mode-btn is-active" id="modeExpressBtn" type="button" role="tab" aria-selected="true">Estimation</button>
-            <button class="input-mode-btn" id="modeOreBtn" type="button" role="tab" aria-selected="false">Minerai</button>
+          <!-- MODE INPUT -->
+          <div class="input-mode">
+            <button class="input-mode-btn is-active" id="modeExpressBtn">Estimation</button>
+            <button class="input-mode-btn" id="modeOreBtn">Minerai</button>
           </div>
 
-          <!-- Express -->
+          <!-- ESTIMATION -->
           <div id="modeExpressPanel">
             <div class="field">
-              <label for="cargoValue">Valeur estimée de ta cargaison minée (aUEC)</label>
-              <input id="cargoValue" type="number" min="0" step="1" placeholder="Ex: 150000" />
-              <div class="hint">Mode rapide : une estimation globale, sans détail minerai.</div>
+              <label>Valeur estimée de la cargaison (aUEC)</label>
+              <input id="cargoValue" type="number" placeholder="Ex: 150000" />
             </div>
           </div>
 
-          <!-- Ore mode (Ship mining, SCU) -->
+          <!-- MINERAI -->
           <div id="modeOrePanel" class="is-hidden">
             <div class="field">
               <label>Minerai (Ship)</label>
-              <div class="chips" id="oreChips">
-                <!-- injecté par JS -->
-              </div>
-              <div class="hint"></div>
+              <div class="chips" id="oreChips"></div>
             </div>
 
             <div class="field">
-              <label for="oreQty">Quantité (<span id="oreUnitLabel">SCU</span>)</label>
-              <input id="oreQty" type="number" min="0" step="0.1" placeholder="Ex: 12.5" />
-              <div class="hint" id="oreQtyHint">La valeur est recalculée automatiquement.</div>
-              <div class="hint" id="oreCapHint">Capacité : —</div>
+              <label>Quantité (SCU)</label>
+              <input id="oreQty" type="number" step="0.1" />
+              <div class="hint" id="oreCapHint"></div>
             </div>
           </div>
 
-          <!-- Time & target -->
+          <!-- SESSION -->
           <div class="field">
-            <label for="sessionMinutes">Temps de session</label>
-            <div class="row-inline">
-              <input id="sessionMinutes" class="input-half" type="number" min="1" step="1" value="30" />
-              <div class="preset-row" aria-label="Préréglages">
-                <button class="btn-preset" type="button">15 min</button>
-                <button class="btn-preset is-active" type="button">30 min</button>
-                <button class="btn-preset" type="button">45 min</button>
-                <button class="btn-preset" type="button">Libre</button>
-              </div>
-            </div>
-            <div class="hint">Évalue ton aUEC/h à partir de la valeur du run.</div>
+            <label>Temps de session (minutes)</label>
+            <input id="sessionMinutes" type="number" value="30" />
           </div>
 
           <div class="field">
-            <label for="targetPerHour">Objectif personnel (aUEC / heure)</label>
-            <input id="targetPerHour" type="number" min="0" step="1" value="80000" />
-            <div class="hint">Le verdict se base sur cet objectif.</div>
+            <label>Objectif personnel (aUEC/h)</label>
+            <input id="targetPerHour" type="number" value="80000" />
           </div>
 
           <div class="actions-row">
-            <button class="btn-secondary" type="button" id="resetBtn">Réinitialiser</button>
+            <button class="btn-secondary" id="resetBtn">Réinitialiser</button>
           </div>
         </section>
 
-        <!-- RESULT -->
-        <section class="panel" aria-labelledby="miningResultTitle">
+        <!-- RÉSULTAT -->
+        <section class="panel">
           <div class="panel-head">
-            <div class="panel-title" id="miningResultTitle">Résultat</div>
-            <span class="panel-badge is-on" id="badgesRow" aria-label="Badges">
-              <span class="badge badge-risk">⚠ Risque</span>
-              <span class="badge badge-stable">⛏️ Stable</span>
-            </span>
+            <div class="panel-title">Résultat</div>
           </div>
 
           <div class="kpi-grid">
@@ -172,117 +155,38 @@
             </div>
 
             <div class="kpi card">
-              <div class="kpi-label">Profit / run</div>
-              <div class="kpi-value"><span id="kpiRun">—</span> aUEC</div>
-            </div>
-
-            <div class="kpi card">
               <div class="kpi-label">Profit / heure</div>
               <div class="kpi-value"><span id="kpiHour">—</span> aUEC/h</div>
             </div>
 
             <div class="kpi card kpi-strong">
               <div class="kpi-label">Verdict</div>
-              <div class="kpi-value"><span class="verdict-pill is-off" id="verdictPill">—</span></div>
-            </div>
-
-            <div class="kpi card">
-              <div class="kpi-label">Écart vs objectif</div>
-              <div class="kpi-value"><span id="kpiDelta">—</span></div>
-            </div>
-
-            <div class="kpi card">
-              <div class="kpi-label">Objectif atteint en</div>
-              <div class="kpi-value"><span id="kpiTimeToTarget">—</span></div>
+              <div class="kpi-value">
+                <span class="verdict-pill is-off" id="verdictPill">—</span>
+              </div>
             </div>
           </div>
-
-          <div class="divider"></div>
 
           <div class="verdict card">
             <div class="verdict-label">Pourquoi ?</div>
-            <div class="verdict-value" id="verdictReason">Renseigne les champs à gauche pour obtenir un verdict.</div>
-          </div>
-
-          <div class="sellers card" id="sellersCard">
-            <div class="verdict-label">Où vendre maintenant</div>
-            
-            <div class="uex-live" id="uexLive">
-              <div class="uex-live-top">
-                <div class="uex-live-title">UEX (live)</div>
-                
-              </div>
-
-              <div class="uex-live-row">
-                <button type="button" class="btn btn-pill btn-cyan btn-small" id="uexRefreshBtn">Actualiser</button>
-                <div class="uex-live-status" id="uexLiveStatus">UEX live</div>
-              </div>
-
-              <div class="uex-live-metrics">
-                <div class="uex-metric">
-                  <div class="uex-k">Terminal</div>
-                  <div class="uex-v" id="uexLiveTerminal">—</div>
-                </div>
-                <div class="uex-metric">
-                  <div class="uex-k">Prix (sell)</div>
-                  <div class="uex-v" id="uexLivePrice">—</div>
-                </div>
-              </div>
-
-              <div class="uex-chart" id="uexChartWrap" aria-label="Historique prix UEX">
-                <svg id="uexChart" viewBox="0 0 320 120" preserveAspectRatio="none" role="img" aria-label="Courbe prix"></svg>
-                <div class="uex-chart-legend" id="uexChartLegend">—</div>
-              </div>
+            <div class="verdict-value" id="verdictReason">
+              Renseigne les champs à gauche.
             </div>
-
-            <div id="sellersList"></div>
-            <div class="compact-note" id="sellersNote">Disponible uniquement en mode Minerai (Ship).</div>
           </div>
-</section>
+        </section>
+
       </main>
 
-      
-  <div class="version-footer" id="versionFooter">
-    <button type="button" class="version-bar" id="versionToggle" aria-expanded="false">
-      <span class="version-main">MINAGE v1.3.2 · PU 4.5 · BETA</span>
-      <span class="version-cta">Détails</span>
-    </button>
-
-    <div class="version-details is-hidden" id="versionDetails" role="region" aria-label="Versions techniques">
-      <div class="version-details-header">
-        <div class="version-details-title">Versions techniques</div>
-        <button type="button" class="btn btn-ghost btn-small" id="copyVersionsBtn">Copier</button>
+      <!-- FOOTER VERSION -->
+      <div class="version-footer">
+        <span>MINAGE v1.3.2 · PU 4.5 · BETA</span>
       </div>
-
-      <div class="version-grid">
-        <div class="version-col">
-          <div class="version-k">Module</div><div class="version-v">MINAGE v1.3.2</div>
-          <div class="version-k">Core</div><div class="version-v">v1.3.9</div>
-          <div class="version-k">Ships</div><div class="version-v">v2.0.5</div>
-        </div>
-
-        <div class="version-col">
-          <div class="version-k">CSS</div><div class="version-v">v1.2.15</div>
-          <div class="version-k">JS</div><div class="version-v">v1.2.15</div>
-          <div class="version-k">miningShips</div><div class="version-v">v1.0.2</div>
-        </div>
-
-        <div class="version-col">
-          <div class="version-k">Ores (Ship)</div><div class="version-v">v1.2.0</div>
-          <div class="version-k">Ores (ROC)</div><div class="version-v">v1.1.0</div>
-          <div class="version-k">PU</div><div class="version-v">4.5</div>
-        </div>
-      </div>
-    </div>
-
-    <textarea id="versionsCopyBuffer" class="sr-only" tabindex="-1" aria-hidden="true"></textarea>
-  </div>
-
 
     </div>
   </div>
 
-  <script src="/assets/js/miningShips.js"></script>
-  <script src="/assets/js/mining.js"></script>
+  <!-- JS (RELATIF AU FICHIER) -->
+  <script src="../assets/js/miningShips.js"></script>
+  <script src="../assets/js/mining.js"></script>
 </body>
 </html>
