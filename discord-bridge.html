@@ -68,9 +68,9 @@
   }
 
   function redirectToHub(){
-    // Assume bridge lives at repo root: /salvage-calc/discord-bridge.html
-    // So HUB = ./index.html
-    location.replace("./index.html");
+    // Redirect to the current HUB (repo renamed to Industriel-calc).
+    // Use an absolute URL to avoid any legacy path (ex: /salvage-calc/) coming from cached OAuth redirects.
+    location.replace("https://shog-sc.github.io/Industriel-calc/");
   }
 
   // Buttons (fallback)
