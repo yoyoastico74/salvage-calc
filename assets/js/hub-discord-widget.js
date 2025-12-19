@@ -1,5 +1,5 @@
 /* hub-discord-widget.js
-   Version: V1.0.1
+   Version: V1.0.2
    Purpose: HUB-only Discord widget, no dependency on core.js.
    Dependencies: optional assets/js/auth.js (window.ShogAuth)
 */
@@ -8,7 +8,17 @@
   const STORAGE_KEY = "shog.discord.user";
   const DEFAULT_LOGIN_URL = "https://salvage-auth.yoyoastico74.workers.dev/auth/discord/login";
 
-  function $(id){ return document.getElementById(id); }
+  
+  const BRIDGE_URL = "https://shog-sc.github.io/Industriel-calc/discord-bridge.html";
+
+  function withReturnUrl(url){
+    // Backward compatible: if the Worker ignores these params, nothing breaks.
+    const sep = url.includes("?") ? "&" : "?";
+    const encoded = encodeURIComponent(BRIDGE_URL);
+    // Try multiple common parameter names to maximize compatibility with Worker implementations.
+    return url + sep + "return=" + encoded + "&redirect_uri=" + encoded + "&bridge=" + encoded;
+  }
+function $(id){ return document.getElementById(id); }
 
   function safeParse(s){
     try { return JSON.parse(s); } catch(_) { return null; }
@@ -75,7 +85,7 @@
 
     if (!loginBtn.dataset.bound){
       loginBtn.dataset.bound = "1";
-      loginBtn.addEventListener("click", () => { window.location.href = loginUrl; });
+      loginBtn.addEventListener("click", () => { window.location.href = withReturnUrl(loginUrl); });
     }
 
     if (logoutBtn && !logoutBtn.dataset.bound){
