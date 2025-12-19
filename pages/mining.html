@@ -1,4 +1,4 @@
-<!-- pages/mining.html — Version V1.3.2
+<!-- pages/mining.html — Version V1.3.3
      Module: MINAGE (Mode Débutant)
      Repo: https://shog-sc.github.io/Industriel-calc/
 -->
@@ -176,17 +176,45 @@
         </section>
 
       </main>
-
-      <!-- FOOTER VERSION -->
-      <div class="version-footer">
-        <span>MINAGE v1.3.2 · PU 4.5 · BETA</span>
-      </div>
-
-    </div>
+</div>
   </div>
 
   <!-- JS (RELATIF AU FICHIER) -->
   <script src="../assets/js/miningShips.js"></script>
   <script src="../assets/js/mining.js"></script>
+
+  <!-- Version technique (MINAGE) -->
+  <div class="page-mining-version" aria-label="Version technique">
+    <div class="version-bar" id="miningVersionBar" role="button" tabindex="0" aria-expanded="false" aria-controls="miningVersionDetails">
+      <div class="version-left" id="miningVersionClosedLabel">MINAGE V— · PU 4.5</div>
+      <div class="version-right" id="miningVersionCta">Détails</div>
+    </div>
+
+    <div class="version-details is-hidden" id="miningVersionDetails" aria-hidden="true">
+      <div class="version-details-header">
+        <div class="version-details-title">Détails versions</div>
+        <div class="version-details-actions"><button class="btn btn-small" type="button" id="miningVersionCopyBtn">Copier</button><button class="btn btn-small" type="button" id="miningVersionCloseBtn">Fermer</button></div>
+      </div>
+
+      <div class="version-grid">
+        <div class="version-col">
+          <div class="version-k">MINAGE (JS)</div><div class="version-v" id="miningJsVer">—</div>
+          <div class="version-k">MINAGE (CSS)</div><div class="version-v" id="miningCssVer">—</div>
+          <div class="version-k">Core</div><div class="version-v" id="miningCoreVer">—</div>
+        </div>
+        <div class="version-col">
+          <div class="version-k">PU</div><div class="version-v" id="miningPuVer">4.5</div>
+          <div class="version-k">Dataset</div><div class="version-v" id="miningDataVer">—</div>
+          <div class="version-k">Build</div><div class="version-v" id="miningBuildVer">—</div>
+        </div>
+        <div class="version-col">
+          <div class="version-k">Repo</div><div class="version-v" id="miningRepoVer">—</div>
+          <div class="version-k">Page</div><div class="version-v" id="miningPageVer">—</div>
+          <div class="version-k">Last update</div><div class="version-v" id="miningLastVer">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

@@ -1,4 +1,4 @@
-/* hauling.js — V1.9.1 FULL (Assisté: Top Routes Globales + click => bascule A→B)
+/* hauling.js — V1.13.19 FULL (Assisté: Top Routes Globales + click => bascule A→B)
    - FULL FILE (remplacement total)
    - Compatible hauling.html (tabs : tabBeginner/tabAdvanced, panels : panelBeginner/panelAdvanced)
    - Beginner: calcul manuel
@@ -84,12 +84,27 @@
   }
 
   function stabMeta(r){
+    // Palette SC/HUD via CSS classes: is-ok (Très stable), is-ok2 (Stable), is-mid (Variable), is-low (Instable), is-low2 (Volatile), is-unk (—)
+
     // "Stabilité" badge (UEX) — 5 niveaux (badge uniquement)
     // Source: r.stability100 (0..100) ou r.stabilityScore / r.stability (0..1 ou 0..100).
-    const raw =
-      (typeof r?.stability100 === "number" ? r.stability100 :
-      (typeof r?.stabilityScore === "number" ? r.stabilityScore :
-      (typeof r?.stability === "number" ? r.stability : null)));
+    // Accept number or numeric string (UEX proxy may serialize numbers).
+    const pick = (...vals) => {
+      for(const v of vals){
+        if(typeof v === "number" && Number.isFinite(v)) return v;
+        if(typeof v === "string"){
+          const f = parseFloat(v.replace(",", "."));
+          if(Number.isFinite(f)) return f;
+        }
+      }
+      return null;
+    };
+
+    const raw = pick(
+      r?.stability100, r?.stability_100, r?.stabilityPercent, r?.stability_percent,
+      r?.stabilityScore, r?.stability_score,
+      r?.stability
+    );
 
     if(raw === null || !Number.isFinite(raw)){
       return { label: "—", cls: "is-unk", title: "Stabilité : données insuffisantes (UEX)." };

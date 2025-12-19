@@ -1,4 +1,4 @@
-/* assets/js/mining.js — Version V1.4.3
+/* assets/js/mining.js — Version V1.4.13
    Module: MINAGE (Mode Débutant) — Mega Package (suite)
    Changements V1.2.1 :
    - Suppression des phrases/hints demandés (texte UI)
@@ -745,11 +745,16 @@ oreDataRoc = await res.json();
     document.addEventListener("click", (e) => {
       const t = e.target;
       if (!(t instanceof Element)) return;
-      if (!$("#miningTypePicker")?.contains(t)) closeMenu(elTypePickerMenu, elTypePickerBtn);
-      if (!$("#miningShipPicker")?.contains(t)) closeMenu(elShipPickerMenu, elShipPickerBtn);
-    });
 
-    document.addEventListener("keydown", (e) => {
+      // Robust outside-click detection:
+      // HTML uses `.picker` wrappers (not the old #miningTypePicker/#miningShipPicker ids).
+      const typeRoot = elTypePickerBtn ? elTypePickerBtn.closest(".picker") : null;
+      const shipRoot = elShipPickerBtn ? elShipPickerBtn.closest(".picker") : null;
+
+      if (typeRoot && !typeRoot.contains(t)) closeMenu(elTypePickerMenu, elTypePickerBtn);
+      if (shipRoot && !shipRoot.contains(t)) closeMenu(elShipPickerMenu, elShipPickerBtn);
+    });
+document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         closeMenu(elTypePickerMenu, elTypePickerBtn);
         closeMenu(elShipPickerMenu, elShipPickerBtn);
@@ -1231,3 +1236,120 @@ function showDataErrorBanner(msg){
 }
 
 function escapeHtml(str){return String(str||'').replace(/[&<>"']/g,(c)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));}
+
+/* ============================
+   Version footer (MINAGE) — Details toggle + fill
+   ============================ */
+function miningGetCssVar(name){
+  try {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim().replace(/^"|"$/g, "");
+  } catch(_) { return ""; }
+}
+
+function miningInitVersionFooter(){
+  const bar = document.getElementById("miningVersionBar");
+  const details = document.getElementById("miningVersionDetails");
+  const closeBtn = document.getElementById("miningVersionCloseBtn");
+  const cta = document.getElementById("miningVersionCta");
+  const closedLabel = document.getElementById("miningVersionClosedLabel");
+  if(!bar || !details || !cta || !closedLabel) return;
+
+  const jsV = "V1.4.8";
+  const cssV = "V1.3.10";
+  const coreV = miningGetCssVar("--core-css-version") || "—";
+  const dataV = (window.MINING_DATA_VERSION) ? String(window.MINING_DATA_VERSION) : "assets/data/*";
+
+  const repo = location.pathname.split("/").filter(Boolean)[0] || "—";
+  const page = location.pathname.split("/").slice(-1)[0] || "mining.html";
+  const build = (location.search || "").replace(/^\?/, "") || "—";
+
+  // Closed bar label exactly like Recyclage (adapted)
+  closedLabel.textContent = `MINAGE ${jsV} · PU 4.5`;
+
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  set("miningJsVer", jsV);
+  set("miningCssVer", cssV);
+  set("miningCoreVer", coreV);
+  set("miningDataVer", dataV);
+  set("miningBuildVer", build);
+  set("miningRepoVer", repo);
+  set("miningPageVer", page);
+  set("miningLastVer", new Date().toLocaleString("fr-FR"));
+
+  
+
+  const copyBtn = document.getElementById("miningVersionCopyBtn");
+  const buildText = () => {
+    const lines = [];
+    lines.push(`MINAGE Support Snapshot`);
+    lines.push(`PU: 4.5`);
+    lines.push(`Repo: ${repo}`);
+    lines.push(`Page: ${page}`);
+    lines.push(`Build: ${build}`);
+    lines.push(`MINAGE JS: ${jsV}`);
+    lines.push(`MINAGE CSS: ${cssV}`);
+    lines.push(`Core: ${coreV}`);
+    lines.push(`Dataset: ${dataV}`);
+    lines.push(`Last update: ${new Date().toLocaleString("fr-FR")}`);
+    return lines.join("\n");
+  };
+  const doCopy = async () => {
+    const txt = buildText();
+    try {
+      await navigator.clipboard.writeText(txt);
+      if(copyBtn) {
+        const prev = copyBtn.textContent;
+        copyBtn.textContent = "Copié";
+        setTimeout(() => { copyBtn.textContent = prev; }, 1200);
+      }
+    } catch(_) {
+      // Fallback
+      const ta = document.createElement("textarea");
+      ta.value = txt;
+      ta.setAttribute("readonly","");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch(__) {}
+      document.body.removeChild(ta);
+    }
+  };
+  if(copyBtn) copyBtn.addEventListener("click", (e) => { e.stopPropagation(); doCopy(); });
+const open = () => {
+    details.classList.remove("is-hidden");
+    details.setAttribute("aria-hidden","false");
+    bar.setAttribute("aria-expanded","true");
+    cta.textContent = "Fermer";
+  };
+
+  const close = () => {
+    details.classList.add("is-hidden");
+    details.setAttribute("aria-hidden","true");
+    bar.setAttribute("aria-expanded","false");
+    cta.textContent = "Détails";
+  };
+
+  const toggle = () => {
+    const isOpen = !details.classList.contains("is-hidden");
+    if(isOpen) close(); else open();
+  };
+
+  bar.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggle();
+  });
+
+  bar.addEventListener("keydown", (e) => {
+    if(e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+    if(e.key === "Escape") { close(); }
+  });
+
+  if(closeBtn) closeBtn.addEventListener("click", (e) => { e.stopPropagation(); close(); });
+
+  close();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  try { miningInitVersionFooter(); } catch(_) {}
+});
