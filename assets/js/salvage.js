@@ -1,4 +1,4 @@
-/* assets/js/salvage.js — V1.4.36 FULL
+/* assets/js/salvage.js — V1.4.40 FULL
    Recyclage (Salvage) — PU 4.5
    ---------------------------------------------------------------------------
    Objectifs V1.4.25
@@ -17,7 +17,7 @@
      CONFIG & CONSTANTES
   ------------------------------*/
 
-  const APP_VERSION = "V1.4.25";
+  const APP_VERSION = "V1.4.40";
   const DEFAULT_GAME_VERSION = "4.4";
 
   // IMPORTANT:
@@ -215,6 +215,8 @@
     chart: {
       seriesRmc: [],
       seriesCmat: [],
+      spotRmc: 0,
+      spotCmat: 0,
       hovering: false,
     }
   };
@@ -774,6 +776,17 @@
     return dedup.length > MAX_POINTS ? dedup.slice(-MAX_POINTS) : dedup;
   }
 
+  function boundsWithSpot(series, spotValue) {
+    const b = boundsOf(series);
+    const s = Number(spotValue);
+    if (!Number.isFinite(s)) return b;
+    if (!b) return { minV: s - 1, maxV: s + 1 };
+    return {
+      minV: Math.min(b.minV, s),
+      maxV: Math.max(b.maxV, s),
+    };
+  }
+
   function boundsOf(series) {
     if (!series || !series.length) return null;
     let minV = Infinity, maxV = -Infinity;
@@ -831,7 +844,7 @@
     return `${dd}/${mm}`;
   }
 
-  function drawChart(seriesR, seriesC, hoverT = null) {
+  function drawChart(seriesR, seriesC, hoverT = null, spot = null) {
     if (!advPriceHistoryChart) return;
 
     setCanvasDprSize();
@@ -839,8 +852,11 @@
     if (!ctx) return;
 
     const tb = timeBounds(seriesR, seriesC);
-    const bR = boundsOf(seriesR);
-    const bC = boundsOf(seriesC);
+    const spotR = spot && Number.isFinite(spot.rmc) ? spot.rmc : null;
+    const spotC = spot && Number.isFinite(spot.cmat) ? spot.cmat : null;
+
+    const bR = boundsWithSpot(seriesR, spotR);
+    const bC = boundsWithSpot(seriesC, spotC);
 
     ctx.clearRect(0, 0, advPriceHistoryChart.width, advPriceHistoryChart.height);
 
@@ -938,6 +954,39 @@
     // CMAT (right axis)
     strokeSeries(seriesC, "rgba(231,236,255,0.85)", "rgba(231,236,255,0.85)", yOfC);
 
+    // Spot lines (actuel / best sell)
+    // NOTE: We draw a dashed horizontal reference line for current UEX best sell (or fallback price),
+    // so users can visually compare "historique" vs "prix actuel".
+    function drawSpotLine(v, yFn, color, label, alignRight) {
+      if (typeof v !== "number" || !Number.isFinite(v)) return;
+      const y = yFn(v);
+      ctx.save();
+      ctx.setLineDash([6, 6]);
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.55;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(pad.l, y);
+      ctx.lineTo(pad.l + gw, y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Small label near the axis edge
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = color;
+      ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+      const txt = `${label} ${fmtInt(v)}`;
+      const tw = ctx.measureText(txt).width;
+      const x = alignRight ? (pad.l + gw - tw - 6) : (pad.l + 6);
+      ctx.fillText(txt, x, y - 6);
+      ctx.restore();
+    }
+
+    // RMC spot (left)
+    if (spotR !== null) drawSpotLine(spotR, yOfR, "rgba(0,229,255,0.95)", "Spot", false);
+    // CMAT spot (right)
+    if (spotC !== null) drawSpotLine(spotC, yOfC, "rgba(231,236,255,0.95)", "Spot", true);
+
     // Hover crosshair + highlights
     if (hoverT && Number.isFinite(hoverT)) {
       const x = xOf(hoverT);
@@ -994,8 +1043,33 @@
     advChartTooltip.setAttribute("aria-hidden", on ? "false" : "true");
     if (!on) return;
 
-    // default position (centered above cursor)
-    advChartTooltip.style.left = `${x}px`;
+    // Position tooltip with horizontal clamping + edge docking (prevents clipping at chart end)
+    const parent = advChartTooltip.parentElement;
+    const pr = parent ? parent.getBoundingClientRect() : null;
+
+    // Default anchor
+    let leftPx = x;
+    let mode = "center"; // center | left | right
+
+    if(pr){
+      const edgePad = 12;
+      const rightDockAt = 170; // when near right edge, dock tooltip to the right side
+      const leftDockAt  = 120; // when near left edge, dock tooltip to the left side
+
+      if(leftPx > (pr.width - rightDockAt)){
+        leftPx = pr.width - edgePad;
+        mode = "right";
+      }else if(leftPx < leftDockAt){
+        leftPx = edgePad;
+        mode = "left";
+      }
+
+      // Clamp (safety)
+      leftPx = Math.max(edgePad, Math.min(pr.width - edgePad, leftPx));
+    }
+
+    // Keep Y anchored to cursor (we only flip vertically if needed)
+    advChartTooltip.style.left = `${leftPx}px`;
     advChartTooltip.style.top = `${y}px`;
 
     const htmlLines = (Array.isArray(lines) ? lines : []).map(l => (
@@ -1007,12 +1081,13 @@
       <div class="tt-body">${htmlLines}</div>
     `;
 
-    // Flip if out of bounds
-    const parent = advChartTooltip.parentElement;
-    const pr = parent ? parent.getBoundingClientRect() : null;
+    // Flip vertically if out of bounds (top)
     const tr = advChartTooltip.getBoundingClientRect();
-    const needsFlip = pr && (tr.top < pr.top);
-    advChartTooltip.style.transform = needsFlip ? "translate(-50%, 18%)" : "translate(-50%, -120%)";
+    const needsFlipY = pr && (tr.top < pr.top);
+
+    const yPart = needsFlipY ? "18%" : "-120%";
+    const xPart = (mode === "right") ? "-100%" : (mode === "left" ? "0%" : "-50%");
+    advChartTooltip.style.transform = `translate(${xPart}, ${yPart})`;
   }
 
   function bindChartInteractions() {
@@ -1022,7 +1097,7 @@
       state.chart.hovering = false;
       state.chart.hoverT = null;
       setTooltip(false, 0, 0, "", []);
-      drawChart(state.chart.seriesRmc, state.chart.seriesCmat, null);
+      drawChart(state.chart.seriesRmc, state.chart.seriesCmat, null, { rmc: state.chart.spotRmc, cmat: state.chart.spotCmat });
     });
 
     advPriceHistoryChart.addEventListener("mousemove", (ev) => {
@@ -1046,7 +1121,7 @@
         state.chart.hovering = false;
         state.chart.hoverT = null;
         setTooltip(false, 0, 0, "", []);
-        drawChart(state.chart.seriesRmc, state.chart.seriesCmat, null);
+        drawChart(state.chart.seriesRmc, state.chart.seriesCmat, null, { rmc: state.chart.spotRmc, cmat: state.chart.spotCmat });
         return;
       }
 
@@ -1059,21 +1134,34 @@
       if (pR) lines.push({ k: "RMC", v: `${fmtInt(pR.v)} aUEC/SCU` });
       if (pC) lines.push({ k: "CMAT", v: `${fmtInt(pC.v)} aUEC/SCU` });
 
+      // Also show current spot (best sell) for reference
+      if (Number.isFinite(state.chart.spotRmc) && state.chart.spotRmc > 0) lines.push({ k: "Spot RMC", v: `${fmtInt(state.chart.spotRmc)} aUEC/SCU` });
+      if (Number.isFinite(state.chart.spotCmat) && state.chart.spotCmat > 0) lines.push({ k: "Spot CMAT", v: `${fmtInt(state.chart.spotCmat)} aUEC/SCU` });
+
       // Tooltip positioned in CSS pixels
       setTooltip(true, xCss, yCss, title, lines);
 
       state.chart.hovering = true;
       state.chart.hoverT = t;
-      drawChart(state.chart.seriesRmc, state.chart.seriesCmat, t);
+      drawChart(state.chart.seriesRmc, state.chart.seriesCmat, t, { rmc: state.chart.spotRmc, cmat: state.chart.spotCmat });
     });
   }
 
   function updateChartFromUex(uex) {
     const r = toSeries(uex?.rmc?.history, "sell");
     const c = toSeries(uex?.cmat?.history, "sell");
+
+    // Spot = "best sell" when available (matches Top ventes / vendre maintenant),
+    // fallback to generic market price if best terminal is missing.
+    const spotR = safePosNum(uex?.rmc?.bestTerminal?.sell, safePosNum(uex?.rmc?.price, 0));
+    const spotC = safePosNum(uex?.cmat?.bestTerminal?.sell, safePosNum(uex?.cmat?.price, 0));
+
     state.chart.seriesRmc = r;
     state.chart.seriesCmat = c;
-    drawChart(r, c, state.chart.hoverT || null);
+    state.chart.spotRmc = spotR;
+    state.chart.spotCmat = spotC;
+
+    drawChart(r, c, state.chart.hoverT || null, { rmc: spotR, cmat: spotC });
   }
 /* -----------------------------
      RESET
@@ -1209,7 +1297,7 @@
       renderTopSales(topRmc, []);
       renderTopSales(topCmat, []);
       if (advSellNowFeedback) setText(advSellNowFeedback, "UEX KO • Mode manuel.");
-      drawChart([], []);
+      drawChart([], [], null, { rmc: 0, cmat: 0 });
       recalcBeginner();
       recalcAdvanced();
     }
