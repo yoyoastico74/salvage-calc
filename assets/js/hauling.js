@@ -1,4 +1,4 @@
-/* hauling.js — V1.13.62 FULL (Suggestions: Top Routes Globales + click => bascule A→B)
+/* hauling.js — V1.14.7 FULL (Suggestions: Top Routes Globales + click => bascule A→B)
    - FULL FILE (remplacement total)
    - Compatible hauling.html (tabs : tabBeginner/tabAdvanced, panels : panelBeginner/panelAdvanced)
    - Beginner: calcul manuel
@@ -11,17 +11,17 @@
 (() => {
   "use strict";
 
-  const VERSION = "V1.14.3 FULL";
+  const VERSION = "V1.14.7 FULL";
 
   // ------------------------------------------------------------
   // TECH VERSIONS (FRET) — single source of truth (Mining-like footer)
   // ------------------------------------------------------------
   const TECH = {
     module: "FRET",
-    moduleVersion: "V1.14.3",
-    html: "V1.14.3",
-    css: "V1.14.3",
-    js: "V1.14.3",
+    moduleVersion: "V1.14.7",
+    html: "V1.13.64",
+    css: "V1.13.61",
+    js: "V1.14.7",
     core: "V1.5.20",
     ships: "v2.0.5",
     pu: "4.5"
@@ -80,6 +80,9 @@
 
 
   function score100(r){
+    // Prefer UI-recomputed score when present (risk tolerance re-rank without refetch)
+    const ui = num(r?.uiScore100);
+    if (Number.isFinite(ui) && ui > 0) return int(ui);
     return int(r?.finalScore100 ?? Math.round(num(r?.finalScore ?? 0) * 100)) || 0;
   }
 
@@ -872,6 +875,117 @@ return lines.join("\n");
     return "Normal : compromis stabilité / performance.";
   }
 
+
+// ------------------------------------------------------------
+// ADVANCED: react to risk tolerance change
+// - If suggestions (Top routes) are currently displayed: refetch with new risk
+// - If route A→B analysis is currently displayed: rerun analysis with new risk
+// - Otherwise: only update the hint (no automatic scan)
+// ------------------------------------------------------------
+let riskRefreshTimer = null;
+function riskScoreLine(r){
+  if (r === "low") return "Score : stabilité > profit (routes plus sûres).";
+  if (r === "high") return "Score : profit > stabilité (No pain, no gain).";
+  return "Score : équilibre stabilité / profit.";
+}
+
+// ------------------------------------------------------------
+// UI local re-rank on risk tolerance change (no refetch, no spinner)
+// ------------------------------------------------------------
+function getStability100(r){
+  const raw =
+    (typeof r?.stability100 === "number" ? r.stability100 :
+    (typeof r?.stabilityScore === "number" ? (r.stabilityScore <= 1 ? r.stabilityScore * 100 : r.stabilityScore) :
+    (typeof r?.stability === "number" ? (r.stability <= 1 ? r.stability * 100 : r.stability) : null)));
+  if (raw == null || !Number.isFinite(raw)) return 50;
+  return Math.max(0, Math.min(100, raw));
+}
+
+function applyUiScoringToList(list, risk){
+  if (!Array.isArray(list) || !list.length) return list;
+
+  // Normalize profits within the current list for meaningful relative ranking
+  let maxPscu = 0;
+  let maxTotal = 0;
+  for (const r of list){
+    const pscu = num(r?.profitPerSCU ?? 0);
+    const tot = num(r?.profitTotal ?? 0);
+    if (pscu > maxPscu) maxPscu = pscu;
+    if (tot > maxTotal) maxTotal = tot;
+  }
+  maxPscu = maxPscu > 0 ? maxPscu : 1;
+  maxTotal = maxTotal > 0 ? maxTotal : 1;
+
+  // Risk weights: low favors stability, high favors profit (No pain, no gain)
+  let wStab = 0.5, wProfit = 0.5;
+  if (risk === "low"){ wStab = 0.65; wProfit = 0.35; }
+  else if (risk === "high"){ wStab = 0.35; wProfit = 0.65; }
+
+  for (const r of list){
+    const stab = getStability100(r) / 100;
+    const pscu = num(r?.profitPerSCU ?? 0) / maxPscu;
+    const tot = num(r?.profitTotal ?? 0) / maxTotal;
+    const profitIndex = Math.max(0, Math.min(1, (0.7 * pscu) + (0.3 * tot)));
+
+    const s = (wStab * stab) + (wProfit * profitIndex);
+    r.uiScore100 = Math.max(1, Math.min(100, Math.round(s * 100)));
+  }
+  return list;
+}
+
+function rerankFromCache(){
+  const mode = getAdvSort();
+
+  // Global top routes list (assisted)
+  if (state.assisted.active && Array.isArray(state.assisted.lastRoutesRaw) && state.assisted.lastRoutesRaw.length){
+    applyUiScoringToList(state.assisted.lastRoutesRaw, state.advanced.risk);
+    const sorted = sortItems(state.assisted.lastRoutesRaw, mode);
+    state.assisted.lastRoutes = sorted;
+
+    const q = ($("advSearch")?.value || "").trim();
+    const shown = q ? filterRoutesByCommodity(sorted, q) : sorted;
+    renderTopRoutes(shown, state.assisted.lastScan || null);
+
+    if (q){
+      setAdvText("advCount", `${shown.length} / ${sorted.length} routes`);
+    } else {
+      setAdvText("advCount", `${shown.length} routes`);
+    }
+    try { setSortStatus(); } catch (_) {}
+    return true;
+  }
+
+  // A→B results (analysis)
+  if (!state.assisted.active && Array.isArray(state.routeCache.lastResultsRaw) && state.routeCache.lastResultsRaw.length){
+    applyUiScoringToList(state.routeCache.lastResultsRaw, state.advanced.risk);
+    const results = sortItems(state.routeCache.lastResultsRaw, mode);
+    state.routeCache.lastResults = results;
+    renderTop3(results);
+    renderGoodsList(results);
+    setAdvText("advRouteStatus", `OK • ${results.length} résultats`);
+    try { setSortStatus(); } catch (_) {}
+    return true;
+  }
+
+  return false;
+}
+
+function refreshAfterRiskChange(){
+  if (riskRefreshTimer) clearTimeout(riskRefreshTimer);
+  riskRefreshTimer = setTimeout(() => {
+    // Avoid parallel fetches: if buttons are disabled, a request is in progress.
+    const btnCalc = $("advTopCalc");
+    const btnAnalyze = $("advRouteAnalyze");
+    if ((btnCalc && btnCalc.disabled) || (btnAnalyze && btnAnalyze.disabled)) return;
+
+    // If we have cached results, re-rank locally (no refetch, no loading).
+    if (rerankFromCache()) return;
+
+    // Otherwise, do nothing (user will click Calculer / Analyser when ready).
+  }, 120);
+}
+
+
   
   function sanitizeSourceLabel(v){
     const s = (v == null) ? "" : String(v);
@@ -1230,7 +1344,9 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
 
   async function analyzeRouteAdvanced() {
     const btn = $("advRouteAnalyze");
-    btn && (btn.disabled = true);
+    const btnCalc = $("advTopCalc");
+    if (btn) btn.disabled = true;
+    if (btnCalc) btnCalc.disabled = true;
 
     try {
       state.assisted.active = false;
@@ -1284,6 +1400,7 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
 
       const resultsRaw = Array.isArray(data?.results) ? data.results : [];
       state.routeCache.lastResultsRaw = resultsRaw;
+      applyUiScoringToList(state.routeCache.lastResultsRaw, state.advanced.risk);
       state.routeCache.lastMeta = meta || null;
       state.routeCache.lastPayload = payload;
       const results = sortItems(resultsRaw, getAdvSort());
@@ -1299,8 +1416,9 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
       setChip("Proxy/UEX indisponible", true);
       setAdvText("advRouteStatus", `Erreur: ${String(e?.message || e)}`);
     } finally {
-      btn && (btn.disabled = false);
-    }
+      if (btnCalc) btnCalc.disabled = false;
+      if (btn) btn.disabled = false;
+      }
   }
 
   
@@ -1320,8 +1438,17 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
       arr.sort((a, b) => num(b.profitPerSCU ?? 0) - num(a.profitPerSCU ?? 0));
       return arr;
     }
-    // score (default): use finalScore (0..1) if present; fallback to profitTotal
-    arr.sort((a, b) => (num(b.finalScore ?? 0) - num(a.finalScore ?? 0)) || (num(b.profitTotal ?? 0) - num(a.profitTotal ?? 0)));
+    // score (default): prefer UI-recomputed uiScore100; fallback to API finalScore/finalScore100, then profitTotal
+    const scoreVal = (r) => {
+      const ui = num(r?.uiScore100);
+      if (Number.isFinite(ui) && ui > 0) return ui / 100;
+      const fs = num(r?.finalScore);
+      if (Number.isFinite(fs) && fs > 0) return fs;
+      const fs100 = num(r?.finalScore100);
+      if (Number.isFinite(fs100) && fs100 > 0) return fs100 / 100;
+      return 0;
+    };
+    arr.sort((a, b) => (scoreVal(b) - scoreVal(a)) || (num(b.profitTotal ?? 0) - num(a.profitTotal ?? 0)));
     return arr;
   }
 
@@ -1452,8 +1579,10 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
   }
 
   async function fetchTopRoutes(opts={}) {
-    const btn = $("advAssist");
-    btn && (btn.disabled = true);
+    const btnCalc = $("advTopCalc");
+    const btnAnalyze = $("advRouteAnalyze");
+    if (btnCalc) btnCalc.disabled = true;
+    if (btnAnalyze) btnAnalyze.disabled = true;
 
     try {
       const shipScu = num($("advUsableScu")?.value || 0);
@@ -1493,6 +1622,7 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
 
       const routesRaw = Array.isArray(data?.routes) ? data.routes : [];
       state.assisted.lastRoutesRaw = routesRaw;
+      applyUiScoringToList(state.assisted.lastRoutesRaw, state.advanced.risk);
       const routes = sortItems(routesRaw, getAdvSort());
       // Optional: commodity-driven search (client side filter)
       const __q = (opts && typeof opts.commodityQuery === "string") ? opts.commodityQuery.trim() : "";
@@ -1524,7 +1654,8 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
       setAdvText("advRouteStatus", `Erreur: ${String(e?.message || e)}`);
       clearResultsArea("Erreur scan routes (voir console).");
     } finally {
-      btn && (btn.disabled = false);
+      if (btnAnalyze) btnAnalyze.disabled = false;
+      if (btnCalc) btnCalc.disabled = false;
       saveState();
     }
   }
@@ -1539,8 +1670,9 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
         state.advanced.risk = (r === "high" || r === "mid" || r === "low") ? r : "low";
 
         $qa(".quick-btn[data-risk]").forEach(b => b.classList.toggle("is-active", b === btn));
-        setAdvText("advRiskHint", `${riskHintText(state.advanced.risk)}  Score = profit pondéré par stabilité (selon risque).`);
+        setAdvText("advRiskHint", `${riskHintText(state.advanced.risk)}  ${riskScoreLine(state.advanced.risk)}`);
         saveState();
+        refreshAfterRiskChange();
       });
     });
 
@@ -1560,7 +1692,7 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
     wireGoodsSearch();
 
     // New: Suggestions (Top routes)
-    $("advAssist")?.addEventListener("click", fetchTopRoutes);
+    $("advTopCalc")?.addEventListener("click", fetchTopRoutes);
     // Tri (Score / Profit / Profit/SCU) — apply instantly (no refetch if cached)
     const __sortHandler = () => {
       try { console.info("[hauling][sort]", getAdvSort()); } catch (_) {}
@@ -1602,7 +1734,7 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
       state.advanced.risk = "low";
       const lowBtn = $q('.quick-btn[data-risk="low"]');
       if (lowBtn) $qa(".quick-btn[data-risk]").forEach(b => b.classList.toggle("is-active", b === lowBtn));
-      setAdvText("advRiskHint", `${riskHintText("low")}  Score = profit pondéré par stabilité (selon risque).`);
+      setAdvText("advRiskHint", `${riskHintText("low")}  ${riskScoreLine("low")}`);
 
       saveState();
     });
@@ -1624,7 +1756,7 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
     setAdvText("advCount", "—");
     setAdvText("advMaj", "MAJ : —");
     setChip("—", false);
-    setAdvText("advRiskHint", `${riskHintText(state.advanced.risk || "low")}  Score = profit pondéré par stabilité (selon risque).`);
+    setAdvText("advRiskHint", `${riskHintText(state.advanced.risk || "low")}  ${riskScoreLine(state.advanced.risk || "low")}`);
 
     if ($("advRouteFrom")) $("advRouteFrom").value = state.advanced.fromName || "";
     if ($("advRouteTo")) $("advRouteTo").value = state.advanced.toName || "";
@@ -1703,78 +1835,3 @@ const pre = ($("advRouteFrom")?.value || "").trim();
   });
 
 })();
-
-
-
-
-/* ============================================================
-   V1.13.62 — Calculer (Top 3) + Balise "!" (Aide)
-   ============================================================ */
-document.addEventListener("DOMContentLoaded", () => {
-  const topCalc = document.getElementById("advTopCalc");
-  const infoBtn = document.getElementById("advInfoToggle");
-  const infoPanel = document.getElementById("advInfoPanel");
-
-  if (topCalc) {
-    topCalc.addEventListener("click", () => {
-      try {
-        // Prefer the Top Routes endpoint / routine (best route suggestions)
-        if (typeof fetchTopRoutes === "function") {
-          fetchTopRoutes();
-        } else if (typeof analyzeRouteAdvanced === "function") {
-          // Fallback: keep behaviour if only analysis exists
-          analyzeRouteAdvanced();
-        }
-      } catch (e) {
-        console.warn("[advTopCalc]", e);
-      }
-    });
-  }
-
-  if (infoBtn && infoPanel) {
-    infoBtn.addEventListener("click", () => {
-      infoPanel.classList.toggle("is-hidden");
-    });
-  }
-});
-
-
-function setAdvButtonsDisabled(disabled){
-  try{
-    const a = document.getElementById("advRouteAnalyze");
-    const c = document.getElementById("advTopCalc");
-    if(a) a.disabled = !!disabled;
-    if(c) c.disabled = !!disabled;
-  }catch(e){}
-}
-
-
-/* ============================================================
-   V1.13.62 — Calculer button (Top 3): trigger the same pipeline as "Analyser la route"
-   - Using click() on #advRouteAnalyze ensures we hit the real, already-wired handler.
-   - The "!" is now pure CSS hover tooltip (HTML/CSS), no JS needed.
-   ============================================================ */
-document.addEventListener("DOMContentLoaded", () => {
-  const topCalc = document.getElementById("advTopCalc");
-  if (topCalc) {
-    topCalc.addEventListener("click", () => {
-      try {
-        const analyzeBtn = document.getElementById("advRouteAnalyze");
-        if (analyzeBtn) {
-          analyzeBtn.click();
-          return;
-        }
-        if (typeof analyzeRouteAdvanced === "function") {
-          analyzeRouteAdvanced();
-          return;
-        }
-        if (typeof fetchTopRoutes === "function") {
-          fetchTopRoutes();
-          return;
-        }
-      } catch (e) {
-        console.warn("[advTopCalc]", e);
-      }
-    });
-  }
-});

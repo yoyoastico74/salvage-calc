@@ -1,4 +1,4 @@
-<!-- pages/hauling.html — V1.13.62 -->
+<!-- pages/hauling.html — V1.13.71 -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -9,7 +9,9 @@
   <!-- Core theme (background + neon) -->
   <link rel="stylesheet" href="../assets/css/core.css" />
 
-  <!-- Module styles (scoped) -->
+  
+  <link rel="stylesheet" href="../assets/css/techbar-fixed.css?v=V1.0.0" />
+<!-- Module styles (scoped) -->
   <link rel="stylesheet" href="../assets/css/hauling.css" />
 </head>
 
@@ -21,7 +23,7 @@
       <div class="top-actions">
         <a class="btn-pill" href="../index.html">← HUB</a>
         <a class="btn-pill btn-cyan" href="https://discord.gg/d3Q5RJ35gr" target="_blank" rel="noopener">DISCORD</a>
-        <a class="btn-pill btn-strong" href="https://discord.gg/d3Q5RJ35gr" target="_blank" rel="noopener">Support</a>
+        <a class="btn-pill btn-strong" href="https://discord.com/channels/1428047802805653640/1453446130858852422" target="_blank" rel="noopener noreferrer">Support</a>
       </div>
 
       <!-- Hero -->
@@ -221,8 +223,9 @@
                 </div>
               </div>
 
-              <div class="field actions">
-                <button id="resetAdvanced" class="btn" type="button">Réinitialiser (Avancé)</button>
+              <div class="field actions advanced-actions">
+                <button id="advTopCalc" class="btn" type="button">Calculer</button>
+                <button id="resetAdvanced" class="btn" type="button">Réinitialiser</button>
               </div>
             </div>
           </div>
@@ -278,7 +281,23 @@
               <button id="advUnlock" class="btn btn-small" type="button">Déverrouiller</button>
             </div>
 
-            <div class="subhead subhead-split subhead-top3">  <span class="subhead-title">Top 3 conseillées    <span class="info-dot info-dot-inline" data-tip="Score : indice de classement (rendement + risque + disponibilité). Variable : niveau d’incertitude (stocks/prix), Élevé = plus volatile. Tolérance au risque : influence le classement. Stocks faibles = route moins viable. UEX : en cas de limite (429), un cooldown s’affiche ici.">!</span>  </span>  <div class="subhead-actions">    <button id="advTopCalc" class="btn btn-small" type="button">Calculer</button>  </div></div>
+            <div class="subhead subhead-split subhead-top3">
+              <span class="subhead-title">
+                Top 3 conseillées
+                <span class="info-dot info-dot-inline" tabindex="0" role="button" aria-label="Aide Top 3">!
+                  <span class="info-tooltip" role="tooltip">
+                    <div class="info-tooltip-title">Aide classement</div>
+                    <ul class="info-tooltip-list">
+                      <li><b>Score</b> : indice de classement (rendement + risque + disponibilité).</li>
+                      <li><b>Variable</b> : niveau d’incertitude (stocks/prix). Élevé = plus volatile.</li>
+                      <li><b>Tolérance au risque</b> : influence le classement (faible = plus stable).</li>
+                      <li><b>Stocks faibles</b> : routes moins viables (quantité limitée).</li>
+                      <li><b>UEX</b> : en cas de limite (429), un cooldown s’affiche ici.</li>
+                    </ul>
+                  </span>
+                </span>
+              </span>
+            </div>
 <div id="top3Row" class="top3-row">
               <div class="empty">Chargement…</div>
             </div>
@@ -306,14 +325,14 @@
 <!-- Version footer (support) — style MINING -->
 <div class="version-footer page-hauling-version" id="versionFooter">
   <button id="versionToggle" class="version-bar" type="button" aria-expanded="false">
-    <div class="version-main" id="versionMainText">FRET V1.13.24 • PU 4.5</div>
+    <div class="version-main" id="versionMainText">FRET V1.13.71 • PU 4.5</div>
     <div class="version-cta">Détails</div>
   </button>
 
   <div id="versionDetails" class="version-details is-hidden">
     <div class="version-details-header">
       <div class="version-details-title">Versions techniques</div>
-      <button id="copyVersionsBtn" class="btn" type="button">Copier</button>
+      <div class="version-details-actions"><button id="copyVersionsBtn" class="btn" type="button">Copier</button><button id="copyBugTemplateBtn" class="btn" type="button">Template bug</button><button id="copyDebugInfoBtn" class="btn" type="button">Infos debug</button></div>
     </div>
 
     <div class="version-grid" role="table" aria-label="Versions techniques FRET">
@@ -349,5 +368,8 @@
 
 
   <script src="../assets/js/hauling.js"></script>
+<script defer src="../assets/js/techbar.js?v=V1.0.0"></script>
+
+<script defer src="../assets/js/support-tools.js?v=V1.0.0"></script>
 </body>
 </html>

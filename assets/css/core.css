@@ -1,4 +1,4 @@
-/* core.css - Version V1.5.37
+/* core.css - Version V1.5.38
    Global UI: Background image + Neon/Glass theme (theme-neon) + centered navigation under title.
    Patch goals (V1.3.9):
    - Increase core specificity so it overrides module-scoped selectors like .page-hauling .panel
@@ -1405,6 +1405,17 @@ body.page-salvage .version-details-header{
   margin-bottom: 10px;
 }
 
+
+.version-details-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.version-details-actions .btn{
+  white-space: nowrap;
+}
 body.page-salvage .version-details-title{
   font-weight: 800;
   color: rgba(255,255,255,.90);

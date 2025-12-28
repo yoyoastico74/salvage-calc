@@ -1,4 +1,4 @@
-/* assets/css/hauling.css — V1.13.61
+/* assets/css/hauling.css — V1.13.63
    IMPORTANT: fichier complet (remplacement total)
    Objectif: conserver la "neon vibe" + compat UI FRET V1.14.3.
    NOTE: Typo delegated to core.css (no fixed px font sizes).
@@ -1210,3 +1210,90 @@
   z-index:50;
 }
 .info-dot-inline:hover::after{ opacity:1; }
+
+
+/* ============================================================
+   V1.13.63 — Advanced actions: move "Calculer" next to Reset
+   ============================================================ */
+.advanced-actions{
+  display:flex;
+  gap:12px;
+  justify-content:space-between;
+}
+.advanced-actions .btn{
+  flex:1;
+}
+
+/* ============================================================
+   V1.13.63 — Structured tooltip for Top 3 "!"
+   (replaces legacy data-tip ::after)
+   ============================================================ */
+.info-dot-inline::after{
+  content: none !important;
+  display:none !important;
+}
+
+.info-dot-inline{
+  position:relative;
+}
+
+.info-dot-inline .info-tooltip{
+  position:absolute;
+  left:50%;
+  top:calc(100% + 10px);
+  transform:translateX(-50%);
+  width:min(520px, 70vw);
+  padding:12px 12px;
+  border-radius:12px;
+  border:1px solid rgba(231,236,255,.16);
+  background:rgba(0,0,0,.82);
+  color:rgba(231,236,255,.92);
+  font-weight:600;
+  line-height:1.35;
+  white-space:normal;
+
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .12s ease, transform .12s ease;
+  z-index:60;
+}
+
+.info-dot-inline:hover .info-tooltip,
+.info-dot-inline:focus .info-tooltip,
+.info-dot-inline:focus-within .info-tooltip{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+  pointer-events:auto;
+}
+
+.info-tooltip-title{
+  font-weight:900;
+  margin-bottom:8px;
+}
+
+.info-tooltip-list{
+  margin:0;
+  padding-left:18px;
+}
+.info-tooltip-list li{
+  margin:6px 0;
+  color:rgba(231,236,255,.88);
+}
+.info-tooltip-list b{
+  font-weight:900;
+}
+
+/* Mobile: keep tooltip readable */
+@media (max-width: 520px){
+  .info-dot-inline .info-tooltip{
+    left:0;
+    transform:none;
+    width:min(520px, 86vw);
+  }
+  .info-dot-inline:hover .info-tooltip,
+  .info-dot-inline:focus .info-tooltip,
+  .info-dot-inline:focus-within .info-tooltip{
+    transform:none;
+  }
+}
+

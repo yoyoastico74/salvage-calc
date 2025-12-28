@@ -1,4 +1,4 @@
-<!-- pages/ships.html — V1.0.38 -->
+<!-- pages/ships.html — V1.0.39 (Support forum link) -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -21,7 +21,7 @@
       <div class="top-actions">
         <a class="btn-pill" href="../index.html">← HUB</a>
         <a class="btn-pill btn-cyan" href="https://discord.gg/d3Q5RJ35gr" target="_blank" rel="noopener">DISCORD</a>
-        <a class="btn-pill btn-strong" href="https://discord.gg/d3Q5RJ35gr" target="_blank" rel="noopener">Support</a>
+        <a class="btn-pill btn-strong" href="https://discord.com/channels/1428047802805653640/1453446130858852422" target="_blank" rel="noopener">Support</a>
       </div>
 
       <!-- Hero -->
@@ -50,8 +50,7 @@
 <div class="ships-filter-row">
   <div class="ships-filter-top">
     <label class="ships-filter-label" for="shipMaker">Constructeur</label>
-    <span class="ships-mini">(marque)</span>
-  </div>
+</div>
   <select id="shipMaker" class="ships-select">
     <option value="__ALL__">Tous les constructeurs</option>
   </select>
@@ -84,14 +83,14 @@
       <!-- Version footer -->
       <div class="version-footer page-ships-version" id="versionFooter">
         <button id="versionToggle" class="version-bar" type="button" aria-expanded="false">
-          <div class="version-main" id="versionMainText">VAISSEAUX V1.0.38 • PU 4.5</div>
+          <div class="version-main" id="versionMainText">VAISSEAUX V1.0.50 • PU 4.5</div>
           <div class="version-cta">Détails</div>
         </button>
 
         <div id="versionDetails" class="version-details is-hidden">
           <div class="version-details-header">
             <div class="version-details-title">Versions techniques</div>
-            <button id="copyVersionsBtn" class="btn" type="button">Copier</button>
+            <div class="version-details-actions"><button id="copyVersionsBtn" class="btn" type="button">Copier</button><button id="copyBugTemplateBtn" class="btn" type="button">Template bug</button><button id="copyDebugInfoBtn" class="btn" type="button">Infos debug</button></div>
           </div>
 
           <div class="version-grid" role="table" aria-label="Versions techniques VAISSEAUX">
@@ -111,6 +110,98 @@
     </div>
   </div>
 
-  <script src="../assets/js/ships.js?v=V1.2.26" defer></script>
+  <script src="../assets/js/ships.js?v=V1.2.27" defer></script><script>
+(function tvTechbarInit(){
+  "use strict";
+
+  var toggle = document.getElementById("versionToggle");
+  var panel  = document.getElementById("versionDetails");
+
+  if (!toggle || !panel) return;
+
+  function setOpen(open){
+    panel.classList.toggle("is-hidden", !open);
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+
+  // Default closed
+  setOpen(false);
+
+  toggle.addEventListener("click", function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    var isOpen = !panel.classList.contains("is-hidden");
+    setOpen(!isOpen);
+  });
+
+  // Close when clicking outside
+  document.addEventListener("click", function(e){
+    var t = e.target;
+    if (toggle.contains(t) || panel.contains(t)) return;
+    setOpen(false);
+  });
+
+  // Close on ESC
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && !panel.classList.contains("is-hidden")){
+      setOpen(false);
+    }
+  });
+
+  // Copy versions (optional)
+  var btnCopy = document.getElementById("copyVersionsBtn");
+  if (btnCopy){
+    btnCopy.addEventListener("click", async function(e){
+      e.preventDefault(); e.stopPropagation();
+      var rowsK = panel.querySelectorAll(".version-k");
+      var rowsV = panel.querySelectorAll(".version-v");
+      var lines = [];
+      for (var i=0;i<Math.min(rowsK.length, rowsV.length);i++){
+        var k = (rowsK[i].textContent || "").trim();
+        var v = (rowsV[i].textContent || "").trim();
+        if (k && v) lines.push(k + ": " + v);
+      }
+      var text = lines.join("\n");
+      var ok = false;
+      try{
+        if (navigator.clipboard && navigator.clipboard.writeText){
+          await navigator.clipboard.writeText(text);
+          ok = true;
+        }
+      }catch(err){ ok = false; }
+
+      if (!ok){
+        try{
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          ta.setAttribute("readonly","");
+          ta.style.position="fixed";
+          ta.style.top="-1000px";
+          ta.style.left="-1000px";
+          document.body.appendChild(ta);
+          ta.select();
+          try{ ok = document.execCommand("copy"); }catch(err2){ ok = false; }
+          document.body.removeChild(ta);
+        }catch(err3){ ok = false; }
+      }
+
+      var old = btnCopy.textContent;
+      btnCopy.textContent = ok ? "Copié ✓" : "Échec";
+      btnCopy.disabled = true;
+      setTimeout(function(){
+        btnCopy.textContent = old;
+        btnCopy.disabled = false;
+      }, 1200);
+
+      if (!ok){
+        try{ window.prompt("Copie manuelle (Ctrl+C / Cmd+C) :", text); }catch(err4){}
+      }
+    });
+  }
+})();
+</script>
+
+
+<script defer src="../assets/js/support-tools.js?v=V1.0.0"></script>
 </body>
 </html>

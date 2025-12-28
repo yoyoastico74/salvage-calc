@@ -1,4 +1,4 @@
-<!-- pages/mining.html — Version V1.3.3
+<!-- pages/mining.html — Version V1.3.11
      Module: MINAGE (Mode Débutant)
      Repo: https://shog-sc.github.io/Industriel-calc/
 -->
@@ -12,7 +12,9 @@
 
   <!-- CSS (RELATIF AU FICHIER) -->
   <link rel="stylesheet" href="../assets/css/core.css" />
-  <link rel="stylesheet" href="../assets/css/mining.css" />
+  
+  <link rel="stylesheet" href="../assets/css/techbar-fixed.css?v=V1.0.0" />
+<link rel="stylesheet" href="../assets/css/mining.css" />
 </head>
 
 <body class="page-mining">
@@ -27,7 +29,7 @@
             <a class="btn-pill btn-discord" href="https://discord.gg/d3Q5RJ35gr" target="_blank" rel="noopener noreferrer">
               DISCORD
             </a>
-            <a class="btn-pill" href="#" aria-label="Support">Support</a>
+            <a class="btn-pill" href="https://discord.com/channels/1428047802805653640/1453446130858852422" target="_blank" rel="noopener noreferrer" aria-label="Support">Support</a>
           </div>
         </div>
 
@@ -193,7 +195,7 @@
     <div class="version-details is-hidden" id="miningVersionDetails" aria-hidden="true">
       <div class="version-details-header">
         <div class="version-details-title">Détails versions</div>
-        <div class="version-details-actions"><button class="btn btn-small" type="button" id="miningVersionCopyBtn">Copier</button><button class="btn btn-small" type="button" id="miningVersionCloseBtn">Fermer</button></div>
+        <div class="version-details-actions"><button class="btn btn-small" type="button" id="miningVersionCopyBtn">Copier</button><button class="btn btn-small" type="button" id="miningVersionCloseBtn">Fermer</button><button class="btn btn-small" type="button" id="copyBugTemplateBtn">Template bug</button><button class="btn btn-small" type="button" id="copyDebugInfoBtn">Infos debug</button></div>
       </div>
 
       <div class="version-grid">
@@ -215,6 +217,8 @@
       </div>
     </div>
   </div>
+<script defer src="../assets/js/techbar.js?v=V1.0.0"></script>
 
+<script defer src="../assets/js/support-tools.js?v=V1.0.0"></script>
 </body>
 </html>

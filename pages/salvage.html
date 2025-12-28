@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- pages/salvage.html — V1.4.40 (tech footer attached to graph panel) -->
+<!-- pages/salvage.html — V1.4.47 (tech footer attached to graph panel) -->
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -18,7 +18,7 @@
         <a class="btn-ghost" href="../index.html">← HUB</a>
         <!-- Discord server link: replace href with your invite URL if needed -->
         <a class="btn-primary btn-discord" href="https://discord.gg/REPLACE_ME" target="_blank" rel="noopener noreferrer">Discord</a>
-        <a class="btn-ghost" href="https://yoyoastico74.github.io/salvage-calc/pages/support.html" target="_blank" rel="noopener noreferrer">Support</a>
+        <a class="btn-ghost" href="https://discord.com/channels/1428047802805653640/1453446130858852422" target="_blank" rel="noopener noreferrer">Support</a>
       </div>
 
       <!-- Hero (aligned with FRET/MINAGE) -->
@@ -177,7 +177,7 @@
         </div>
 
         <div class="panel inner-panel" style="margin-top:14px;">
-            <div class="panel inner-panel" style="margin-top:14px;">
+
     <div class="panel-title panel-title-sm">Guide rapide (abréviations)</div>
 
     <div class="guide-grid">
@@ -411,14 +411,14 @@ Un écart est normal si le marché vient de bouger." style="margin-left:6px; fon
   <!-- Version footer (support) — attached to graph panel -->
   <div class="version-footer page-salvage-version" id="versionFooter">
     <button id="versionToggle" class="version-bar" type="button" aria-expanded="false">
-      <div class="version-main" id="versionMainText">RECYCLAGE V1.4.35 • PU 4.5</div>
+      <div class="version-main" id="versionMainText">RECYCLAGE V1.4.47 • PU 4.5</div>
       <div class="version-cta">Détails</div>
     </button>
 
     <div id="versionDetails" class="version-details is-hidden">
       <div class="version-details-header">
         <div class="version-details-title">Versions techniques</div>
-        <button id="copyVersionsBtn" class="btn" type="button">Copier</button>
+        <div class="version-details-actions"><button id="copyVersionsBtn" class="btn" type="button">Copier</button><button id="copyBugTemplateBtn" class="btn" type="button">Template bug</button><button id="copyDebugInfoBtn" class="btn" type="button">Infos debug</button></div>
       </div>
 
       <div class="version-grid" role="table" aria-label="Versions techniques RECYCLAGE">
@@ -454,5 +454,8 @@ Un écart est normal si le marché vient de bouger." style="margin-left:6px; fon
   <script src="../assets/js/core.js" defer></script>
   <script src="../assets/js/uex-token.js" defer></script>
   <script src="../assets/js/salvage.js" defer></script>
+<script defer src="../assets/js/techbar.js?v=V1.0.0"></script>
+
+<script defer src="../assets/js/support-tools.js?v=V1.0.0"></script>
 </body>
 </html>

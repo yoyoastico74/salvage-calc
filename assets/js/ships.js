@@ -1,4 +1,4 @@
-/* assets/js/ships.js — V1.2.26
+/* assets/js/ships.js — V1.2.27
    Module: VAISSEAUX (Ship Finder)
    Data source: UEX Proxy (Option B)
    -------------------------------------------------------
@@ -52,11 +52,33 @@
     if (v === null || v === undefined) return "—";
     if (typeof v === "number") return Number.isFinite(v) ? String(v) : "—";
     if (typeof v === "string") {
-      const s = v.trim();
+      let s = v.trim();
       if (!s) return "—";
       // Prevent rendering of weird objects turned into strings
       if (s === "[object Object]" || s.includes("function Object()")) return "—";
-      return s;
+
+      // Decode HTML entities if present (some sources may already contain &apos; etc.)
+      if (s.includes("&") && typeof document !== "undefined") {
+        try {
+          const ta = document.createElement("textarea");
+          // Some strings may require 2 decode passes (e.g., &amp;apos;)
+          for (let i = 0; i < 2; i++) {
+            const prev = s;
+            ta.innerHTML = s;
+            s = ta.value;
+            if (s === prev) break;
+          }
+        } catch (e) {}
+      }
+
+      // Fix known corruption pattern: "Grey&apos;apos;s" -> "Grey's"
+      s = s.replace(/'apos;/gi, "'");
+      s = s.replace(/&apos;/gi, "'");
+
+      // Normalize curly apostrophes just in case
+      s = s.replace(/\u2019/g, "'").replace(/\u2018/g, "'");
+
+      return s.trim() || "—";
     }
     // Avoid leaking object function bodies in UI
     return "—";
@@ -86,7 +108,7 @@
     const rawName = String(s.name || "").trim();
     const n = normalizeName(rawName);
     const t = normalizeName(s.type);
-    const makerRaw = String(s.manufacturer || s.manufacturer_name || "—").trim() || "—";
+    const makerRaw = safeText(s.manufacturer || s.manufacturer_name);
     const maker = normalizeName(makerRaw);
     const blob = `${n} ${t} ${maker}`;
     const scuNum = Number(s.scu ?? 0) || 0;
@@ -601,7 +623,7 @@
       if (cat !== "__ALL__" && (s.category || "Autre") !== cat) return false;
 
       if (!q) return true;
-      const hay = normalizeName(`${s.name} ${s.manufacturer} ${s.type} ${s.category}`);
+      const hay = normalizeName(`${s.name} ${safeText(s.manufacturer)} ${s.type} ${s.category}`);
       return hay.includes(q);
     });
 
@@ -610,7 +632,7 @@
 
   function populateMakerSelect(){
     const makers = new Set();
-    ships.forEach((s)=>makers.add((s.manufacturer || "—").trim() || "—"));
+    ships.forEach((s)=>makers.add(safeText(s.manufacturer)));
     const sorted = Array.from(makers).sort((a,b)=>a.localeCompare(b,"fr"));
 
     if (!elMaker) return;
@@ -700,7 +722,7 @@ function populateRoleSelect() {
         .map((s) => ({
           id_vehicle: s.id_vehicle,
           name: s.name,
-          manufacturer: s.manufacturer,
+          manufacturer: safeText(s.manufacturer),
           type: s.type,
           scu: s.scu,
           crew_min: s.crew_min,
