@@ -1,4 +1,4 @@
-/* ships.css — Version V1.0.19
+/* ships.css — Version V1.0.22_SPECS_ENRICH
    Module: VAISSEAUX (Ship Database)
    Scope: .page-ships only
 
@@ -535,4 +535,56 @@ body.page-ships .is-hidden{ display:none !important; }
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+}
+
+
+/* --- Flight ready filter checkbox --- */
+.filter-line{
+  margin-top: 10px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  background: rgba(0,0,0,0.12);
+}
+.checkbox{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  cursor:pointer;
+  user-select:none;
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.88);
+}
+.checkbox input{
+  width: 16px;
+  height: 16px;
+}
+.checkbox span{
+  line-height: 1.2;
+}
+
+
+/* --- Flight-ready toggle --- */
+.ships-filter-row-compact{
+  margin-top: 8px;
+}
+.ships-check{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  background: rgba(0,0,0,0.12);
+  cursor:pointer;
+  user-select:none;
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.88);
+}
+.ships-check input{
+  width: 16px;
+  height: 16px;
+}
+.ships-check span{
+  line-height: 1.2;
 }

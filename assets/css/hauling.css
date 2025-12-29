@@ -1,4 +1,4 @@
-/* assets/css/hauling.css — V1.13.63
+/* assets/css/hauling.css — V1.13.76
    IMPORTANT: fichier complet (remplacement total)
    Objectif: conserver la "neon vibe" + compat UI FRET V1.14.3.
    NOTE: Typo delegated to core.css (no fixed px font sizes).
@@ -1297,3 +1297,20 @@
   }
 }
 
+
+/* V1.13.66 — Structured info popover content */
+.info-grid{ display:flex; flex-direction:column; gap:10px; }
+.info-row{ display:grid; grid-template-columns: 120px 1fr; gap:10px; align-items:start; }
+.info-k{ font-weight:700; color: var(--text); }
+.info-v{ color: var(--muted); line-height:1.35; }
+@media (max-width: 520px){
+  .info-row{ grid-template-columns: 1fr; }
+}
+
+/* V1.13.66 — Context actions row (Refresh routes + Reset) */
+.context-actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.context-actions .btn{ flex:1; }

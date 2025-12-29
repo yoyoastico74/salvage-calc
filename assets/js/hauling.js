@@ -1,27 +1,19 @@
-/* hauling.js — V1.14.7 FULL (Suggestions: Top Routes Globales + click => bascule A→B)
-   - FULL FILE (remplacement total)
-   - Compatible hauling.html (tabs : tabBeginner/tabAdvanced, panels : panelBeginner/panelAdvanced)
-   - Beginner: calcul manuel
-   - Advanced:
-       - A→B via /v1/hauling/terminals/search + /v1/hauling/route
-       - Suggestions via /v1/hauling/routes/top (scan terminaux, best-effort)
-       - Clic sur une route => pré-remplit A/B + verrouille marchandise + lance analyse détaillée (B)
-*/
+/* hauling.js — V1.14.25 FULL (SCU_LIVE + SHIPS_SCU_FILTER) */
 
 (() => {
   "use strict";
 
-  const VERSION = "V1.14.7 FULL";
+  const VERSION = "V1.14.3 FULL";
 
   // ------------------------------------------------------------
   // TECH VERSIONS (FRET) — single source of truth (Mining-like footer)
   // ------------------------------------------------------------
   const TECH = {
     module: "FRET",
-    moduleVersion: "V1.14.7",
-    html: "V1.13.64",
-    css: "V1.13.61",
-    js: "V1.14.7",
+    moduleVersion: "V1.14.3",
+    html: "V1.14.3",
+    css: "V1.14.3",
+    js: "V1.14.3",
     core: "V1.5.20",
     ships: "v2.0.5",
     pu: "4.5"
@@ -80,9 +72,6 @@
 
 
   function score100(r){
-    // Prefer UI-recomputed score when present (risk tolerance re-rank without refetch)
-    const ui = num(r?.uiScore100);
-    if (Number.isFinite(ui) && ui > 0) return int(ui);
     return int(r?.finalScore100 ?? Math.round(num(r?.finalScore ?? 0) * 100)) || 0;
   }
 
@@ -421,7 +410,41 @@ setText("tvSourceFret", sanitizeSourceLabel("last-worker-response"));
 
     state.tab = "advanced";
     saveState();
+
+    autoLoadAdvancedTopRoutes();
   }
+
+  // Auto Top Routes when entering Advanced:
+  // - triggers only if no cached routes
+  // - debounced (min 15s) to avoid spam
+  // - does NOT lock permanently if previous fetch returned 0 routes
+  let __autoTopLastAt = 0;
+  async function autoLoadAdvancedTopRoutes(){
+    const now = Date.now();
+    if (now - __autoTopLastAt < 15000) return;
+
+    // Respect cooldown (429 guard)
+    if (typeof __uexIsCooldownActive === "function" && __uexIsCooldownActive()){
+      return;
+    }
+
+    const raw = Array.isArray(state?.assisted?.lastRoutesRaw) ? state.assisted.lastRoutesRaw : [];
+    if (raw.length) return;
+
+    const shipScu = num($("advUsableScu")?.value || 0);
+    if (shipScu <= 0) return;
+
+    __autoTopLastAt = now;
+    try{
+      await fetchTopRoutes({ reason: "auto-open" });
+      // If still empty, allow a re-try later (by time debounce), no permanent lock.
+      const after = Array.isArray(state?.assisted?.lastRoutesRaw) ? state.assisted.lastRoutesRaw : [];
+      if (!after.length) __autoTopLastAt = now; // keep debounce only
+    }catch(_){
+      // silent
+    }
+  }
+
 
   function initTabs() {
     $("tabBeginner")?.addEventListener("click", showBeginner);
@@ -461,7 +484,8 @@ setText("tvSourceFret", sanitizeSourceLabel("last-worker-response"));
       } catch (_) {}
     }
     const rows = Array.isArray(data) ? data : (Array.isArray(data?.ships) ? data.ships : []);
-    shipsCatalog = rows.map(normalizeShipRow).filter(s => s.name);
+        // Filter out ships with 0 SCU (cargo-less ships are irrelevant for FRET)
+    shipsCatalog = rows.map(normalizeShipRow).filter(s => s.name && int(s.scu) > 0);
     return shipsCatalog;
   }
 
@@ -522,7 +546,10 @@ setText("tvSourceFret", sanitizeSourceLabel("last-worker-response"));
           if ($("cargoScu") && int(s.scu) > 0) $("cargoScu").value = String(int(s.scu));
           computeBeginner();
         } else {
-          if ($("advUsableScu") && int(s.scu) > 0) $("advUsableScu").value = String(int(s.scu));
+          if ($("advUsableScu") && int(s.scu) > 0) {
+            $("advUsableScu").value = String(int(s.scu));
+            try { applyContextToCachedTopRoutes(); } catch(_) {}
+          }
         }
 
         saveState();
@@ -875,117 +902,6 @@ return lines.join("\n");
     return "Normal : compromis stabilité / performance.";
   }
 
-
-// ------------------------------------------------------------
-// ADVANCED: react to risk tolerance change
-// - If suggestions (Top routes) are currently displayed: refetch with new risk
-// - If route A→B analysis is currently displayed: rerun analysis with new risk
-// - Otherwise: only update the hint (no automatic scan)
-// ------------------------------------------------------------
-let riskRefreshTimer = null;
-function riskScoreLine(r){
-  if (r === "low") return "Score : stabilité > profit (routes plus sûres).";
-  if (r === "high") return "Score : profit > stabilité (No pain, no gain).";
-  return "Score : équilibre stabilité / profit.";
-}
-
-// ------------------------------------------------------------
-// UI local re-rank on risk tolerance change (no refetch, no spinner)
-// ------------------------------------------------------------
-function getStability100(r){
-  const raw =
-    (typeof r?.stability100 === "number" ? r.stability100 :
-    (typeof r?.stabilityScore === "number" ? (r.stabilityScore <= 1 ? r.stabilityScore * 100 : r.stabilityScore) :
-    (typeof r?.stability === "number" ? (r.stability <= 1 ? r.stability * 100 : r.stability) : null)));
-  if (raw == null || !Number.isFinite(raw)) return 50;
-  return Math.max(0, Math.min(100, raw));
-}
-
-function applyUiScoringToList(list, risk){
-  if (!Array.isArray(list) || !list.length) return list;
-
-  // Normalize profits within the current list for meaningful relative ranking
-  let maxPscu = 0;
-  let maxTotal = 0;
-  for (const r of list){
-    const pscu = num(r?.profitPerSCU ?? 0);
-    const tot = num(r?.profitTotal ?? 0);
-    if (pscu > maxPscu) maxPscu = pscu;
-    if (tot > maxTotal) maxTotal = tot;
-  }
-  maxPscu = maxPscu > 0 ? maxPscu : 1;
-  maxTotal = maxTotal > 0 ? maxTotal : 1;
-
-  // Risk weights: low favors stability, high favors profit (No pain, no gain)
-  let wStab = 0.5, wProfit = 0.5;
-  if (risk === "low"){ wStab = 0.65; wProfit = 0.35; }
-  else if (risk === "high"){ wStab = 0.35; wProfit = 0.65; }
-
-  for (const r of list){
-    const stab = getStability100(r) / 100;
-    const pscu = num(r?.profitPerSCU ?? 0) / maxPscu;
-    const tot = num(r?.profitTotal ?? 0) / maxTotal;
-    const profitIndex = Math.max(0, Math.min(1, (0.7 * pscu) + (0.3 * tot)));
-
-    const s = (wStab * stab) + (wProfit * profitIndex);
-    r.uiScore100 = Math.max(1, Math.min(100, Math.round(s * 100)));
-  }
-  return list;
-}
-
-function rerankFromCache(){
-  const mode = getAdvSort();
-
-  // Global top routes list (assisted)
-  if (state.assisted.active && Array.isArray(state.assisted.lastRoutesRaw) && state.assisted.lastRoutesRaw.length){
-    applyUiScoringToList(state.assisted.lastRoutesRaw, state.advanced.risk);
-    const sorted = sortItems(state.assisted.lastRoutesRaw, mode);
-    state.assisted.lastRoutes = sorted;
-
-    const q = ($("advSearch")?.value || "").trim();
-    const shown = q ? filterRoutesByCommodity(sorted, q) : sorted;
-    renderTopRoutes(shown, state.assisted.lastScan || null);
-
-    if (q){
-      setAdvText("advCount", `${shown.length} / ${sorted.length} routes`);
-    } else {
-      setAdvText("advCount", `${shown.length} routes`);
-    }
-    try { setSortStatus(); } catch (_) {}
-    return true;
-  }
-
-  // A→B results (analysis)
-  if (!state.assisted.active && Array.isArray(state.routeCache.lastResultsRaw) && state.routeCache.lastResultsRaw.length){
-    applyUiScoringToList(state.routeCache.lastResultsRaw, state.advanced.risk);
-    const results = sortItems(state.routeCache.lastResultsRaw, mode);
-    state.routeCache.lastResults = results;
-    renderTop3(results);
-    renderGoodsList(results);
-    setAdvText("advRouteStatus", `OK • ${results.length} résultats`);
-    try { setSortStatus(); } catch (_) {}
-    return true;
-  }
-
-  return false;
-}
-
-function refreshAfterRiskChange(){
-  if (riskRefreshTimer) clearTimeout(riskRefreshTimer);
-  riskRefreshTimer = setTimeout(() => {
-    // Avoid parallel fetches: if buttons are disabled, a request is in progress.
-    const btnCalc = $("advTopCalc");
-    const btnAnalyze = $("advRouteAnalyze");
-    if ((btnCalc && btnCalc.disabled) || (btnAnalyze && btnAnalyze.disabled)) return;
-
-    // If we have cached results, re-rank locally (no refetch, no loading).
-    if (rerankFromCache()) return;
-
-    // Otherwise, do nothing (user will click Calculer / Analyser when ready).
-  }, 120);
-}
-
-
   
   function sanitizeSourceLabel(v){
     const s = (v == null) ? "" : String(v);
@@ -1002,6 +918,99 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
     el.textContent = sanitizeSourceLabel(text);
     el.classList.toggle("chip-warn", !!warn);
   }
+
+  function normalizeScan(scan){
+    // Accept legacy scan shapes and worker meta shapes.
+    // Returns {sampledTerminals,totalTerminals,originMatched,marketsFetched}
+    if (!scan) return null;
+
+    // Some responses may wrap scan in meta
+    const s = scan.meta ? scan.meta : scan;
+
+    const total =
+      (typeof s.totalTerminals === "number" ? s.totalTerminals :
+      (typeof s.totalTerminalsAll === "number" ? s.totalTerminalsAll :
+      (typeof s.total === "number" ? s.total :
+      null)));
+
+    const sampled =
+      (typeof s.sampledTerminals === "number" ? s.sampledTerminals :
+      (typeof s.sampledGlobal === "number" ? s.sampledGlobal :
+      (typeof s.sampled === "number" ? s.sampled :
+      null)));
+
+    const originMatched = (typeof s.originMatched === "number" ? s.originMatched : null);
+    const marketsFetched = (typeof s.marketsFetched === "number" ? s.marketsFetched : null);
+
+    // Fallback: if sampled is missing but marketsFetched exists, use it for the "scan" numerator
+    const sampled2 = (sampled == null && marketsFetched != null) ? marketsFetched : sampled;
+
+    return {
+      sampledTerminals: sampled2,
+      totalTerminals: total,
+      originMatched,
+      marketsFetched
+    }
+
+  // Origin-only mode: user types a city/terminal in A, we compute best destinations (Top routes with origin=...).
+  async function findDestinationsFromOrigin({ reason = "origin-ab" } = {}){
+    const fromQ = ($("advRouteFrom")?.value || "").trim();
+    if (!fromQ || fromQ.length < 3){
+      setAdvError("Entre un départ (au moins 3 caractères).");
+      return;
+    }
+
+    // Clear commodity search to avoid filtering everything out unintentionally
+    const goodsInput = $("advGoodsSearch") || $("advCommoditySearch") || null;
+    if (goodsInput) goodsInput.value = "";
+    state.advanced.goodsSearch = "";
+
+    // Also clear city filter input if it exists; server-side origin will handle the filter
+    const originInput = $("advOrigin");
+    if (originInput) originInput.value = fromQ;
+
+    try{
+      await fetchTopRoutes({ reason, originOverride: fromQ });
+    }catch(_){}
+  }
+
+  let __originFromTimer = null;
+  function wireOriginFromAB(){
+    const input = $("advRouteFrom");
+    const btn = $("advRouteAnalyze");
+    if (!input) return;
+
+    btn?.addEventListener("click", () => findDestinationsFromOrigin({ reason: "origin-button" }));
+
+    input.addEventListener("input", () => {
+      if (__originFromTimer) clearTimeout(__originFromTimer);
+      __originFromTimer = setTimeout(() => {
+        const v = (input.value || "").trim();
+        if (v.length >= 3) findDestinationsFromOrigin({ reason: "origin-live" });
+      }, 450);
+    });
+  }
+
+  function wireABExactToggle(){
+    const t = $("advABExactToggle");
+    const wrap = $("advABExactWrap");
+    if (!t || !wrap) return;
+
+    t.addEventListener("click", () => {
+      const isHidden = wrap.hasAttribute("hidden");
+      if (isHidden) wrap.removeAttribute("hidden");
+      else wrap.setAttribute("hidden","hidden");
+    });
+
+    $("advRouteAnalyzeExact")?.addEventListener("click", () => {
+      if (typeof analyzeRouteAdvanced === "function") analyzeRouteAdvanced();
+      else setAdvError("Analyse exacte indisponible.");
+    });
+  }
+
+;
+  }
+
 
   function setSortStatus() {
     const el = $("advRouteStatus");
@@ -1191,6 +1200,122 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
     }
   }
 
+  /* -----------------------------
+     Advanced: Origin (city) live filter
+  ------------------------------ */
+  function extractCity(name){
+    const s = (name || "—").toString().trim();
+    if (!s || s === "—") return "—";
+    // Heuristic: take first chunk before separators commonly used in terminal labels
+    const parts = s.split(/\s[-–—|\/•:]\s|\s\(|\s\[|\s\{/).filter(Boolean);
+    const city = (parts[0] || s).trim();
+    return city || s;
+  }
+
+  function filterRoutesByOrigin(list, query){
+    const q = normStr(query).trim();
+    if (!q) return list;
+    return (list || []).filter(r => {
+      const fromName = (r?.from?.name || "").toString();
+      const fromCity = extractCity(fromName);
+      const a = normStr(fromName);
+      const b = normStr(fromCity);
+      return a.includes(q) || b === q || b.includes(q);
+    });
+  }
+
+  function updateCitiesDatalistFromRoutes(routes){
+    const dl = $("advCitiesDatalist");
+    if (!dl) return;
+    const set = new Set();
+
+    (routes || []).forEach(r => {
+      const fromName = (r?.from?.name || "").toString();
+      const city = extractCity(fromName);
+      if (city && city !== "—") set.add(city);
+    });
+
+    const cities = Array.from(set).sort((a,b) => a.localeCompare(b, "fr", { sensitivity: "base" }));
+    dl.innerHTML = cities.map(c => `<option value="${escapeHtml(c)}"></option>`).join("");
+  }
+
+  let advOriginSearchTimer = null;
+  async function applyOriginAndCommodityFilters(sourceRoutes, scanMeta){
+    const oq = ($("advOrigin")?.value || "").trim();
+    const q  = ($("advSearch")?.value || "").trim();
+
+    const sorted = sortItems(sourceRoutes || [], getAdvSort());
+    let shown = oq ? filterRoutesByOrigin(sorted, oq) : sorted;
+    shown = q ? filterRoutesByCommodity(shown, q) : shown;
+
+    // Commodity lock (optional, consistent with existing behavior)
+    if (q){
+      unlockCommodity();
+      const lbl = bestCommodityLabel(sorted, q) || q;
+      lockCommodity(lbl);
+      setAdvText("advCount", `${shown.length} / ${sorted.length} routes`);
+      setAdvText("advRouteStatus", `OK • ${shown.length} routes (filtré)`);
+    } else if (oq){
+      unlockCommodity();
+      setAdvText("advCount", `${shown.length} / ${sorted.length} routes`);
+      setAdvText("advRouteStatus", `OK • ${shown.length} routes (filtré)`);
+    } else {
+      setAdvText("advCount", `${shown.length} routes`);
+    }
+
+    renderTopRoutes(shown, scanMeta || null);
+    try { setSortStatus(); } catch (_){}
+  }
+
+  function wireOriginSearch(){
+    const input = $("advOrigin");
+    const clear = $("advOriginClear");
+    if (!input) return;
+
+    const apply = async () => {
+      const oq = (input.value || "").trim();
+      // If user filters by origin BEFORE any scan has run, run one global scan.
+      const hasCache = Array.isArray(state?.assisted?.lastRoutesRaw) && state.assisted.lastRoutesRaw.length > 0;
+
+      if (oq && !hasCache){
+        await fetchTopRoutes({ reason: "origin-filter" });
+        return;
+      }
+
+      // Otherwise apply filters locally from cache
+      if (hasCache){
+        await applyOriginAndCommodityFilters(state.assisted.lastRoutesRaw, state.assisted.lastScan || null);
+      }
+    };
+
+    input.addEventListener("input", () => {
+      if (advOriginSearchTimer) clearTimeout(advOriginSearchTimer);
+      advOriginSearchTimer = setTimeout(() => { apply(); }, 220);
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter"){
+        e.preventDefault();
+        apply();
+      }
+      if (e.key === "Escape"){
+        input.value = "";
+        apply();
+        input.blur();
+      }
+    });
+
+    if (clear){
+      clear.addEventListener("click", () => {
+        input.value = "";
+        apply();
+        try { input.focus(); } catch(_){}
+      });
+    }
+  }
+
+
+
 
   function renderGoodsList(results, isFiltered=false) {
     const list = $("advGoodsList");
@@ -1317,12 +1442,33 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
     const dl = $("advTerminalsDatalist");
     if (!dl) return;
     dl.innerHTML = "";
-    (items || []).slice(0, 30).forEach(t => {
+
+    const seen = new Set();
+    (items || []).forEach(t => {
+      const name = (t?.name || "").trim();
+      if (!name) return;
+
+      const city = (t?.city || "").trim();
+      const planet = (t?.planet || "").trim();
+      const system = (t?.system || "").trim();
+      const type = (t?.type || "").trim();
+
+      // Build a stable display line that avoids duplicates
+      const loc = city || planet || system || "";
+      const label = [name, loc ? `— ${loc}` : "", (system && loc !== system) ? `(${system})` : "", type ? `• ${type}` : ""].join(" ").replace(/\s+/g, " ").trim();
+      const key = `${name}||${loc}||${system}||${type}`.toLowerCase();
+
+      if (seen.has(key)) return;
+      seen.add(key);
+
       const opt = document.createElement("option");
-      opt.value = t.name || "";
-      opt.label = t.system ? `${t.name} — ${t.system}` : (t.name || "");
+      opt.value = name;
+      opt.label = label;
       dl.appendChild(opt);
     });
+
+    // Hard cap for datalist
+    while (dl.children.length > 40) dl.removeChild(dl.lastChild);
   }
 
   async function resolveTerminalIdByName(name) {
@@ -1344,9 +1490,7 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
 
   async function analyzeRouteAdvanced() {
     const btn = $("advRouteAnalyze");
-    const btnCalc = $("advTopCalc");
-    if (btn) btn.disabled = true;
-    if (btnCalc) btnCalc.disabled = true;
+    btn && (btn.disabled = true);
 
     try {
       state.assisted.active = false;
@@ -1400,7 +1544,6 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
 
       const resultsRaw = Array.isArray(data?.results) ? data.results : [];
       state.routeCache.lastResultsRaw = resultsRaw;
-      applyUiScoringToList(state.routeCache.lastResultsRaw, state.advanced.risk);
       state.routeCache.lastMeta = meta || null;
       state.routeCache.lastPayload = payload;
       const results = sortItems(resultsRaw, getAdvSort());
@@ -1416,9 +1559,8 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
       setChip("Proxy/UEX indisponible", true);
       setAdvText("advRouteStatus", `Erreur: ${String(e?.message || e)}`);
     } finally {
-      if (btnCalc) btnCalc.disabled = false;
-      if (btn) btn.disabled = false;
-      }
+      btn && (btn.disabled = false);
+    }
   }
 
   
@@ -1438,17 +1580,8 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
       arr.sort((a, b) => num(b.profitPerSCU ?? 0) - num(a.profitPerSCU ?? 0));
       return arr;
     }
-    // score (default): prefer UI-recomputed uiScore100; fallback to API finalScore/finalScore100, then profitTotal
-    const scoreVal = (r) => {
-      const ui = num(r?.uiScore100);
-      if (Number.isFinite(ui) && ui > 0) return ui / 100;
-      const fs = num(r?.finalScore);
-      if (Number.isFinite(fs) && fs > 0) return fs;
-      const fs100 = num(r?.finalScore100);
-      if (Number.isFinite(fs100) && fs100 > 0) return fs100 / 100;
-      return 0;
-    };
-    arr.sort((a, b) => (scoreVal(b) - scoreVal(a)) || (num(b.profitTotal ?? 0) - num(a.profitTotal ?? 0)));
+    // score (default): use finalScore (0..1) if present; fallback to profitTotal
+    arr.sort((a, b) => (num(b.finalScore ?? 0) - num(a.finalScore ?? 0)) || (num(b.profitTotal ?? 0) - num(a.profitTotal ?? 0)));
     return arr;
   }
 
@@ -1459,7 +1592,13 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
     if (state.assisted.active && Array.isArray(state.assisted.lastRoutesRaw) && state.assisted.lastRoutesRaw.length) {
       const sorted = sortItems(state.assisted.lastRoutesRaw, mode);
       state.assisted.lastRoutes = sorted;
-      renderTopRoutes(sorted, state.assisted.lastScan || null);
+      const oq = ($("advOrigin")?.value || "").trim();
+      const q  = ($("advSearch")?.value || "").trim();
+      let shown = oq ? filterRoutesByOrigin(sorted, oq) : sorted;
+      shown = q ? filterRoutesByCommodity(shown, q) : shown;
+      renderTopRoutes(shown, state.assisted.lastScan || null);
+      if (q || oq) setAdvText("advCount", `${shown.length} / ${sorted.length} routes`);
+      else setAdvText("advCount", `${shown.length} routes`);
       return true;
     }
 
@@ -1484,7 +1623,91 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
     setAdvText("advCount", "—");
   }
 
-  function renderTopRoutes(routes, scanMeta) {
+  
+
+  function applyContextToCachedTopRoutes(){
+    const raw = Array.isArray(state?.assisted?.lastRoutesRaw) ? state.assisted.lastRoutesRaw : [];
+    if (!raw.length) return;
+
+    const shipScu = num($("advUsableScu")?.value || 0);
+    const budget = num($("advBudget")?.value || $("advBudgetAuec")?.value || 0);
+
+    const adj = raw.map(r => {
+      const buy = num(r.buy || 0);
+      const sell = num(r.sell || 0);
+
+      // Quantity cap: ship, buy stock, budget/buy
+      let q = Math.max(0, Math.floor(shipScu || 0));
+      const stockBuy = num(r.buyStockSCU || 0);
+      if (stockBuy > 0) q = Math.min(q, Math.floor(stockBuy));
+      if (budget > 0 && buy > 0) q = Math.min(q, Math.floor(budget / buy));
+      q = Math.max(0, Math.floor(q));
+
+      const profitPer = Math.max(0, sell - buy);
+      const spend = q * buy;
+      const revenue = q * sell;
+      const profitTotal = q * profitPer;
+
+      // clone while overriding computed fields
+      return {
+        ...r,
+        quantitySCU: q,
+        spend,
+        revenue,
+        profitPerSCU: profitPer,
+        profitTotal,
+      };
+    });
+
+    // Preserve current sorting choice but do not rescore; just sort by existing finalScore then profitTotal
+    const sorted = sortItems(adj, getAdvSort());
+    state.assisted.lastRoutes = sorted;
+
+    const q = (state.advanced.goodsSearch || "").trim();
+    let shown = q ? filterRoutesByCommodity(sorted, q) : sorted;
+
+    const oq = ($("advOrigin")?.value || "").trim();
+    if (oq) shown = filterRoutesByOrigin(shown, oq);
+
+    renderTopRoutes(shown, state.assisted.lastScan || null);
+    setAdvText("advCount", `${shown.length} / ${sorted.length} routes`);
+    setAdvText("advRouteStatus", `OK • ${shown.length} routes (SCU live)`);
+  }
+
+  let __scuLiveTimer = null;
+  function wireScuLive(){
+    const input = $("advUsableScu");
+    if (!input) return;
+
+    const run = () => {
+      if (__scuLiveTimer) clearTimeout(__scuLiveTimer);
+      __scuLiveTimer = setTimeout(() => {
+        // Recompute quantities/profits from cache (no network)
+        if (typeof applyContextToCachedTopRoutes === "function") applyContextToCachedTopRoutes();
+      }, 180);
+    };
+
+    input.addEventListener("input", run);
+    input.addEventListener("change", run);
+  }
+
+  let __budgetLiveTimer = null;
+  function wireBudgetLive(){
+    const input = $("advBudget") || $("advBudgetAuec");
+    if (!input) return;
+
+    const run = () => {
+      if (__budgetLiveTimer) clearTimeout(__budgetLiveTimer);
+      __budgetLiveTimer = setTimeout(() => {
+        if (typeof applyContextToCachedTopRoutes === "function") applyContextToCachedTopRoutes();
+      }, 180);
+    };
+
+    input.addEventListener("input", run);
+    input.addEventListener("change", run);
+  }
+
+function renderTopRoutes(routes, scanMeta) {
     const list = $("advGoodsList");
     if (!list) return;
 
@@ -1579,10 +1802,8 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
   }
 
   async function fetchTopRoutes(opts={}) {
-    const btnCalc = $("advTopCalc");
-    const btnAnalyze = $("advRouteAnalyze");
-    if (btnCalc) btnCalc.disabled = true;
-    if (btnAnalyze) btnAnalyze.disabled = true;
+    const btn = $("advTopCalc") || $("advAssist") || $("advCalculate") || $("advCalc");
+    btn && (btn.disabled = true);
 
     try {
       const shipScu = num($("advUsableScu")?.value || 0);
@@ -1597,13 +1818,21 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
       setAdvText("advRouteStatus", "Scan routes globales…");
       clearResultsArea("Scan en cours…");
 
-      const url =
+      const originQ0 = (opts && typeof opts.originOverride === "string" && opts.originOverride.trim().length >= 3)
+        ? opts.originOverride.trim()
+        : (($("advOrigin")?.value || "").trim());
+      const originQ = originQ0.length >= 3 ? originQ0 : "";
+      const usedOriginParam = !!originQ;
+      const maxTerms = usedOriginParam ? 150 : TOP_ROUTES_MAX_TERMINALS;
+
+      let url =
         `${PROXY_BASE}/v1/hauling/routes/top?ship_scu=${encodeURIComponent(shipScu)}` +
         `&budget=${encodeURIComponent(budget)}` +
         `&risk=${encodeURIComponent(state.advanced.risk)}` +
         `&limit=${encodeURIComponent(TOP_ROUTES_LIMIT)}` +
-        `&max_terminals=${encodeURIComponent(TOP_ROUTES_MAX_TERMINALS)}` +
-        `&game_version=${encodeURIComponent(GAME_VERSION)}`;
+        `&max_terminals=${encodeURIComponent(maxTerms)}`;
+      if (originQ) url += `&origin=${encodeURIComponent(originQ)}`;
+      url += `&game_version=${encodeURIComponent(GAME_VERSION)}`;
 
       const payload = await fetchJson(url);
       const { data, meta, warnings } = unwrapV1(payload);
@@ -1622,13 +1851,12 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
 
       const routesRaw = Array.isArray(data?.routes) ? data.routes : [];
       state.assisted.lastRoutesRaw = routesRaw;
-      applyUiScoringToList(state.assisted.lastRoutesRaw, state.advanced.risk);
       const routes = sortItems(routesRaw, getAdvSort());
       // Optional: commodity-driven search (client side filter)
       const __q = (opts && typeof opts.commodityQuery === "string") ? opts.commodityQuery.trim() : "";
       const routesFiltered = __q ? filterRoutesByCommodity(routes, __q) : routes;
       state.assisted.lastRoutes = routes;
-      state.assisted.lastScan = data?.scan || null;
+      state.assisted.lastScan = (typeof normalizeScan === "function" ? (normalizeScan(data?.scan) || data?.scan) : data?.scan) || null;
       state.assisted.active = true;
       state.routeCache.lastResultsRaw = [];
       state.routeCache.lastResults = [];
@@ -1646,7 +1874,18 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
         setAdvText("advCount", `${shown} / ${total} routes`);
       }
 
-      renderTopRoutes(routesFiltered, data?.scan || null);
+      // Origin (city) filter + cities datalist
+      try{ updateCitiesDatalistFromRoutes(routes); } catch(_){ }
+      const __oq = ($("advOrigin")?.value || "").trim();
+      let routesShown = routesFiltered;
+      // If we used server-side origin param, routes are already restricted; do not client-filter by parsing names.
+      if (!usedOriginParam && __oq){
+        routesShown = filterRoutesByOrigin(routesShown, __oq);
+        const total = routes.length;
+        setAdvText("advCount", `${routesShown.length} / ${total} routes`);
+      }
+
+      renderTopRoutes(routesShown, state.assisted.lastScan || data?.scan || null)
       try { setSortStatus(); } catch (_) {}
     } catch (e) {
       console.warn("[hauling][assist] top routes failed:", e);
@@ -1654,8 +1893,7 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
       setAdvText("advRouteStatus", `Erreur: ${String(e?.message || e)}`);
       clearResultsArea("Erreur scan routes (voir console).");
     } finally {
-      if (btnAnalyze) btnAnalyze.disabled = false;
-      if (btnCalc) btnCalc.disabled = false;
+      btn && (btn.disabled = false);
       saveState();
     }
   }
@@ -1663,16 +1901,51 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
   // ------------------------------------------------------------
   // ADVANCED init + bindings
   // ------------------------------------------------------------
-  function initAdvanced() {
+  
+
+  function dockTopRoutesButtonNextToReset(){
+    try{
+      const topBtn =
+        $("advTopCalc") || $("advAssist") || $("advCalculate") || $("advCalc") || null;
+      if (!topBtn) return;
+
+      const resetBtn =
+        $("advReset") || $("advResetBtn") ||
+        Array.from(document.querySelectorAll("button")).find(b => /Réinitialiser/i.test((b.textContent||"").trim())) ||
+        null;
+
+      if (!resetBtn) return;
+      if (resetBtn.parentElement && resetBtn.parentElement.contains(topBtn)) return;
+
+      let parent = resetBtn.parentElement;
+      if (!parent) return;
+
+      // Ensure a flex row container for both buttons
+      if (!parent.classList.contains("context-actions")){
+        const row = document.createElement("div");
+        row.className = "context-actions";
+
+        // Insert the row right where the reset button currently is
+        parent.insertBefore(row, resetBtn);
+        row.appendChild(topBtn);
+        row.appendChild(resetBtn);
+      } else {
+        parent.insertBefore(topBtn, resetBtn);
+      }
+
+      const txt = (topBtn.textContent || "").trim();
+      if (/^Calculer$/i.test(txt)) topBtn.textContent = "Rafraîchir routes (UEX)";
+    }catch(_){}
+  }
+function initAdvanced() {
     $qa(".quick-btn[data-risk]").forEach(btn => {
       btn.addEventListener("click", () => {
         const r = (btn.getAttribute("data-risk") || "low").trim();
         state.advanced.risk = (r === "high" || r === "mid" || r === "low") ? r : "low";
 
         $qa(".quick-btn[data-risk]").forEach(b => b.classList.toggle("is-active", b === btn));
-        setAdvText("advRiskHint", `${riskHintText(state.advanced.risk)}  ${riskScoreLine(state.advanced.risk)}`);
+        setAdvText("advRiskHint", `${riskHintText(state.advanced.risk)}  Score = profit pondéré par stabilité (selon risque).`);
         saveState();
-        refreshAfterRiskChange();
       });
     });
 
@@ -1685,14 +1958,19 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
     $("advRouteFrom")?.addEventListener("input", onTermInput);
     $("advRouteTo")?.addEventListener("input", onTermInput);
 
-    $("advRouteAnalyze")?.addEventListener("click", analyzeRouteAdvanced);
     $("advRefresh")?.addEventListener("click", analyzeRouteAdvanced);
 
     // Goods search (filters the full results list)
     wireGoodsSearch();
+    dockTopRoutesButtonNextToReset();
+    wireOriginFromAB();
+    wireABExactToggle();
+    wireOriginSearch();
+    wireScuLive();
+    wireBudgetLive();
 
     // New: Suggestions (Top routes)
-    $("advTopCalc")?.addEventListener("click", fetchTopRoutes);
+    $("advAssist")?.addEventListener("click", fetchTopRoutes);
     // Tri (Score / Profit / Profit/SCU) — apply instantly (no refetch if cached)
     const __sortHandler = () => {
       try { console.info("[hauling][sort]", getAdvSort()); } catch (_) {}
@@ -1734,16 +2012,28 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
       state.advanced.risk = "low";
       const lowBtn = $q('.quick-btn[data-risk="low"]');
       if (lowBtn) $qa(".quick-btn[data-risk]").forEach(b => b.classList.toggle("is-active", b === lowBtn));
-      setAdvText("advRiskHint", `${riskHintText("low")}  ${riskScoreLine("low")}`);
+      setAdvText("advRiskHint", `${riskHintText("low")}  Score = profit pondéré par stabilité (selon risque).`);
 
       saveState();
     });
 
+    
+    // Persist advanced inputs + apply "SCU live" recalculation for cached results
+    const __applyLive = (() => {
+      let t = null;
+      return () => {
+        try { if (t) clearTimeout(t); } catch(_){}
+        t = setTimeout(() => {
+          try { applyContextToCachedTopRoutes(); } catch(_){}
+        }, 120);
+      };
+    })();
+
     ["advBudget", "advUsableScu", "advRouteFrom", "advRouteTo"].forEach(id => {
-      $(id)?.addEventListener("input", saveState);
-      $(id)?.addEventListener("change", saveState);
+      $(id)?.addEventListener("input", () => { saveState(); if (id === "advBudget" || id === "advUsableScu") __applyLive(); });
+      $(id)?.addEventListener("change", () => { saveState(); if (id === "advBudget" || id === "advUsableScu") __applyLive(); });
     });
-  }
+}
 
   // ------------------------------------------------------------
   // INIT
@@ -1756,7 +2046,7 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
     setAdvText("advCount", "—");
     setAdvText("advMaj", "MAJ : —");
     setChip("—", false);
-    setAdvText("advRiskHint", `${riskHintText(state.advanced.risk || "low")}  ${riskScoreLine(state.advanced.risk || "low")}`);
+    setAdvText("advRiskHint", `${riskHintText(state.advanced.risk || "low")}  Score = profit pondéré par stabilité (selon risque).`);
 
     if ($("advRouteFrom")) $("advRouteFrom").value = state.advanced.fromName || "";
     if ($("advRouteTo")) $("advRouteTo").value = state.advanced.toName || "";
@@ -1835,3 +2125,78 @@ const pre = ($("advRouteFrom")?.value || "").trim();
   });
 
 })();
+
+
+
+
+/* ============================================================
+   V1.13.62 — Calculer (Top 3) + Balise "!" (Aide)
+   ============================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  const topCalc = document.getElementById("advTopCalc");
+  const infoBtn = document.getElementById("advInfoToggle");
+  const infoPanel = document.getElementById("advInfoPanel");
+
+  if (topCalc) {
+    topCalc.addEventListener("click", () => {
+      try {
+        // Prefer the Top Routes endpoint / routine (best route suggestions)
+        if (typeof fetchTopRoutes === "function") {
+          fetchTopRoutes();
+        } else if (typeof analyzeRouteAdvanced === "function") {
+          // Fallback: keep behaviour if only analysis exists
+          analyzeRouteAdvanced();
+        }
+      } catch (e) {
+        console.warn("[advTopCalc]", e);
+      }
+    });
+  }
+
+  if (infoBtn && infoPanel) {
+    infoBtn.addEventListener("click", () => {
+      infoPanel.classList.toggle("is-hidden");
+    });
+  }
+});
+
+
+function setAdvButtonsDisabled(disabled){
+  try{
+    const a = document.getElementById("advRouteAnalyze");
+    const c = document.getElementById("advTopCalc");
+    if(a) a.disabled = !!disabled;
+    if(c) c.disabled = !!disabled;
+  }catch(e){}
+}
+
+
+/* ============================================================
+   V1.13.62 — Calculer button (Top 3): trigger the same pipeline as "Analyser la route"
+   - Using click() on #advRouteAnalyze ensures we hit the real, already-wired handler.
+   - The "!" is now pure CSS hover tooltip (HTML/CSS), no JS needed.
+   ============================================================ */
+document.addEventListener("DOMContentLoaded", () => {
+  const topCalc = document.getElementById("advTopCalc");
+  if (topCalc) {
+    topCalc.addEventListener("click", () => {
+      try {
+        const analyzeBtn = document.getElementById("advRouteAnalyze");
+        if (analyzeBtn) {
+          analyzeBtn.click();
+          return;
+        }
+        if (typeof analyzeRouteAdvanced === "function") {
+          analyzeRouteAdvanced();
+          return;
+        }
+        if (typeof fetchTopRoutes === "function") {
+          fetchTopRoutes();
+          return;
+        }
+      } catch (e) {
+        console.warn("[advTopCalc]", e);
+      }
+    });
+  }
+});

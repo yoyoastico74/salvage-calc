@@ -1,7 +1,7 @@
-/* assets/js/ships.js — V1.2.27
+/* assets/js/ships.js — V1.2.47_SPEED_MERGE_ZERO_FIX
    Module: VAISSEAUX (Ship Finder)
    Data source: UEX Proxy (Option B)
-   -------------------------------------------------------
+
    - Loads ships list from Cloudflare Worker proxy (/ships)
    - Category filter (derived from UEX capability flags)
    - Autocomplete-like search list updates live
@@ -12,6 +12,9 @@
 
 (() => {
   "use strict";
+
+  // Build tag (debug/cache-bust)
+  const BUILD_TAG = "V1.2.47_SPEED_MERGE_ZERO_FIX";
 
   // --- Configuration ---------------------------------------------------------
   const DEFAULT_PROXY = "https://uex-ships.yoyoastico74.workers.dev";
@@ -28,6 +31,7 @@
   const elClear = document.getElementById("shipClear");
   const elMaker = document.getElementById("shipMaker");
   const elRole = document.getElementById("shipRole");
+const elFilterConcepts = document.getElementById("filterConcepts");
   const elResults = document.getElementById("shipResults");
   const elCard = document.getElementById("shipCard");
   const elSelectedBadge = document.getElementById("shipSelectedBadge");
@@ -46,6 +50,10 @@
   let filteredShips = [];      // results list
   let selectedShip = null;     // currently selected (from list)
   let lastDetailFetchId = 0;   // anti-race
+  let lastLoadMs = null;
+  let lastResultsCount = 0;
+  const DB_SOURCE_LABEL = "UEX";
+
 
   // --- Utils -----------------------------------------------------------------
   const safeText = (v) => {
@@ -96,6 +104,8 @@
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
 
+  const normalizeKey = (s) => normalizeName(String(s || "")).replace(/[^a-z0-9]+/g," ").trim();
+
   function deriveCategory(s) {
     // Single-role model (Erkul-style) — brand-first SAFE mapping
     // Priority:
@@ -115,15 +125,15 @@
 
     // 0) ROLE_OVERRIDES (highest confidence)
     const ROLE_OVERRIDES = [
-      [/(hercules.*a2)|(a2.*hercules)/, "Bomber"],
-      [/avenger\s+stalker/, "Interceptor"],
-      [/apollo.*(medivac|triage)/, "Medical"],
-      [/cutlass.*red/, "Medical"],
-      [/(c8r|pisces rescue)/, "Medical"],
-      [/starfarer/, "Refuel"],
-      [/mantis/, "Interdiction"],
-      [/eclipse/, "Bomber"],
-      [/retaliator/, "Bomber"],
+      [/(\bhercules\b.*\ba2\b)|(\ba2\b.*\bhercules\b)/, "Bomber"],
+      [/\bavenger\s+stalker\b/, "Interceptor"],
+      [/\bapollo\b.*\b(medivac|triage)\b/, "Medical"],
+      [/\bcutlass\b.*\bred\b/, "Medical"],
+      [/\b(c8r|pisces rescue)\b/, "Medical"],
+      [/\bstarfarer\b/, "Refuel"],
+      [/\bmantis\b/, "Interdiction"],
+      [/\beclipse\b/, "Bomber"],
+      [/\bretaliator\b/, "Bomber"],
     ];
     for (const [rx, role] of ROLE_OVERRIDES) {
       if (rx.test(blob)) return role;
@@ -134,21 +144,21 @@
 
     // MIRAI
     if (maker.includes("mirai")) {
-      if (match(/pulse/)) return "Ground";
-      if (match(/fury/)) return "Interceptor";
-      if (match(/guardian/)) return "Combat";
+      if (match(/\bpulse\b/)) return "Ground";
+      if (match(/\bfury\b/)) return "Interceptor";
+      if (match(/\bguardian\b/)) return "Combat";
       return "Combat";
     }
 
     // AEGIS
     if (maker.includes("aegis")) {
-      if (match(/avenger\s+titan/)) return "Starter";
-      if (match(/avenger\s+warlock/)) return "Interceptor";
-      if (match(/avenger/)) return "Interceptor";
+      if (match(/\bavenger\s+titan\b/)) return "Starter";
+      if (match(/\bavenger\s+warlock\b/)) return "Interceptor";
+      if (match(/\bavenger\b/)) return "Interceptor";
 
-      if (match(/(gladius|sabre|vanguard|hammerhead)/)) return "Combat";
-      if (match(/(retaliator|eclipse)/)) return "Bomber";
-      if (match(/reclaimer/)) return "Salvage";
+      if (match(/\b(gladius|sabre|vanguard|hammerhead)\b/)) return "Combat";
+      if (match(/\b(retaliator|eclipse)\b/)) return "Bomber";
+      if (match(/\breclaimer\b/)) return "Salvage";
 
       return "Combat";
     }
@@ -397,16 +407,16 @@
     if (Number(s.is_freight) === 1) return "Freight";
 
     // 3) keyword heuristics
-    if (/(medivac|triage|medical|ambulance|hospital)/.test(blob)) return "Medical";
-    if (/(refuel|refuelling|tanker)/.test(blob)) return "Refuel";
-    if (/(repair|rearm|support)/.test(blob)) return "Support";
-    if (/(data)/.test(blob)) return "Data";
-    if (/(passenger|touring|luxury)/.test(blob)) return "Passenger";
-    if (/(racing|racer)/.test(blob)) return "Racing";
-    if (/(dropship|drop ship|troop)/.test(blob)) return "Dropship";
-    if (/(interdiction|interdict)/.test(blob)) return "Interdiction";
-    if (/(bomber)/.test(blob)) return "Bomber";
-    if (/(interceptor)/.test(blob)) return "Interceptor";
+    if (/\b(medivac|triage|medical|ambulance|hospital)\b/.test(blob)) return "Medical";
+    if (/\b(refuel|refuelling|tanker)\b/.test(blob)) return "Refuel";
+    if (/\b(repair|rearm|support)\b/.test(blob)) return "Support";
+    if (/\b(data)\b/.test(blob)) return "Data";
+    if (/\b(passenger|touring|luxury)\b/.test(blob)) return "Passenger";
+    if (/\b(racing|racer)\b/.test(blob)) return "Racing";
+    if (/\b(dropship|drop ship|troop)\b/.test(blob)) return "Dropship";
+    if (/\b(interdiction|interdict)\b/.test(blob)) return "Interdiction";
+    if (/\b(bomber)\b/.test(blob)) return "Bomber";
+    if (/\b(interceptor)\b/.test(blob)) return "Interceptor";
 
     if (blob.includes("mining") || blob.includes("miner")) return "Mining";
     if (blob.includes("salvage")) return "Salvage";
@@ -423,19 +433,30 @@
     const m = safeText(s.manufacturer);
     const role = safeText(s.category);
     const scu = fmtInt(s.scu ?? 0);
-    return `${m} • ${role} • ${scu} SCU`;
+    return `${m} • ${role}`;
   }
 
   function setDbStatus(text, isError = false) {
-    elDbStatus.textContent = text;
-    elDbStatus.classList.toggle("is-error", !!isError);
-  }
+  elDbStatus.textContent = text;
+  elDbStatus.classList.toggle("is-error", !!isError);
+}
+
+function updateDbChip() {
+  if (!elDbStatus) return;
+  const db = ships.length || 0;
+  const res = lastResultsCount || 0;
+  const ms = (typeof lastLoadMs === "number" && Number.isFinite(lastLoadMs)) ? lastLoadMs : null;
+
+  const parts = [`Source : ${DB_SOURCE_LABEL}`, `DB : ${db}` , `Résultats : ${res}`];
+  if (ms !== null) parts.push(`Load : ${ms} ms`);
+  setDbStatus(parts.join(" • "), false);
+}
 
   function setTechVersions() {
-    if (elTvModule) elTvModule.textContent = "V1.2.26";
-    // These are present in your layout; keep them if they exist
+    if (elTvModule) elTvModule.textContent = "V1.2.47_SPEED_MERGE_ZERO_FIX";
+// These are present in your layout; keep them if they exist
     if (elTvCore) elTvCore.textContent = (window.CORE_VERSION || elTvCore.textContent || "—");
-    if (elTvDb) elTvDb.textContent = "UEX";
+    if (elTvDb) elTvDb.textContent = "UEX (proxy)";
   }
 
   // --- Rendering --------------------------------------------------------------
@@ -484,29 +505,37 @@
   }
 
   function renderCardBase(s) {
-    const name = safeText(s.name);
-    const category = safeText(s.category);
+  const name = safeText(s.name);
+  const category = safeText(s.category);
+  const type = safeText(s.type);
 
-    elSelectedBadge.textContent = category ? `${name} • ${category}` : name;
+  elSelectedBadge.textContent = category && category !== "—" ? `${name} • ${category}` : name;
 
-    elCard.innerHTML = `
-<div class="ship-grid">
-        <div class="ship-kv"><div class="k">Constructeur</div><div class="v" id="shipKvManufacturer">${safeText(s.manufacturer)}</div></div>
-        <div class="ship-kv"><div class="k">Rôle</div><div class="v" id="shipKvCategory">${category}</div></div>
-        <div class="ship-kv"><div class="k">SCU</div><div class="v" id="shipKvScu">${fmtInt(s.scu ?? 0)}</div></div>
+  elCard.innerHTML = `
+    <div class="ship-grid">
+      <div class="ship-kv"><div class="k">Constructeur</div><div class="v" id="shipKvManufacturer">${safeText(s.manufacturer)}</div></div>
+      <div class="ship-kv"><div class="k">Type</div><div class="v" id="shipKvType">${type}</div></div>
+      <div class="ship-kv"><div class="k">SCU</div><div class="v" id="shipKvScu">${fmtInt(s.scu ?? 0)}</div></div>
 
-        <div class="ship-kv"><div class="k">Équipage (min / max)</div><div class="v" id="shipKvCrew">${crewText(s)}</div></div>
+      <div class="ship-kv"><div class="k">Équipage (min / max)</div><div class="v" id="shipKvCrew">${crewText(s)}</div></div>
+      <div class="ship-kv"><div class="k">Armement</div><div class="v" id="shipKvArmament">—</div></div>
+      <div class="ship-kv"><div class="k">Dimensions (L × l × h)</div><div class="v" id="shipKvDims">—</div></div>
 
-        <div class="ship-kv"><div class="k">Prix en jeu (aUEC)</div><div class="v" id="shipKvPriceIngame">—</div></div>
-        <div class="ship-kv"><div class="k">Valeur IRL</div><div class="v" id="shipKvPriceIrl">—</div></div>
-      </div>
+      <div class="ship-kv"><div class="k">Masse</div><div class="v" id="shipKvMass">—</div></div>
+      <div class="ship-kv"><div class="k">Vitesse (SCM / NAV)</div><div class="v" id="shipKvSpeed">—</div></div>
+      <div class="ship-kv"><div class="k">Quantum (capable)</div><div class="v" id="shipKvQuantum">—</div></div>
 
-      <div class="ship-sales">
-        <div class="ship-sales-title">Emplacements de vente</div>
-        <div class="ship-sales-list" id="shipSalesList">—</div>
-      </div>
-    `;
-  }
+      <div class="ship-kv"><div class="k">Carburant (H2 / QT)</div><div class="v" id="shipKvFuel">—</div></div>
+      <div class="ship-kv"><div class="k">Prix en jeu (aUEC)</div><div class="v" id="shipKvPriceIngame">—</div></div>
+      <div class="ship-kv"><div class="k">Valeur IRL</div><div class="v" id="shipKvPriceIrl">—</div></div>
+    </div>
+
+    <div class="ship-sales">
+      <div class="ship-sales-title">Emplacements de vente</div>
+      <div class="ship-sales-list" id="shipSalesList">—</div>
+    </div>
+`;
+}
 
   function crewText(s) {
     const min = s.crew_min;
@@ -517,157 +546,311 @@
     return `— / ${fmtInt(max)}`;
   }
 
-  function applyCardDetails(details) {
-    if (!selectedShip) return;
+  
 
-    // IRL pledge store price
-    const irl = details?.irl || null;
-    const elIrl = document.getElementById("shipKvPriceIrl");
-    if (elIrl) {
-      if (irl && typeof irl.price !== "undefined" && irl.price !== null) {
-        const currency = safeText(irl.currency || "USD");
-        const price = Number(irl.price);
-        elIrl.textContent = Number.isFinite(price) ? `${price.toFixed(0)} ${currency}` : "—";
-      } else {
-        elIrl.textContent = "—";
-      }
+  function normalizeSpeed(src) {
+    const num = (v) => {
+    // Robust parsing for numeric strings that may include spaces/commas (e.g. "1,234" or "1 234").
+    if (v === null || typeof v === "undefined") return null;
+    if (typeof v === "number") return Number.isFinite(v) ? v : null;
+
+    const s0 = String(v).trim();
+    if (!s0) return null;
+
+    let s = s0.replace(/\u00A0/g, "");   // NBSP
+    s = s.replace(/\s+/g, "");          // spaces
+
+    // Handle common thousands/decimal formats:
+    // - If both ',' and '.' exist, assume ',' are thousands separators.
+    // - If only ',' exists and matches grouped thousands (1,234,567), treat as thousands; else treat as decimal comma.
+    if (s.includes(",") && s.includes(".")) {
+      s = s.replace(/,/g, "");
+    } else if (s.includes(",") && !s.includes(".")) {
+      if (/^\d{1,3}(,\d{3})+$/.test(s)) s = s.replace(/,/g, "");
+      else s = s.replace(",", ".");
     }
 
-    // In-game prices + locations
-    const ingame = Array.isArray(details?.ingame) ? details.ingame : [];
-    const elIngame = document.getElementById("shipKvPriceIngame");
-    const elSales = document.getElementById("shipSalesList");
+    s = s.replace(/_/g, ""); // underscores
 
-    if (ingame.length) {
-      // Compute a representative price: min of price_buy_min if available, else price_buy
-      const prices = ingame
-        .map((r) => Number(r.price_buy_min ?? r.price_buy))
-        .filter((n) => Number.isFinite(n) && n > 0);
+    const n = Number(s);
+    return Number.isFinite(n) ? n : null;
+  };
+    const scm = (() => { const v = num(src?.speed_scm ?? src?.scm_speed ?? src?.speed_scm_max ?? src?.scm); return (v !== null && v > 0) ? v : null; })();
+  const boost = (() => { const v = num(src?.speed_boost ?? src?.boost_speed ?? src?.speed_boost_max ?? src?.boost); return (v !== null && v > 0) ? v : null; })();
+  const max = (() => { const v = num(src?.speed_max ?? src?.max_speed ?? src?.top_speed ?? src?.speed); return (v !== null && v > 0) ? v : null; })();
+    if (scm || boost) return `${scm ? fmtInt(scm) : "—"} / ${boost ? fmtInt(boost) : "—"} m/s`;
+    if (max) return `${fmtInt(max)} m/s`;
+    return "—";
+  }
 
-      const minPrice = prices.length ? Math.min(...prices) : null;
-      if (elIngame) elIngame.textContent = minPrice ? fmtInt(minPrice) : "—";
+  function applyCardDetails(details) {
+  if (!selectedShip) return;
 
-      if (elSales) {
-        const entries = ingame
-          .map((r) => {
-            const terminal = safeText(r.terminal_name);
-            const city = safeText(r.city_name);
-            const planet = safeText(r.planet_name || r.moon_name || r.space_station_name || r.orbit_name);
-            const system = safeText(r.star_system_name);
+  const elIrl = document.getElementById("shipKvPriceIrl");
+  const elIngame = document.getElementById("shipKvPriceIngame");
+  const elSales = document.getElementById("shipSalesList");
 
-            // Build a compact path: Terminal — City (Planet, System)
-            const parts = [];
-            if (city !== "—") parts.push(city);
-            const place = [planet, system].filter((x) => x !== "—").join(", ");
-            const placeText = place ? `(${place})` : "";
-            const right = parts.length ? `${parts.join(" • ")} ${placeText}`.trim() : placeText;
-
-            return {
-              terminal,
-              place: right || "—",
-              price: Number(r.price_buy_min ?? r.price_buy) || 0,
-            };
-          })
-          .filter((e) => (e.terminal && e.terminal !== "—") || (e.place && e.place !== "—"));
-
-        // Sort by best (lowest) price first
-        entries.sort((a, b) => (a.price || 0) - (b.price || 0));
-
-        const maxLines = 6;
-        const shown = entries.slice(0, maxLines);
-        const more = entries.length - shown.length;
-
-        elSales.innerHTML = "";
-        const ul = document.createElement("ul");
-        ul.className = "ship-sales-ul";
-
-        shown.forEach((e) => {
-          const li = document.createElement("li");
-
-          const t = document.createElement("span");
-          t.className = "sale-terminal";
-          t.textContent = e.terminal && e.terminal !== "—" ? e.terminal : "Terminal";
-
-          const p = document.createElement("span");
-          p.className = "sale-place";
-          p.textContent = e.place && e.place !== "—" ? e.place : "—";
-
-          li.appendChild(t);
-          li.appendChild(p);
-          ul.appendChild(li);
-        });
-
-        elSales.appendChild(ul);
-
-        if (more > 0) {
-          const moreDiv = document.createElement("div");
-          moreDiv.className = "ship-sales-more";
-          moreDiv.textContent = `+${more} autres emplacements`;
-          elSales.appendChild(moreDiv);
-        }
-      }
+  // Specs fields
+  const elDims = document.getElementById("shipKvDims");
+  const elMass = document.getElementById("shipKvMass");
+  const elFuel = document.getElementById("shipKvFuel");
+  const elArm = document.getElementById("shipKvArmament");
+  const elSpeed = document.getElementById("shipKvSpeed");
+  const elQt = document.getElementById("shipKvQuantum");
+// IRL pledge store price
+  const irl = details?.irl || null;
+  if (elIrl) {
+    if (irl && typeof irl.price !== "undefined" && irl.price !== null) {
+      const currency = safeText(irl.currency || "USD");
+      const price = Number(irl.price);
+      elIrl.textContent = Number.isFinite(price) ? `${price.toFixed(0)} ${currency}` : "—";
     } else {
-      if (elIngame) elIngame.textContent = "—";
-      if (elSales) elSales.textContent = "—";
+      elIrl.textContent = "—";
     }
   }
 
-  // --- Filtering --------------------------------------------------------------
-  function applyFilters() {
-    const q = normalizeName(elQuery.value);
-    const cat = elRole.value || "__ALL__";
-    const makerSel = (elMaker && elMaker.value) ? elMaker.value : "__ALL__";
+  // In-game prices + locations
+  const ingame = Array.isArray(details?.ingame) ? details.ingame : [];
 
+  if (ingame.length) {
+    const prices = ingame
+      .map((r) => Number(r.price_buy_min ?? r.price_buy))
+      .filter((n) => Number.isFinite(n) && n > 0);
+
+    const minPrice = prices.length ? Math.min(...prices) : null;
+    if (elIngame) elIngame.textContent = minPrice ? fmtInt(minPrice) : "—";
+
+    if (elSales) {
+      const entries = ingame
+        .map((r) => {
+          const terminal = safeText(r.terminal_name);
+          const city = safeText(r.city_name);
+          const planet = safeText(r.planet_name || r.moon_name || r.space_station_name || r.orbit_name);
+          const system = safeText(r.star_system_name);
+
+          const parts = [];
+          if (city !== "—") parts.push(city);
+          const place = [planet, system].filter((x) => x !== "—").join(", ");
+          const placeText = place ? `(${place})` : "";
+          const right = parts.length ? `${parts.join(" • ")} ${placeText}`.trim() : placeText;
+
+          return {
+            terminal,
+            place: right || "—",
+            price: Number(r.price_buy_min ?? r.price_buy) || 0,
+          };
+        })
+        .filter((e) => (e.terminal && e.terminal !== "—") || (e.place && e.place !== "—"));
+
+      entries.sort((a, b) => (a.price || 0) - (b.price || 0));
+
+      const maxLines = 6;
+      const shown = entries.slice(0, maxLines);
+      const more = entries.length - shown.length;
+
+      elSales.innerHTML = "";
+      const ul = document.createElement("ul");
+      ul.className = "ship-sales-ul";
+
+      shown.forEach((e) => {
+        const li = document.createElement("li");
+
+        const t = document.createElement("span");
+        t.className = "sale-terminal";
+        t.textContent = e.terminal && e.terminal !== "—" ? e.terminal : "Terminal";
+
+        const p = document.createElement("span");
+        p.className = "sale-place";
+        p.textContent = e.place && e.place !== "—" ? e.place : "—";
+
+        li.appendChild(t);
+        li.appendChild(p);
+        ul.appendChild(li);
+      });
+
+      elSales.appendChild(ul);
+
+      if (more > 0) {
+        const moreDiv = document.createElement("div");
+        moreDiv.className = "ship-sales-more";
+        moreDiv.textContent = `+${more} autres emplacements`;
+        elSales.appendChild(moreDiv);
+      }
+    }
+  } else {
+    if (elIngame) elIngame.textContent = "—";
+    if (elSales) elSales.textContent = "—";
+  }
+
+  // --- Specs (from worker /ship; can be at root or under `vehicle`) ----------
+  const src = (details && typeof details === "object")
+    ? (details.vehicle && typeof details.vehicle === "object" ? details.vehicle : details)
+    : null;
+  const enriched = (details && typeof details === "object" && details.enriched && typeof details.enriched === "object")
+    ? details.enriched
+    : null;
+
+  // Build a merged source for speed extraction (enriched + base), without relying on undefined vars.
+    // Prefer enrichment over UEX for speed fields (UEX frequently uses 0 when unknown).
+  const speedSrc = { ...(src || {}), ...(enriched || {}), ...(enriched?.match || {}) };
+
+  const num = (v) => {
+    // Robust parsing for numeric strings that may include spaces/commas (e.g. "1,234" or "1 234").
+    if (v === null || typeof v === "undefined") return null;
+    if (typeof v === "number") return Number.isFinite(v) ? v : null;
+
+    const s0 = String(v).trim();
+    if (!s0) return null;
+
+    let s = s0.replace(/\u00A0/g, "");   // NBSP
+    s = s.replace(/\s+/g, "");          // spaces
+
+    // Handle common thousands/decimal formats:
+    // - If both ',' and '.' exist, assume ',' are thousands separators.
+    // - If only ',' exists and matches grouped thousands (1,234,567), treat as thousands; else treat as decimal comma.
+    if (s.includes(",") && s.includes(".")) {
+      s = s.replace(/,/g, "");
+    } else if (s.includes(",") && !s.includes(".")) {
+      if (/^\d{1,3}(,\d{3})+$/.test(s)) s = s.replace(/,/g, "");
+      else s = s.replace(",", ".");
+    }
+
+    s = s.replace(/_/g, ""); // underscores
+
+    const n = Number(s);
+    return Number.isFinite(n) ? n : null;
+  };
+
+
+  const pickPos = (primary, fallback) => {
+  const p = num(primary);
+  if (p !== null && p > 0) return p;
+  const f = num(fallback);
+  return (f !== null && f > 0) ? f : null;
+}
+
+function formatSpeedScmNav(speedObj){
+  const scm = speedObj?.scm ?? null;
+  const nav = speedObj?.max ?? null; // NAV max speed
+  if (scm === null && nav === null) return "—";
+  if (scm !== null && nav !== null) return `${Math.round(scm)} / ${Math.round(nav)} m/s`;
+  if (scm !== null) return `${Math.round(scm)} / — m/s`;
+  return `— / ${Math.round(nav)} m/s`;
+}
+;
+
+  const len = pickPos(src?.length, enriched?.length ?? enriched?.match?.length);
+  const wid = pickPos(src?.width,  enriched?.width  ?? enriched?.match?.width);
+  const hei = pickPos(src?.height, enriched?.height ?? enriched?.match?.height);
+
+  // UEX often provides 0 for "unknown" → treat as missing and fall back to enrichment sources.
+  const mass = pickPos(src?.mass, enriched?.mass ?? enriched?.match?.mass);
+  const h2   = pickPos(src?.fuel_hydrogen, enriched?.fuel_hydrogen ?? enriched?.match?.fuel_hydrogen);
+  const qt   = pickPos(src?.fuel_quantum,  enriched?.fuel_quantum  ?? enriched?.match?.fuel_quantum);
+
+  if (elDims) {
+    if (len && wid && hei && len > 0 && wid > 0 && hei > 0) {
+      const f = (x) => (Math.round(x * 10) / 10).toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      elDims.textContent = `${f(len)} m × ${f(wid)} m × ${f(hei)} m`;
+    } else {
+      elDims.textContent = "—";
+    }
+  }
+
+  if (elMass) {
+    if (mass && mass > 0) {
+      elMass.textContent = `${fmtInt(mass)} kg`;
+    } else {
+      elMass.textContent = "—";
+    }
+  }
+
+  if (elFuel) {
+    if ((h2 && h2 > 0) || (qt && qt > 0)) {
+      elFuel.textContent = `${h2 && h2 > 0 ? fmtInt(h2) : "—"} / ${qt && qt > 0 ? fmtInt(qt) : "—"}`;
+    } else {
+      elFuel.textContent = "—";
+    }
+  }
+
+  
+  // --- Enrichment via proxy (specs + prices) ---------------------------------
+if (elSpeed) {
+    elSpeed.textContent = formatSpeedScmNav(normalizeSpeed(speedSrc));
+  }
+
+  // Armament + Quantum summary in KV grid
+
+  if (elArm) { elArm.textContent = "—"; }
+
+  if (elQt) {
+    // Without base-loadout UI, keep Quantum field simple and readable.
+    elQt.textContent = selectedShip && selectedShip.is_quantum_capable ? "Oui" : "Non";
+  }
+
+} // end applyCardDetails
+
+  // --- Filtering -------------------------------------------------------------
+  function applyFilters() {
+    const q = normalizeKey(elQuery.value);
+    const makerSel = elMaker ? String(elMaker.value || "").trim() : "";
+    const roleSel = String(elRole.value || "").trim();
+
+
+    const includeConcepts = !!(elFilterConcepts && elFilterConcepts.checked);
     filteredShips = ships.filter((s) => {
-      if (makerSel !== "__ALL__" && (s.manufacturer || "—") !== makerSel) return false;
-      if (cat !== "__ALL__" && (s.category || "Autre") !== cat) return false;
+      if (!s) return false;
+
+      // Flight-ready filter: by default we exclude concepts (UEX: is_concept = 1)
+      if (!includeConcepts && Number(s.is_concept) === 1) return false;
+
+      if (makerSel && makerSel !== "*" && safeText(s.manufacturer) !== makerSel) return false;
+      if (roleSel && roleSel !== "*" && safeText(s.category) !== roleSel) return false;
 
       if (!q) return true;
-      const hay = normalizeName(`${s.name} ${safeText(s.manufacturer)} ${s.type} ${s.category}`);
-      return hay.includes(q);
+
+      const name = normalizeKey(s.name);
+      const maker = normalizeKey(s.manufacturer);
+      const type = normalizeKey(s.type);
+      return name.includes(q) || maker.includes(q) || type.includes(q);
     });
 
+    lastResultsCount = filteredShips.length;
+    updateDbChip();
     renderResults(filteredShips);
   }
 
-  function populateMakerSelect(){
-    const makers = new Set();
-    ships.forEach((s)=>makers.add(safeText(s.manufacturer)));
-    const sorted = Array.from(makers).sort((a,b)=>a.localeCompare(b,"fr"));
-
+  function populateMakerFilter() {
     if (!elMaker) return;
-    elMaker.innerHTML = "";
-    const all = document.createElement("option");
-    all.value="__ALL__";
-    all.textContent="Tous les constructeurs";
-    elMaker.appendChild(all);
 
-    sorted.forEach((m)=>{
-      const opt=document.createElement("option");
-      opt.value=m;
-      opt.textContent=m;
+    const makers = Array.from(new Set(ships.map((s) => safeText(s.manufacturer)).filter((m) => m !== "—")))
+      .sort((a, b) => a.localeCompare(b, "fr", { sensitivity: "base" }));
+
+    elMaker.innerHTML = "";
+    const optAll = document.createElement("option");
+    optAll.value = "*";
+    optAll.textContent = "Tous les constructeurs";
+    elMaker.appendChild(optAll);
+
+    makers.forEach((m) => {
+      const opt = document.createElement("option");
+      opt.value = m;
+      opt.textContent = m;
       elMaker.appendChild(opt);
     });
   }
 
-function populateRoleSelect() {
-    const roles = new Set();
-    const makerSel = (elMaker && elMaker.value) ? elMaker.value : "__ALL__";
-
-    ships.forEach((s) => {
-      if (makerSel !== "__ALL__" && (s.manufacturer || "—") !== makerSel) return;
-      roles.add((s.category || "Autre"));
-    });
-
-    const sorted = Array.from(roles).sort((a, b) => a.localeCompare(b, "fr"));
+  function populateRoleFilter() {
+    const roles = Array.from(new Set(ships.map((s) => safeText(s.category)).filter((r) => r !== "—")))
+      .sort((a, b) => a.localeCompare(b, "fr", { sensitivity: "base" }));
 
     elRole.innerHTML = "";
     const optAll = document.createElement("option");
-    optAll.value = "__ALL__";
-    optAll.textContent = "Tous les rôles";
+    optAll.value = "*";
+    optAll.textContent = "Toutes les catégories";
     elRole.appendChild(optAll);
 
-    sorted.forEach((r) => {
+    roles.forEach((r) => {
       const opt = document.createElement("option");
       opt.value = r;
       opt.textContent = r;
@@ -675,105 +858,111 @@ function populateRoleSelect() {
     });
   }
 
-  // --- Selection --------------------------------------------------------------
+  // --- Selection + Details ---------------------------------------------------
   async function selectShipById(idVehicle) {
-    const id = Number(idVehicle);
-    const s = ships.find((x) => Number(x.id_vehicle) === id);
+    const id = String(idVehicle || "").trim();
+    if (!id) return;
+
+    const s = ships.find((x) => String(x.id_vehicle) === id);
     if (!s) return;
 
     selectedShip = s;
-    renderCardBase(s);
 
+    // Ensure category is present (some upstream lists may not include it)
+    if (!selectedShip.category || selectedShip.category === "—") {
+      selectedShip.category = deriveCategory(selectedShip);
+    }
+
+    renderCardBase(selectedShip);
+
+    // Fetch details (anti-race)
     const fetchId = ++lastDetailFetchId;
+    const url = `${ENDPOINT_SHIP}?id_vehicle=${encodeURIComponent(id)}`;
 
     try {
-      const url = `${ENDPOINT_SHIP}?id_vehicle=${encodeURIComponent(id)}`;
-      const resp = await fetch(url, { method: "GET" });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const details = await r.json();
 
-      const details = await resp.json();
-
-      // Ignore out-of-order responses
-      if (fetchId !== lastDetailFetchId) return;
-
+      if (fetchId !== lastDetailFetchId) return; // stale response
       applyCardDetails(details);
     } catch (e) {
-      // Keep base card; just set placeholders
       if (fetchId !== lastDetailFetchId) return;
-      applyCardDetails({ irl: null, ingame: null });
-      console.warn("[Ships] ship details failed:", e);
-    }
+      console.warn("[Ships] /ship failed:", e);
+}
   }
 
-  // --- Bootstrap --------------------------------------------------------------
+  // --- Boot ------------------------------------------------------------------
   async function loadShips() {
     setTechVersions();
-    setDbStatus("Chargement…", false);
     renderEmptyCard();
+    setDbStatus(`Chargement… (${DB_SOURCE_LABEL})`, false);
 
+    const t0 = performance.now();
     try {
-      const resp = await fetch(ENDPOINT_SHIPS, { method: "GET" });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const r = await fetch(ENDPOINT_SHIPS, { cache: "no-store" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
 
-      const data = await resp.json();
-      const list = Array.isArray(data?.ships) ? data.ships : [];
-
+      const list = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
       ships = list
-        .map((s) => ({
-          id_vehicle: s.id_vehicle,
-          name: s.name,
-          manufacturer: safeText(s.manufacturer),
-          type: s.type,
-          scu: s.scu,
-          crew_min: s.crew_min,
-          crew_max: s.crew_max,
-          is_mining: s.is_mining,
-          is_salvage: s.is_salvage,
-          is_freight: s.is_freight,
-          is_combat: s.is_combat,
-          is_ground: s.is_ground,
-          is_exploration: s.is_exploration,
-        }))
-        .filter((s) => s.id_vehicle && s.name)
-        .map((s) => ({ ...s, category: deriveCategory(s) }));
+        .map((s) => {
+          const o = Object.assign({}, s);
+          // Normalize key fields expected by UI
+          o.name = safeText(o.name);
+          o.manufacturer = safeText(o.manufacturer || o.manufacturer_name);
+          o.type = safeText(o.type);
+          o.scu = Number(o.scu ?? 0) || 0;
+          // Category derived deterministically (stable filter)
+          o.category = deriveCategory(o);
+          return o;
+        })
+        .filter((s) => s.name !== "—" && String(s.id_vehicle || "").trim() !== "");
 
-      setDbStatus(`DB : ${ships.length} vaisseaux`, false);
-      populateMakerSelect();
-      populateRoleSelect();
+      // sort by manufacturer then name (stable)
+      ships.sort((a, b) => {
+        const ma = safeText(a.manufacturer);
+        const mb = safeText(b.manufacturer);
+        const c = ma.localeCompare(mb, "fr", { sensitivity: "base" });
+        if (c !== 0) return c;
+        return safeText(a.name).localeCompare(safeText(b.name), "fr", { sensitivity: "base" });
+      });
+
+      lastLoadMs = Math.round(performance.now() - t0);
+      lastResultsCount = ships.length;
+
+      populateMakerFilter();
+      populateRoleFilter();
+      updateDbChip();
+
       applyFilters();
-
-      // Auto-focus for speed
-      elQuery.focus();
+      setDbStatus(`OK • Source : ${DB_SOURCE_LABEL} • DB : ${ships.length}`, false);
     } catch (e) {
+      console.error("[Ships] loadShips failed:", e);
+      lastLoadMs = Math.round(performance.now() - t0);
       ships = [];
-      setDbStatus("DB : Erreur", true);
+      filteredShips = [];
+      lastResultsCount = 0;
+      updateDbChip();
       renderResults([]);
-      renderEmptyCard();
-      console.error("[Ships] DB load failed:", e);
+      setDbStatus(`Erreur chargement DB (${DB_SOURCE_LABEL}) • ${safeText(e?.message)}`, true);
     }
   }
 
-  // Events
-  elQuery.addEventListener("input", applyFilters);
-  if (elMaker) {
-    elMaker.addEventListener("change", () => {
-      // Maker should immediately reduce results and the Role list
-      populateRoleSelect();
-      elRole.value = "__ALL__";
-      applyFilters();
-    });
-  }
-  elRole.addEventListener("change", applyFilters);
+  // --- Events ----------------------------------------------------------------
+  elQuery.addEventListener("input", () => applyFilters());
 
   elClear.addEventListener("click", () => {
     elQuery.value = "";
-    elRole.value = "__ALL__";
-    applyFilters();
-    selectedShip = null;
-    renderEmptyCard();
     elQuery.focus();
+    applyFilters();
   });
 
-  // Init
+  if (elMaker) elMaker.addEventListener("change", () => applyFilters());
+  elRole.addEventListener("change", () => applyFilters());
+  if (elFilterConcepts) elFilterConcepts.addEventListener("change", () => applyFilters());
+
+  // Initial load
   loadShips();
-})();
+
+})(); // end IIFE

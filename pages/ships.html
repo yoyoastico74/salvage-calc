@@ -1,4 +1,4 @@
-<!-- pages/ships.html — V1.0.39 (Support forum link) -->
+<!-- pages/ships.html — V1.0.46_SPECS_ENRICH -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="../assets/css/core.css" />
 
   <!-- Module styles (scoped) -->
-  <link rel="stylesheet" href="../assets/css/ships.css?v=V1.0.19" />
+  <link rel="stylesheet" href="../assets/css/ships.css?v=V1.0.25_SCM_NAV_SPEEDS" />
 </head>
 
 <body class="page-ships">
@@ -39,33 +39,40 @@
           </div>
 
           <div class="ships-search">
-            <label class="ships-label" for="shipQuery">Nom du vaisseau</label>
-            <div class="ships-search-row">
-              <input id="shipQuery" class="input ships-input" type="text" placeholder="Tape le nom du vaisseau… (ex: C2, Caterpillar, Cutlass)" autocomplete="off" />
-              <button id="shipClear" class="btn btn-ghost" type="button" aria-label="Effacer">Effacer</button>
-            </div>
-            <div class="ships-filter-row">
-              <div class="ships-filter-top">
-                
-<div class="ships-filter-row">
-  <div class="ships-filter-top">
-    <label class="ships-filter-label" for="shipMaker">Constructeur</label>
-</div>
-  <select id="shipMaker" class="ships-select">
-    <option value="__ALL__">Tous les constructeurs</option>
-  </select>
-</div>
+  <label class="ships-label" for="shipQuery">Nom du vaisseau</label>
+  <div class="ships-search-row">
+    <input id="shipQuery" class="input ships-input" type="text" placeholder="Tape le nom du vaisseau… (ex: C2, Caterpillar, Cutlass)" autocomplete="off" />
+    <button id="shipClear" class="btn btn-ghost" type="button" aria-label="Effacer">Effacer</button>
+  </div>
 
-  <label class="ships-filter-label" for="shipRole">Rôle</label>
-                <span class="ships-mini">(référence Erkul / RSI)</span>
-              </div>
-              <select id="shipRole" class="ships-select">
-                <option value="__ALL__">Tous les rôles</option>
-              </select>
-            </div>
+  <div class="ships-filter-row">
+    <div class="ships-filter-top">
+      <label class="ships-filter-label" for="shipMaker">Constructeur</label>
+    </div>
+    <select id="shipMaker" class="ships-select">
+      <option value="__ALL__">Tous les constructeurs</option>
+    </select>
+  </div>
 
-<div id="shipResults" class="ships-results" role="listbox" aria-label="Résultats"></div>
-          </div>
+  <div class="ships-filter-row">
+    <div class="ships-filter-top">
+      <label class="ships-filter-label" for="shipRole">Rôle</label>
+      <span class="ships-mini">(référence Erkul / RSI)</span>
+    </div>
+    <select id="shipRole" class="ships-select">
+      <option value="__ALL__">Tous les rôles</option>
+    </select>
+  </div>
+  <div class="ships-filter-row ships-filter-row-compact">
+    <label class="ships-check">
+      <input type="checkbox" id="filterConcepts" />
+      <span>Inclure les concepts (non flight-ready)</span>
+    </label>
+  </div>
+
+
+  <div id="shipResults" class="ships-results" role="listbox" aria-label="Résultats"></div>
+</div>
         </div>
 
         <div class="panel panel-strong ships-details-panel">
@@ -83,7 +90,7 @@
       <!-- Version footer -->
       <div class="version-footer page-ships-version" id="versionFooter">
         <button id="versionToggle" class="version-bar" type="button" aria-expanded="false">
-          <div class="version-main" id="versionMainText">VAISSEAUX V1.0.50 • PU 4.5</div>
+          <div class="version-main" id="versionMainText">VAISSEAUX V1.0.52 • PU 4.5</div>
           <div class="version-cta">Détails</div>
         </button>
 
@@ -110,7 +117,7 @@
     </div>
   </div>
 
-  <script src="../assets/js/ships.js?v=V1.2.27" defer></script><script>
+  <script src="../assets/js/ships.js?v=V1.2.47_SPEED_MERGE_ZERO_FIX" defer></script><script>
 (function tvTechbarInit(){
   "use strict";
 
