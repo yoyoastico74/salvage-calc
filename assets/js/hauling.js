@@ -3,11 +3,11 @@
 (() => {
   "use strict";
 
-  const VERSION = "V1.14.34 FULL (SINGLE_SUGGEST_MENU)";
+  const VERSION = "V1.14.40 FULL (TOP3_ORIGIN_LIVE)";
 
 
-const HTML_VERSION = "V1.13.85";
-const CSS_VERSION = "V1.13.85";
+const HTML_VERSION = "V1.13.91";
+const CSS_VERSION = "V1.13.91";
 function getAdvOriginQuery(){
   const el = document.getElementById("advRouteFrom")
         || document.getElementById("advOrigin")
@@ -37,6 +37,34 @@ function getAdvOriginQuery(){
 
   // ------------------------------------------------------------
   // CONFIG
+
+  // ------------------------------------------------------------
+  // TOP3_ORIGIN_LIVE: keep Top 3 synced with Departure (A) when B is empty
+  // ------------------------------------------------------------
+  let __top3OriginTimer = null;
+  function wireTop3OriginLive(){
+    const fromEl = document.getElementById("advRouteFrom");
+    if (!fromEl) return;
+
+    const handler = () => {
+      const fromName = (fromEl.value || "").trim();
+      const toName = (document.getElementById("advRouteTo")?.value || "").trim();
+      if (toName) return; // user is in A→B mode
+      clearTimeout(__top3OriginTimer);
+      __top3OriginTimer = setTimeout(() => {
+        const q = (document.getElementById("advSearch")?.value || "").trim();
+        if (!fromName){
+          // back to global scan (no origin)
+          try{ setAdvText("advRouteStatus", "Scan routes globales…"); }catch(_e){}
+          fetchTopRoutes({ commodityQuery: q, reason: "origin-cleared" })
+            .catch((_e) => {});
+        }
+      }, 250);
+    };
+
+    fromEl.addEventListener("input", handler);
+  }
+
   // ------------------------------------------------------------
   const PROXY_BASE = "https://uex-proxy.yoyoastico74.workers.dev";
   const GAME_VERSION = "4.5";
@@ -331,6 +359,7 @@ setText("tvSourceFret", sanitizeSourceLabel("last-worker-response"));
   // STATE (persist minimal)
   // ------------------------------------------------------------
   const state = {
+  ui: { showAdvFromSuggest: false, showAdvToSuggest: false },
     tab: "beginner", // beginner|advanced
     beginner: { minutes: 25 },
     advanced: {
@@ -1539,6 +1568,20 @@ function renderTermSuggest(inputEl, items){
       inputEl.setAttribute("data-terminal-id", String(t?.id_terminal || ""));
       hideTermSuggest(boxId);
       try { saveState(); } catch(_){}
+
+      // TOP3_ORIGIN_LIVE: if user picked a Departure (A) and Arrival is empty,
+      // refresh Top 3 + list for that origin without requiring an extra click.
+      try{
+        const id = inputEl && inputEl.id;
+        const toName = (document.getElementById("advRouteTo")?.value || "").trim();
+        if (id === "advRouteFrom" && !toName){
+          const q = (document.getElementById("advSearch")?.value || "").trim();
+          setAdvText("advRouteStatus", "Scan routes depuis A…");
+          fetchTopRoutes({ originOverride: name, commodityQuery: q, reason: "origin-pick" })
+            .then(() => { try{ setAdvText("advRouteStatus", "OK • Scan depuis A"); }catch(_e){} })
+            .catch((e) => { try{ setAdvText("advRouteStatus", `Erreur: ${String(e?.message || e)}`); }catch(_e){} });
+        }
+      }catch(_e){}
     });
 
     box.appendChild(btn);
@@ -1985,9 +2028,10 @@ function renderTopRoutes(routes, scanMeta) {
       setAdvText("advRouteStatus", "Scan routes globales…");
       clearResultsArea("Scan en cours…");
 
+      
       const originQ0 = (opts && typeof opts.originOverride === "string" && opts.originOverride.trim().length >= 3)
         ? opts.originOverride.trim()
-        : (($("advOrigin")?.value || "").trim());
+        : (getAdvOriginQuery() || "").trim();
       const originQ = originQ0.length >= 3 ? originQ0 : "";
       const usedOriginParam = !!originQ;
       const maxTerms = usedOriginParam ? 150 : TOP_ROUTES_MAX_TERMINALS;
@@ -1998,9 +2042,9 @@ function renderTopRoutes(routes, scanMeta) {
         `&risk=${encodeURIComponent(state.advanced.risk)}` +
         `&limit=${encodeURIComponent(TOP_ROUTES_LIMIT)}` +
         `&max_terminals=${encodeURIComponent(maxTerms)}`;
-        const originQuery = getAdvOriginQuery();
-  if (originQuery) url += `&origin=${encodeURIComponent(originQuery)}`;
-if (originQ) url += `&origin=${encodeURIComponent(originQ)}`;
+
+      if (originQ) url += `&origin=${encodeURIComponent(originQ)}`;
+
       url += `&game_version=${encodeURIComponent(GAME_VERSION)}`;
 
       const payload = await fetchJson(url);
@@ -2369,6 +2413,65 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+
+
+function killNativeAutofill(){
+  const ids = ["advRouteFrom","advRouteTo","routeFrom","routeTo","advOrigin","advDest"];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    // Browsers sometimes ignore autocomplete="off"; "new-password" is more reliably respected.
+    el.setAttribute("autocomplete","new-password");
+    el.setAttribute("autocapitalize","off");
+    el.setAttribute("spellcheck","false");
+    // "name" triggers autofill; randomize it each load.
+    el.setAttribute("name", `nope_${id}_${Date.now()}`);
+  });
+}
+
+function dedupeTermSuggestBoxes(){
+
+function isAdvSuggestEnabled(inputId){
+  if (inputId === "advRouteFrom") return !!state.ui?.showAdvFromSuggest;
+  if (inputId === "advRouteTo") return !!state.ui?.showAdvToSuggest;
+  return true;
+}
+
+function setAdvSuggestEnabled(inputId, v){
+  if (!state.ui) state.ui = {};
+  if (inputId === "advRouteFrom") state.ui.showAdvFromSuggest = !!v;
+  if (inputId === "advRouteTo") state.ui.showAdvToSuggest = !!v;
+}
+
+function toggleAdvSuggest(inputId){
+  const enabled = isAdvSuggestEnabled(inputId);
+  setAdvSuggestEnabled(inputId, !enabled);
+  const el = document.getElementById(inputId);
+  if (el) el.focus();
+  const boxId = (inputId === "advRouteFrom") ? "advFromSuggest" : "advToSuggest";
+  const box = document.getElementById(boxId);
+  if (!isAdvSuggestEnabled(inputId)){
+    if (box) box.classList.add("is-hidden");
+    return;
+  }
+  if (el) renderTermSuggest(el, boxId);
+}
+
+function wireAdvSuggestToggles(){
+  const btnFrom = document.getElementById("advFromToggle");
+  const btnTo = document.getElementById("advToToggle");
+  if (btnFrom) btnFrom.addEventListener("click", () => toggleAdvSuggest("advRouteFrom"));
+  if (btnTo) btnTo.addEventListener("click", () => toggleAdvSuggest("advRouteTo"));
+}
+
+  // If the HTML has been patched multiple times, duplicate suggestion nodes can exist.
+  // Keep only the first instance for each id.
+  ["advFromSuggest","advToSuggest"].forEach(id => {
+    const nodes = document.querySelectorAll(`#${id}`);
+    if (nodes.length <= 1) return;
+    nodes.forEach((n, idx) => { if (idx > 0) n.remove(); });
+  });
+}
 
 function extractVTag(str){
   if (!str) return "";

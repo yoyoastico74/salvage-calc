@@ -1375,3 +1375,38 @@
   font-size: 13px;
 }
 
+
+
+/* ------------------------------------------------------------
+   ON-DEMAND TERMINAL SUGGESTIONS (avoid double dropdown overlap)
+   ------------------------------------------------------------ */
+.term-input-wrap{
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.term-input-wrap > input{
+  flex: 1 1 auto;
+}
+
+.term-suggest-toggle{
+  flex: 0 0 auto;
+  height: 42px;
+  min-width: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.18);
+  color: rgba(255,255,255,0.92);
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 1;
+  user-select: none;
+}
+.term-suggest-toggle:hover{
+  background: rgba(0,0,0,0.28);
+}
+.term-suggest-toggle:active{
+  transform: translateY(1px);
+}
