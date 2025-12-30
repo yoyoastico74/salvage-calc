@@ -1,19 +1,31 @@
-/* hauling.js — V1.14.25 FULL (SCU_LIVE + SHIPS_SCU_FILTER) */
+/* hauling.js — V1.14.31 FULL (CITY_FILTER_FIX) */
 
 (() => {
   "use strict";
 
-  const VERSION = "V1.14.3 FULL";
+  const VERSION = "V1.14.34 FULL (SINGLE_SUGGEST_MENU)";
+
+
+const HTML_VERSION = "V1.13.85";
+const CSS_VERSION = "V1.13.85";
+function getAdvOriginQuery(){
+  const el = document.getElementById("advRouteFrom")
+        || document.getElementById("advOrigin")
+        || document.getElementById("routeFrom")
+        || null;
+  return (el && typeof el.value === "string") ? el.value.trim() : "";
+}
+
 
   // ------------------------------------------------------------
   // TECH VERSIONS (FRET) — single source of truth (Mining-like footer)
   // ------------------------------------------------------------
   const TECH = {
     module: "FRET",
-    moduleVersion: "V1.14.3",
-    html: "V1.14.3",
-    css: "V1.14.3",
-    js: "V1.14.3",
+    moduleVersion: "V1.14.27",
+    html: "V1.14.27",
+    css: "V1.14.27",
+    js: "V1.14.27",
     core: "V1.5.20",
     ships: "v2.0.5",
     pu: "4.5"
@@ -484,8 +496,7 @@ setText("tvSourceFret", sanitizeSourceLabel("last-worker-response"));
       } catch (_) {}
     }
     const rows = Array.isArray(data) ? data : (Array.isArray(data?.ships) ? data.ships : []);
-        // Filter out ships with 0 SCU (cargo-less ships are irrelevant for FRET)
-    shipsCatalog = rows.map(normalizeShipRow).filter(s => s.name && int(s.scu) > 0);
+    shipsCatalog = rows.map(normalizeShipRow).filter(s => s.name);
     return shipsCatalog;
   }
 
@@ -546,10 +557,7 @@ setText("tvSourceFret", sanitizeSourceLabel("last-worker-response"));
           if ($("cargoScu") && int(s.scu) > 0) $("cargoScu").value = String(int(s.scu));
           computeBeginner();
         } else {
-          if ($("advUsableScu") && int(s.scu) > 0) {
-            $("advUsableScu").value = String(int(s.scu));
-            try { applyContextToCachedTopRoutes(); } catch(_) {}
-          }
+          if ($("advUsableScu") && int(s.scu) > 0) $("advUsableScu").value = String(int(s.scu));
         }
 
         saveState();
@@ -991,6 +999,24 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
     });
   }
 
+  // Safe wiring: do NOT hijack the Analyze button.
+  // Only triggers origin-only suggestions while typing in A, and only when B is empty.
+  function wireOriginFromABSafe(){
+    const input = $("advRouteFrom");
+    const toInput = $("advRouteTo");
+    if (!input) return;
+
+    input.addEventListener("input", () => {
+      if (__originFromTimer) clearTimeout(__originFromTimer);
+      __originFromTimer = setTimeout(() => {
+        const v = (input.value || "").trim();
+        const toV = (toInput?.value || "").trim();
+        if (v.length >= 3 && !toV) findDestinationsFromOrigin({ reason: "origin-live" });
+      }, 450);
+    });
+  }
+
+
   function wireABExactToggle(){
     const t = $("advABExactToggle");
     const wrap = $("advABExactWrap");
@@ -1416,13 +1442,14 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
     if (query.length < 2) {
       setAdvText("advTermCount", "Terminaux : —");
       $("advTerminalsDatalist") && ($("advTerminalsDatalist").innerHTML = "");
-      return;
+      return [];
     }
 
     if (state.terminalsCache.q === query && (Date.now() - state.terminalsCache.ts) < 20_000) {
-      renderTermDatalist(state.terminalsCache.items);
+      // renderTermDatalist(state.terminalsCache.items); // disabled (single menu)
       setAdvText("advTermCount", `Terminaux : ${state.terminalsCache.items.length}`);
       return;
+    return state.terminalsCache.items || [];
     }
 
     const url = `${PROXY_BASE}/v1/hauling/terminals/search?q=${encodeURIComponent(query)}&game_version=${encodeURIComponent(GAME_VERSION)}`;
@@ -1434,11 +1461,93 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
     state.terminalsCache.q = query;
     state.terminalsCache.items = terminals;
 
-    renderTermDatalist(terminals);
+    // renderTermDatalist(terminals); // disabled (single menu)
     setAdvText("advTermCount", `Terminaux : ${terminals.length}`);
+
+    return terminals;
   }
 
-  function renderTermDatalist(items) {
+  
+
+function hideTermSuggest(which){
+  const box = document.getElementById(which);
+  if (!box) return;
+  box.classList.add("is-hidden");
+  box.innerHTML = "";
+}
+
+function renderTermSuggest(inputEl, items){
+  if (!inputEl) return;
+  const isFrom = inputEl.id === "advRouteFrom";
+  const boxId = isFrom ? "advFromSuggest" : "advToSuggest";
+  const box = document.getElementById(boxId);
+  if (!box) return;
+
+  const q = String(inputEl.value || "").trim().toLowerCase();
+  if (q.length < 2){
+    hideTermSuggest(boxId);
+    return;
+  }
+
+  const list = Array.isArray(items) ? items : [];
+  const filtered = list
+    .filter(t => String(t?.name || "").toLowerCase().includes(q))
+    .slice(0, 8);
+
+  box.innerHTML = "";
+
+  if (!filtered.length){
+    box.innerHTML = `<div class="term-empty">Aucun terminal correspondant.</div>`;
+    box.classList.remove("is-hidden");
+    return;
+  }
+
+  filtered.forEach(t => {
+    const name = String(t?.name || "").trim();
+    const city = String(t?.city || "").trim();
+    const system = String(t?.system || "").trim();
+    const type = String(t?.type || "").trim();
+    const meta = [city, system].filter(Boolean).join(" • ");
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "term-item";
+    btn.setAttribute("data-term-id", String(t?.id_terminal || ""));
+    btn.setAttribute("data-term-name", name);
+
+    // render
+    const left = document.createElement("div");
+    left.style.display = "flex";
+    left.style.flexDirection = "column";
+    left.style.gap = "2px";
+
+    const main = document.createElement("div");
+    main.className = "term-main";
+    main.textContent = name;
+
+    const sub = document.createElement("div");
+    sub.className = "term-meta";
+    sub.textContent = [meta, type].filter(Boolean).join(" • ");
+
+    left.appendChild(main);
+    left.appendChild(sub);
+
+    btn.appendChild(left);
+
+    btn.addEventListener("click", () => {
+      inputEl.value = name;
+      inputEl.setAttribute("data-terminal-id", String(t?.id_terminal || ""));
+      hideTermSuggest(boxId);
+      try { saveState(); } catch(_){}
+    });
+
+    box.appendChild(btn);
+  });
+
+  box.classList.remove("is-hidden");
+}
+
+function renderTermDatalist(items) {
     const dl = $("advTerminalsDatalist");
     if (!dl) return;
     dl.innerHTML = "";
@@ -1502,8 +1611,18 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
       const shipScu = num($("advUsableScu")?.value || 0);
       const budget = num($("advBudget")?.value || $("advBudgetAuec")?.value || 0);
 
-      if (!fromName || !toName || shipScu <= 0) {
-        setAdvText("advRouteStatus", "Paramètres incomplets (A, B, SCU).");
+      if (!fromName || shipScu <= 0) {
+        setAdvText("advRouteStatus", "Paramètres incomplets (A, SCU).");
+        return;
+      }
+
+      // Mode "A seulement": si B est vide, on bascule sur le scan Top routes filtré par origine.
+      // Objectif: permettre à l'utilisateur de sélectionner un terminal A et obtenir immédiatement les routes possibles.
+      if (!toName) {
+        const q = ($("advSearch")?.value || "").trim();
+        setAdvText("advRouteStatus", "Scan routes depuis A…");
+        await fetchTopRoutes({ originOverride: fromName, commodityQuery: q, reason: "origin-only" });
+        setAdvText("advRouteStatus", "OK • Scan depuis A (mode A seulement)");
         return;
       }
 
@@ -1543,6 +1662,7 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
       if ($("advRouteJson")) $("advRouteJson").textContent = JSON.stringify(payload, null, 2);
 
       const resultsRaw = Array.isArray(data?.results) ? data.results : [];
+      state.routeCache.lastResultsBase = Array.isArray(resultsRaw) ? resultsRaw.map(r => ({ ...r })) : [];
       state.routeCache.lastResultsRaw = resultsRaw;
       state.routeCache.lastMeta = meta || null;
       state.routeCache.lastPayload = payload;
@@ -1674,7 +1794,50 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
     setAdvText("advRouteStatus", `OK • ${shown.length} routes (SCU live)`);
   }
 
-  let __scuLiveTimer = null;
+  
+  // Live recompute for last analyzed route results (A→B mode).
+  // This complements applyContextToCachedTopRoutes() which only targets "Top routes" cache.
+  function applyContextToCachedRouteResults(){
+    const base = Array.isArray(state?.routeCache?.lastResultsBase) && state.routeCache.lastResultsBase.length
+      ? state.routeCache.lastResultsBase
+      : (Array.isArray(state?.routeCache?.lastResultsRaw) ? state.routeCache.lastResultsRaw : []);
+    if (!base.length) return false;
+
+    const shipScu = num($("advUsableScu")?.value || 0);
+    const budget = num($("advBudget")?.value || $("advBudgetAuec")?.value || 0);
+
+    const adj = base.map(r => {
+      const buy = num(r.buy || 0);
+      const sell = num(r.sell || 0);
+
+      // Quantity cap: ship, buy stock, budget/buy
+      let q = Math.max(0, Math.floor(shipScu || 0));
+      const stockBuy = num(r.buyStockSCU || 0);
+      if (stockBuy > 0) q = Math.min(q, Math.floor(stockBuy));
+      if (budget > 0 && buy > 0) q = Math.min(q, Math.floor(budget / buy));
+
+      const spend = buy > 0 ? q * buy : 0;
+      const revenue = sell > 0 ? q * sell : 0;
+      const profitTotal = revenue - spend;
+      const profitPerSCU = (sell > 0 && buy > 0) ? (sell - buy) : 0;
+
+      // preserve everything else, override computed fields
+      return {
+        ...r,
+        quantitySCU: q,
+        spend,
+        revenue,
+        profitTotal,
+        profitPerSCU,
+        profitPerSCU_display: undefined,
+      };
+    });
+
+    state.routeCache.lastResultsRaw = adj;
+    try { return !!applySortAndRender(); } catch(_){ return false; }
+  }
+
+let __scuLiveTimer = null;
   function wireScuLive(){
     const input = $("advUsableScu");
     if (!input) return;
@@ -1684,6 +1847,8 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
       __scuLiveTimer = setTimeout(() => {
         // Recompute quantities/profits from cache (no network)
         if (typeof applyContextToCachedTopRoutes === "function") applyContextToCachedTopRoutes();
+          try { applyContextToCachedRouteResults(); } catch(_){ }
+          try { applyContextToCachedRouteResults(); } catch(_){ }
       }, 180);
     };
 
@@ -1700,6 +1865,8 @@ function setAdvText(id, v) { const el = $(id); if (el) el.textContent = v || "�
       if (__budgetLiveTimer) clearTimeout(__budgetLiveTimer);
       __budgetLiveTimer = setTimeout(() => {
         if (typeof applyContextToCachedTopRoutes === "function") applyContextToCachedTopRoutes();
+          try { applyContextToCachedRouteResults(); } catch(_){ }
+          try { applyContextToCachedRouteResults(); } catch(_){ }
       }, 180);
     };
 
@@ -1831,7 +1998,9 @@ function renderTopRoutes(routes, scanMeta) {
         `&risk=${encodeURIComponent(state.advanced.risk)}` +
         `&limit=${encodeURIComponent(TOP_ROUTES_LIMIT)}` +
         `&max_terminals=${encodeURIComponent(maxTerms)}`;
-      if (originQ) url += `&origin=${encodeURIComponent(originQ)}`;
+        const originQuery = getAdvOriginQuery();
+  if (originQuery) url += `&origin=${encodeURIComponent(originQuery)}`;
+if (originQ) url += `&origin=${encodeURIComponent(originQ)}`;
       url += `&game_version=${encodeURIComponent(GAME_VERSION)}`;
 
       const payload = await fetchJson(url);
@@ -1860,6 +2029,7 @@ function renderTopRoutes(routes, scanMeta) {
       state.assisted.active = true;
       state.routeCache.lastResultsRaw = [];
       state.routeCache.lastResults = [];
+    state.routeCache.lastResultsBase = [];
       state.routeCache.lastMeta = null;
       state.routeCache.lastPayload = null;
 
@@ -1950,24 +2120,33 @@ function initAdvanced() {
     });
 
     const onTermInput = (e) => {
-      const q = String(e?.target?.value || "").trim();
+      const target = e?.target || null;
+      const q = String(target?.value || "").trim();
       if (termTimer) clearTimeout(termTimer);
-      termTimer = setTimeout(() => { advSearchTerminals(q).catch(() => {}); }, 220);
+      termTimer = setTimeout(async () => {
+        try{
+          const items = await advSearchTerminals(q);
+          renderTermSuggest(target, items || []);
+        }catch(_){}
+      }, 220);
       saveState();
     };
     $("advRouteFrom")?.addEventListener("input", onTermInput);
+    $("advRouteFrom")?.addEventListener("blur", () => { setTimeout(() => hideTermSuggest("advFromSuggest"), 160); });
+    $("advRouteTo")?.addEventListener("blur", () => { setTimeout(() => hideTermSuggest("advToSuggest"), 160); });
+
     $("advRouteTo")?.addEventListener("input", onTermInput);
 
     $("advRefresh")?.addEventListener("click", analyzeRouteAdvanced);
 
     // Goods search (filters the full results list)
-    wireGoodsSearch();
-    dockTopRoutesButtonNextToReset();
-    wireOriginFromAB();
-    wireABExactToggle();
-    wireOriginSearch();
-    wireScuLive();
-    wireBudgetLive();
+    if (typeof wireGoodsSearch === "function") wireGoodsSearch();
+    if (typeof dockTopRoutesButtonNextToReset === "function") dockTopRoutesButtonNextToReset();
+    if (typeof wireOriginFromABSafe === "function") wireOriginFromABSafe();
+    if (typeof wireABExactToggle === "function") wireABExactToggle();
+    if (typeof wireOriginSearch === "function") wireOriginSearch();
+    if (typeof wireScuLive === "function") wireScuLive();
+    if (typeof wireBudgetLive === "function") wireBudgetLive();
 
     // New: Suggestions (Top routes)
     $("advAssist")?.addEventListener("click", fetchTopRoutes);
@@ -2017,23 +2196,11 @@ function initAdvanced() {
       saveState();
     });
 
-    
-    // Persist advanced inputs + apply "SCU live" recalculation for cached results
-    const __applyLive = (() => {
-      let t = null;
-      return () => {
-        try { if (t) clearTimeout(t); } catch(_){}
-        t = setTimeout(() => {
-          try { applyContextToCachedTopRoutes(); } catch(_){}
-        }, 120);
-      };
-    })();
-
     ["advBudget", "advUsableScu", "advRouteFrom", "advRouteTo"].forEach(id => {
-      $(id)?.addEventListener("input", () => { saveState(); if (id === "advBudget" || id === "advUsableScu") __applyLive(); });
-      $(id)?.addEventListener("change", () => { saveState(); if (id === "advBudget" || id === "advUsableScu") __applyLive(); });
+      $(id)?.addEventListener("input", saveState);
+      $(id)?.addEventListener("change", saveState);
     });
-}
+  }
 
   // ------------------------------------------------------------
   // INIT
@@ -2200,3 +2367,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+
+
+function extractVTag(str){
+  if (!str) return "";
+  const m = String(str).match(/V\d+\.\d+\.\d+/);
+  return m ? m[0] : String(str).trim();
+}
+
+function setFretVersionUI(){
+  const vTag = extractVTag(VERSION);
+  const pu = "4.5";
+  const main = document.getElementById("versionMainText");
+  if (main) main.textContent = `FRET ${vTag} • PU ${pu}`;
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set("tvModuleFret", vTag);
+  set("tvHtmlFret", HTML_VERSION);
+  set("tvCssFret", CSS_VERSION);
+  set("tvJsFret", vTag);
+
+  // Worker/Contract are set elsewhere (proxy meta), keep if present.
+  set("tvPuFret", pu);
+}
+
+

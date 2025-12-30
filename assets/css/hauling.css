@@ -1,4 +1,4 @@
-/* assets/css/hauling.css — V1.13.76
+/* assets/css/hauling.css — V1.13.79
    IMPORTANT: fichier complet (remplacement total)
    Objectif: conserver la "neon vibe" + compat UI FRET V1.14.3.
    NOTE: Typo delegated to core.css (no fixed px font sizes).
@@ -723,7 +723,7 @@
 }
 
 /* --- Versions techniques (bar + panel) — centered & clickable --- */
-:root{ --hauling-css-version: "V1.12.9"; }
+:root{ --hauling-css-version: "V1.13.79"; }
 
 .techbar{
   position: fixed;
@@ -1235,6 +1235,7 @@
 
 .info-dot-inline{
   position:relative;
+  z-index:6000;
 }
 
 .info-dot-inline .info-tooltip{
@@ -1255,7 +1256,7 @@
   opacity:0;
   pointer-events:none;
   transition:opacity .12s ease, transform .12s ease;
-  z-index:60;
+  z-index:6000;
 }
 
 .info-dot-inline:hover .info-tooltip,
@@ -1314,3 +1315,63 @@
   align-items:center;
 }
 .context-actions .btn{ flex:1; }
+
+
+/* Terminal suggestions (custom, because <datalist> is unreliable with our glass/transform layout) */
+.field.term-field { position: relative; }
+
+.term-suggest{
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 99999;
+  background: rgba(0,0,0,0.65);
+  border: 1px solid rgba(0,255,255,0.16);
+  border-radius: 12px;
+  padding: 6px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+}
+
+.term-suggest.is-hidden{ display:none; }
+
+.term-suggest .term-item{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.92);
+  cursor: pointer;
+  text-align: left;
+}
+
+.term-suggest .term-item:hover,
+.term-suggest .term-item:focus{
+  outline: none;
+  background: rgba(0,255,255,0.10);
+}
+
+.term-suggest .term-item .term-main{
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.term-suggest .term-item .term-meta{
+  font-size: 12px;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.term-suggest .term-empty{
+  padding: 8px 10px;
+  opacity: 0.8;
+  font-size: 13px;
+}
+
