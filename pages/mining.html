@@ -1,4 +1,4 @@
-<!-- pages/mining.html — Version V1.3.11
+<!-- pages/mining.html — Version V1.3.23
      Module: MINAGE (Mode Débutant)
      Repo: https://shog-sc.github.io/Industriel-calc/
 -->
@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="../assets/css/core.css" />
   
   <link rel="stylesheet" href="../assets/css/techbar-fixed.css?v=V1.0.0" />
-<link rel="stylesheet" href="../assets/css/mining.css" />
+<link rel="stylesheet" href="../assets/css/mining.css?v=V1.3.28" />
 </head>
 
 <body class="page-mining">
@@ -70,7 +70,7 @@
               <option value="ship">Vaisseau</option>
             </select>
 
-            <div class="picker">
+            <div class="picker picker--half" id="miningTypePicker">
               <button class="picker-btn" id="miningTypePickerBtn" type="button">
                 <span id="miningTypePickerLabel">ROC</span>
                 <span class="picker-caret">▼</span>
@@ -89,7 +89,7 @@
             <label>Vaisseau de minage</label>
             <input type="hidden" id="miningShip" />
 
-            <div class="picker">
+            <div class="picker picker--half" id="miningShipPicker">
               <button class="picker-btn" id="miningShipPickerBtn" type="button">
                 <span id="miningShipPickerLabel">Sélectionner un vaisseau</span>
                 <span class="picker-caret">▼</span>
@@ -117,18 +117,20 @@
           <!-- MINERAI -->
           <div id="modeOrePanel" class="is-hidden">
             <div class="field">
-              <label>Minerai (Ship)</label>
-              <div class="chips" id="oreChips"></div>
-            </div>
+              <label>Minerais</label>
 
-            <div class="field">
-              <label>Quantité (SCU)</label>
-              <input id="oreQty" type="number" step="0.1" />
-              <div class="hint" id="oreCapHint"></div>
+              <div class="ore-single" role="group" aria-label="Sélection minerais">
+                <div class="ore-col">
+                  <div class="ore-col-head">Disponibles</div>
+                  <div class="ore-list" id="oreAvailList" aria-label="Minerais disponibles"></div>
+                </div>
+
+                <div class="hint ore-sidehint">Clique sur un minerai pour l’ajouter à droite.</div>
+              </div>
             </div>
           </div>
 
-          <!-- SESSION -->
+<!-- SESSION -->
           <div class="field">
             <label>Temps de session (minutes)</label>
             <input id="sessionMinutes" type="number" value="30" />
@@ -143,6 +145,8 @@
             <button class="btn-secondary" id="resetBtn">Réinitialiser</button>
           </div>
         </section>
+
+        <div class="right-col">
 
         <!-- RÉSULTAT -->
         <section class="panel">
@@ -177,13 +181,36 @@
           </div>
         </section>
 
+        <!-- MINERAIS SÉLECTIONNÉS -->
+        <section class="panel is-hidden" id="oreSelectedPanel">
+          <div class="panel-head">
+            <div class="panel-title">Minerais sélectionnés</div>
+          </div>
+
+          <div class="ore-selected-meta" aria-hidden="true">
+                    <div class="ore-selected-col">Minerai</div>
+                    <div class="ore-selected-col">Quantité (<span id="oreUnitLabel">SCU</span>)</div>
+                    <div class="ore-selected-col">Prix / SCU</div>
+                    <div class="ore-selected-col is-right">Sous-total</div>
+                    <div class="ore-selected-col is-center" aria-hidden="true"></div>
+                  </div>
+
+          <div class="ore-list ore-selected-list" id="oreSelectedList" aria-label="Minerais sélectionnés"></div>
+
+          <div class="ratio-badge" id="oreUnitRatio">1 SCU = 1 000 mSCU · 1 mSCU = 0.001 SCU</div>
+          <div class="hint" id="oreQtyHint"></div>
+          <div class="hint" id="oreCapHint"></div>
+        </section>
+
+        </div>
+
       </main>
 </div>
   </div>
 
   <!-- JS (RELATIF AU FICHIER) -->
   <script src="../assets/js/miningShips.js"></script>
-  <script src="../assets/js/mining.js"></script>
+  <script src="../assets/js/mining.js?v=V1.4.24"></script>
 
   <!-- Version technique (MINAGE) -->
   <div class="page-mining-version" aria-label="Version technique">

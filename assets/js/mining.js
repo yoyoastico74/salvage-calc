@@ -1,4 +1,4 @@
-/* assets/js/mining.js — Version V1.4.13
+/* assets/js/mining.js — Version V1.4.24
    Module: MINAGE (Mode Débutant) — Mega Package (suite)
    Changements V1.2.1 :
    - Suppression des phrases/hints demandés (texte UI)
@@ -91,8 +91,7 @@
   };
 
   const SCU_TO_MSCU = 1000;
-
-  // ---------- Elements ----------
+    // ---------- Elements ----------
   const elType = $("#miningType");
   const elSession = $("#sessionMinutes");
   const elTarget = $("#targetPerHour");
@@ -102,13 +101,14 @@
   const btnModeOre = $("#modeOreBtn");
   const panelExpress = $("#modeExpressPanel");
   const panelOre = $("#modeOrePanel");
+  const panelOreSelected = $("#oreSelectedPanel");
 
   // Express value
   const elCargo = $("#cargoValue");
 
   // Ore mode
-  const elOreChips = $("#oreChips");
-  const elOreQty = $("#oreQty");
+  const elOreAvailList = $("#oreAvailList");
+  const elOreSelectedList = $("#oreSelectedList");
   const elOreUnitLabel = $("#oreUnitLabel");
   const elOreQtyHint = $("#oreQtyHint");
   const elOreUnitRatio = $("#oreUnitRatio");
@@ -172,8 +172,10 @@
   let oreDataShip = null;
   let oreDataRoc = null;
 
-  let selectedOreKeyShip = null;
-  let selectedOreKeyRoc = null;
+  let selectedOreKeysShip = [];
+  let selectedOreKeysRoc = [];
+  let oreQtyByKeyShip = Object.create(null);
+  let oreQtyByKeyRoc = Object.create(null);
 
   // ---------- UI helpers ----------
   function closeMenu(menuEl, btnEl){
@@ -199,25 +201,28 @@
   function isVehicleType(t){ return (t === "roc" || t === "rocds"); }
 
   function setOreUnitLabel(){
-    const t = getType();
-    const useMSCU = isVehicleType(t);
-    if (elOreUnitLabel) elOreUnitLabel.textContent = useMSCU ? "mSCU" : "SCU";
+  const t = getType();
+  const useMSCU = isVehicleType(t);
 
-    // Input ergonomics: ROC/ROC-DS/FPS en mSCU, Vaisseau en SCU
-    if (elOreQty){
-      elOreQty.inputMode = "decimal";
-      elOreQty.step = useMSCU ? "1" : "0.01";
-      elOreQty.placeholder = useMSCU ? "1000" : "1.0";
-      elOreQty.setAttribute("aria-label", useMSCU ? "Quantité en mSCU" : "Quantité en SCU");
+  // Label in UI: Quantité (mSCU) for ROC/ROC-DS, SCU for ships
+  if (elOreUnitLabel) elOreUnitLabel.textContent = useMSCU ? "mSCU" : "SCU";
 
-    if (elOreUnitRatio){
-      elOreUnitRatio.textContent = useMSCU
-        ? "1 mSCU = 0.001 SCU · 1 SCU = 1 000 mSCU"
-        : "1 SCU = 1 000 mSCU · 1 mSCU = 0.001 SCU";
-    }
+  // Update all quantity inputs in the selected list (multi-ore)
+  const inputs = document.querySelectorAll(".ore-qty-input");
+  inputs.forEach((inp) => {
+    inp.inputMode = "decimal";
+    inp.step = useMSCU ? "1" : "0.01";
+    inp.placeholder = useMSCU ? "1000" : "1.0";
+    inp.setAttribute("aria-label", useMSCU ? "Quantité en mSCU" : "Quantité en SCU");
+  });
 
+  // Conversion ratio badge
+  if (elOreUnitRatio){
+    elOreUnitRatio.textContent = useMSCU
+      ? "1 mSCU = 0.001 SCU · 1 SCU = 1 000 mSCU"
+      : "1 SCU = 1 000 mSCU · 1 mSCU = 0.001 SCU";
   }
-  }
+}
 
   // ---------- Type picker ----------
   function syncTypePicker(){
@@ -347,7 +352,6 @@
       throw new Error("mining_ores_ship.json introuvable (" + res.status + ")");
     }
 oreDataShip = await res.json();
-    if (!selectedOreKeyShip && oreDataShip?.ores?.length) selectedOreKeyShip = oreDataShip.ores[0].key;
     return oreDataShip;
   }
 
@@ -359,68 +363,200 @@ oreDataShip = await res.json();
       throw new Error("mining_ores_roc.json introuvable (" + res.status + ")");
     }
 oreDataRoc = await res.json();
-    if (!selectedOreKeyRoc && oreDataRoc?.ores?.length) selectedOreKeyRoc = oreDataRoc.ores[0].key;
     return oreDataRoc;
   }
 
   function getActiveOreDataset(){
     const t = getType();
-    if (t === "ship") return { data: oreDataShip, selectedKey: selectedOreKeyShip };
-    if (t === "roc" || t === "rocds") return { data: oreDataRoc, selectedKey: selectedOreKeyRoc };
-    return { data: null, selectedKey: null };
+    if (t === "ship") return { data: oreDataShip, selectedKeys: selectedOreKeysShip };
+    if (t === "roc" || t === "rocds") return { data: oreDataRoc, selectedKeys: selectedOreKeysRoc };
+    return { data: null, selectedKeys: [] };
   }
 
-  function setSelectedOreKey(key){
+  function setSelectedOreKeys(keys){
     const t = getType();
-    if (t === "ship") selectedOreKeyShip = key;
-    else if (t === "roc" || t === "rocds") selectedOreKeyRoc = key;
+    const clean = Array.isArray(keys) ? keys.filter(Boolean) : [];
+    if (t === "ship") selectedOreKeysShip = clean;
+    else if (t === "roc" || t === "rocds") selectedOreKeysRoc = clean;
   }
 
+  function getSelectedOreKeys(){
+    const t = getType();
+    if (t === "ship") return Array.isArray(selectedOreKeysShip) ? selectedOreKeysShip : [];
+    if (t === "roc" || t === "rocds") return Array.isArray(selectedOreKeysRoc) ? selectedOreKeysRoc : [];
+    return [];
+  }
+
+  function toggleSelectedOreKey(key){
+    const keys = getSelectedOreKeys();
+    const idx = keys.indexOf(key);
+    if (idx >= 0) {
+      keys.splice(idx, 1);
+      setSelectedOreKeys(keys);
+      return { changed: true, action: "remove" };
+    }
+keys.push(key);
+    setSelectedOreKeys(keys);
+    return { changed: true, action: "add" };
+  }
+
+  function getSelectedOres(){
+    const { data } = getActiveOreDataset();
+    const keys = getSelectedOreKeys();
+    if (!data || !Array.isArray(data.ores) || !keys.length) return [];
+    const byKey = new Map(data.ores.map(o => [o.key, o]));
+    return keys.map(k => byKey.get(k)).filter(Boolean);
+  }
+
+  // Backward-compat: some integrations expect a single ore
   function getSelectedOre(){
-    const { data, selectedKey } = getActiveOreDataset();
-    if (!data || !selectedKey) return null;
-    return data.ores.find(o => o.key === selectedKey) || null;
+    return getSelectedOres()[0] || null;
+  }
+
+  function getOreQtyMap(){
+    const t = getType();
+    if (t === "ship") return oreQtyByKeyShip;
+    if (t === "roc" || t === "rocds") return oreQtyByKeyRoc;
+    return Object.create(null);
+  }
+
+  function getTotalOreQtyDisplay(){
+    const keys = getSelectedOreKeys();
+    const map = getOreQtyMap();
+    let sum = 0;
+    keys.forEach((k) => {
+      const v = Number(map[k]);
+      if (Number.isFinite(v) && v > 0) sum += v;
+    });
+    return sum;
   }
 
   // Expose minimal getters for external modules (UEX live) without leaking internals
   window.__miningGetSelectedOre = getSelectedOre;
+  window.__miningGetSelectedOres = getSelectedOres;
   window.__miningGetType = getType;
 
-
   function renderOreChips(){
-    if (!elOreChips) return;
+    // Dual-column picker: available (left) / selected (right)
+    if (!elOreAvailList || !elOreSelectedList) return;
 
     const t = getType();
     setOreUnitLabel();
-    const { data, selectedKey } = getActiveOreDataset();
+
+    const { data } = getActiveOreDataset();
+    const selectedKeys = getSelectedOreKeys();
+
     if (!data || !Array.isArray(data.ores)) {
-      elOreChips.innerHTML = "<div class=\"picker-empty\">Dataset minerais indisponible</div>";
+      elOreAvailList.innerHTML = "<div class=\"picker-empty\">Dataset minerais indisponible</div>";
+      elOreSelectedList.innerHTML = "";
       return;
     }
 
-    elOreChips.innerHTML = "";
+    // ---------- Available ----------
+    elOreAvailList.innerHTML = "";
+    const selectedSet = new Set(selectedKeys);
+
     data.ores.forEach((ore) => {
+      if (selectedSet.has(ore.key)) return;
+
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "chip";
+      btn.className = "ore-item";
       btn.dataset.key = ore.key;
-      const color = ore.color || "#64748b";
-      btn.style.setProperty("--chip-dot", color);
-      btn.style.setProperty("--chip-bd", color + "66");
-      btn.style.setProperty("--chip-bg", color + "22");
-      btn.innerHTML = `<span class="chip-dot" aria-hidden="true"></span>${ore.name}`;
 
-      if (selectedKey === ore.key) btn.classList.add("is-active");
+      const color = ore.color || "#64748b";
+      btn.style.setProperty("--ore-dot", color);
+      btn.innerHTML = `<span class="ore-dot" aria-hidden="true"></span><span class="ore-name">${ore.name}</span>`;
 
       btn.addEventListener("click", () => {
-        setSelectedOreKey(ore.key);
-        Array.from(elOreChips.querySelectorAll(".chip")).forEach((c) => c.classList.remove("is-active"));
-        btn.classList.add("is-active");
+        const r = toggleSelectedOreKey(ore.key);
+renderOreChips();
         compute();
       });
 
-      elOreChips.appendChild(btn);
+      elOreAvailList.appendChild(btn);
     });
+
+    if (!elOreAvailList.children.length){
+      elOreAvailList.innerHTML = "<div class=\"picker-empty\">—</div>";
+    }
+
+    // ---------- Selected ----------
+    elOreSelectedList.innerHTML = "";
+    if (!selectedKeys.length){
+      elOreSelectedList.innerHTML = "<div class=\"picker-empty\">Aucun minerai sélectionné</div>";
+      return;
+    }
+
+    const qtyMap = getOreQtyMap();
+    const useMSCU = isVehicleType(t);
+
+    selectedKeys.forEach((key) => {
+      const ore = data.ores.find(o => o.key === key);
+      if (!ore) return;
+
+      const row = document.createElement("div");
+      row.className = "ore-row";
+      row.dataset.key = ore.key;
+
+      // Clickable ore button -> remove (moves back to left)
+      const oreBtn = document.createElement("button");
+      oreBtn.type = "button";
+      oreBtn.className = "ore-item is-selected";
+      const color = ore.color || "#64748b";
+      oreBtn.style.setProperty("--ore-dot", color);
+      oreBtn.innerHTML = `<span class="ore-dot" aria-hidden="true"></span><span class="ore-name">${ore.name}</span>`;
+      oreBtn.addEventListener("click", () => {
+        toggleSelectedOreKey(ore.key);
+        renderOreChips();
+        compute();
+      });
+
+      const qty = document.createElement("input");
+      qty.type = "number";
+      qty.className = "ore-qty-input";
+      qty.min = "0";
+      qty.step = useMSCU ? "1" : "0.01";
+      qty.value = (qtyMap[ore.key] !== undefined && qtyMap[ore.key] !== null) ? String(qtyMap[ore.key]) : "";
+      qty.placeholder = useMSCU ? "1000" : "1.0";
+
+      qty.addEventListener("input", () => {
+        const v = clamp(floatSafe(qty.value), 0, 1_000_000);
+        qtyMap[ore.key] = v;
+        compute();
+      });
+
+      const price = document.createElement("div");
+      price.className = "ore-price";
+      price.textContent = "—";
+
+      const subtotal = document.createElement("div");
+      subtotal.className = "ore-subtotal";
+      subtotal.textContent = "—";
+
+      row.appendChild(oreBtn);
+      row.appendChild(qty);
+      row.appendChild(price);
+      row.appendChild(subtotal);
+
+      const rmBtn = document.createElement("button");
+      rmBtn.type = "button";
+      rmBtn.className = "ore-remove-btn";
+      rmBtn.title = "Retirer";
+      rmBtn.setAttribute("aria-label", `Retirer ${ore.name}`);
+      rmBtn.textContent = "×";
+      rmBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        toggleSelectedOreKey(ore.key);
+        renderOreChips();
+        compute();
+      });
+      row.appendChild(rmBtn);
+
+      elOreSelectedList.appendChild(row);
+    });
+
+    setOreUnitLabel();
   }
 
   // ---------- Input mode ----------
@@ -432,6 +568,7 @@ oreDataRoc = await res.json();
     if (btnModeOre) btnModeOre.classList.toggle("is-active", m === "ore");
     if (panelExpress) panelExpress.classList.toggle("is-hidden", m !== "express");
     if (panelOre) panelOre.classList.toggle("is-hidden", m !== "ore");
+    if (panelOreSelected) panelOreSelected.classList.toggle("is-hidden", m !== "ore");
 
     if (m === "ore") renderOreChips();
     setOreUnitLabel();
@@ -468,7 +605,10 @@ oreDataRoc = await res.json();
     if (elTarget) elTarget.value = String(DEFAULTS.targetPerHour);
 
     if (elCargo) elCargo.value = "";
-    if (elOreQty) elOreQty.value = "";
+    selectedOreKeysShip = [];
+    selectedOreKeysRoc = [];
+    oreQtyByKeyShip = Object.create(null);
+    oreQtyByKeyRoc = Object.create(null);
 
     setInputMode("express");
 
@@ -486,14 +626,14 @@ oreDataRoc = await res.json();
 
   // ---------- Capacity / warning ----------
   function clearCapacityWarning(){
-    if (elOreQty) elOreQty.classList.remove("input-warn");
+    document.querySelectorAll(".ore-qty-input").forEach((i) => i.classList.remove("input-warn"));
     if (elOreCapHint) elOreCapHint.classList.remove("hint-warn");
   }
 
   async function getCapacitySCU(){
     const t = getType();
-    if (t === "roc") return CAPACITY_SCU["ROC"] ?? null;
-    if (t === "rocds") return CAPACITY_SCU["ROC-DS"] ?? null;
+    if (t === "roc") return CAPACITY_SCU.roc ?? null;
+    if (t === "rocds") return CAPACITY_SCU.rocds ?? null;
 
     if (t === "ship") {
       const shipName = elShipInput?.value || null;
@@ -520,11 +660,11 @@ oreDataRoc = await res.json();
     const useMSCU = isVehicleType(t);
     const capDisplay = useMSCU ? Math.round(capSCU * SCU_TO_MSCU) : capSCU;
 
-    const qtyDisplay = qtyInput; // already in displayed unit
+    const qtyDisplay = Number.isFinite(qtyInput) ? qtyInput : 0; // displayed unit
     elOreCapHint.textContent = `Capacité : ${useMSCU ? fmtInt(capDisplay) + " mSCU" : capDisplay + " SCU"}`;
 
     if (Number.isFinite(qtyDisplay) && qtyDisplay > capDisplay && qtyDisplay > 0) {
-      if (elOreQty) elOreQty.classList.add("input-warn");
+      document.querySelectorAll(".ore-qty-input").forEach((i) => i.classList.add("input-warn"));
       elOreCapHint.classList.add("hint-warn");
       elOreCapHint.textContent = `Capacité : ${useMSCU ? fmtInt(capDisplay) + " mSCU" : capDisplay + " SCU"} — Dépassée`;
     } else {
@@ -567,29 +707,58 @@ oreDataRoc = await res.json();
       clearCapacityWarning();
       if (elOreCapHint) elOreCapHint.textContent = "Capacité : —";
     } else {
-      const ore = getSelectedOre();
+      const ores = getSelectedOres();
+      const qtyMap = getOreQtyMap();
 
-      // Quantity input is:
-      // - Ship: SCU
-      // - ROC / ROC-DS / FPS: mSCU
-      const qtyInput = clamp(floatSafe(elOreQty?.value), 0, 1_000_000);
+      const useMSCU = isVehicleType(t);
 
-      await updateCapacityHintAndWarn(qtyInput);
+      // Total quantity in the unit the user enters (SCU for ships, mSCU for ROC/ROC-DS)
+      const totalQtyDisplay = getTotalOreQtyDisplay();
+      await updateCapacityHintAndWarn(totalQtyDisplay);
 
-      const qtySCU = isVehicleType(t) ? (qtyInput / SCU_TO_MSCU) : qtyInput;
+      // Compute totals and update per-row UI
+      let sumValue = 0;
 
-      if (ore && qtySCU > 0) {
-        const p = ore.price_auEc_per_scu;
-        if (p === null || p === undefined || !Number.isFinite(Number(p)) || Number(p) <= 0) {
-          runValue = 0;
-          sellers = Array.isArray(ore.sellers) ? ore.sellers : [];
-        } else {
-          runValue = qtySCU * Number(p);
-          sellers = Array.isArray(ore.sellers) ? ore.sellers : [];
+      ores.forEach((ore) => {
+        const key = ore?.key;
+        const qtyDisplay = clamp(floatSafe(qtyMap[key]), 0, 1_000_000);
+        const qtySCU = useMSCU ? (qtyDisplay / SCU_TO_MSCU) : qtyDisplay;
+
+        const pRaw = ore?.price_auEc_per_scu;
+        const p = (pRaw === null || pRaw === undefined) ? NaN : Number(pRaw);
+
+        const subtotal = (Number.isFinite(p) && p > 0 && qtySCU > 0) ? (qtySCU * p) : 0;
+        sumValue += subtotal;
+
+        // Row UI update (if present)
+        if (elOreSelectedList){
+          const row = elOreSelectedList.querySelector(`.ore-row[data-key="${key}"]`);
+          if (row){
+            const elPrice = row.querySelector(".ore-price");
+            const elSub = row.querySelector(".ore-subtotal");
+            if (elPrice) elPrice.textContent = (Number.isFinite(p) && p > 0) ? fmtInt(p) : "—";
+            if (elSub) elSub.textContent = subtotal > 0 ? fmtInt(subtotal) : "—";
+          }
         }
+      });
+
+      runValue = sumValue;
+
+      // Sellers: only meaningful when a single ore is selected
+      if (ores.length === 1) {
+        sellers = Array.isArray(ores[0].sellers) ? ores[0].sellers : [];
       } else {
-        runValue = 0;
-        sellers = ore ? (ore.sellers || []) : null;
+        sellers = null;
+      }
+
+      // Context hint: show current total quantity
+      if (elOreQtyHint){
+        if (!ores.length) {
+          elOreQtyHint.textContent = "Clique sur un minerai (colonne gauche) pour l'ajouter. Clique sur un minerai sélectionné pour le retirer.";
+        } else {
+          const unit = useMSCU ? "mSCU" : "SCU";
+          elOreQtyHint.textContent = `Quantité totale : ${fmtInt(totalQtyDisplay)} ${unit}`;
+        }
       }
     }
 
@@ -611,14 +780,25 @@ oreDataRoc = await res.json();
 
     // Si en mode Minerai et prix manquant, on explique pourquoi il n'y a pas de calcul.
     if (mode === "ore") {
-      const ore = getSelectedOre();
-      const qtyInputNow = clamp(floatSafe(elOreQty?.value), 0, 1_000_000);
-      const qtySCUNow = (isVehicleType(t) ? (qtyInputNow / SCU_TO_MSCU) : qtyInputNow);
-      if (ore && qtySCUNow > 0) {
-        const p = ore.price_auEc_per_scu;
-        if (p === null || p === undefined || !Number.isFinite(Number(p)) || Number(p) <= 0) {
-          reason = "Prix indisponible pour ce minerai. Passe en Estimation ou mets à jour le dataset des prix.";
-        }
+      const oresNow = getSelectedOres();
+      const qtyMapNow = getOreQtyMap();
+      const useMSCU = isVehicleType(t);
+
+      const missing = [];
+      oresNow.forEach((ore) => {
+        const key = ore?.key;
+        const qtyDisplay = clamp(floatSafe(qtyMapNow[key]), 0, 1_000_000);
+        const qtySCU = useMSCU ? (qtyDisplay / SCU_TO_MSCU) : qtyDisplay;
+        if (qtySCU <= 0) return;
+
+        const pRaw = ore?.price_auEc_per_scu;
+        const p = (pRaw === null || pRaw === undefined) ? NaN : Number(pRaw);
+        if (!Number.isFinite(p) || p <= 0) missing.push(ore?.name || key);
+      });
+
+      if (missing.length) {
+        const list = missing.slice(0, 3).join(", ") + (missing.length > 3 ? "…" : "");
+        reason = `Prix indisponible pour : ${list}. Passe en Estimation ou mets à jour le dataset des prix.`;
       }
     }
 
@@ -723,10 +903,13 @@ oreDataRoc = await res.json();
   // ---------- Bind ----------
   function bind(){
     if (elType) elType.addEventListener("change", () => {
-      setOreUnitLabel();
-      updateCapacityHintAndWarn();
- syncTypePicker(); if (DEFAULTS.mode === "ore") renderOreChips(); setOreUnitLabel(); compute(); });
-    if (elTypePickerBtn) elTypePickerBtn.addEventListener("click", () => toggleMenu(elTypePickerMenu, elTypePickerBtn));
+  syncTypePicker();
+  if (DEFAULTS.mode === "ore") renderOreChips();
+  setOreUnitLabel();
+  updateCapacityHintAndWarn(getTotalOreQtyDisplay());
+  compute();
+});
+if (elTypePickerBtn) elTypePickerBtn.addEventListener("click", () => toggleMenu(elTypePickerMenu, elTypePickerBtn));
     typePickerItems.forEach((btn) => btn.addEventListener("click", () => setType(String(btn.dataset.value || "roc"))));
 
     if (elShipPickerBtn) elShipPickerBtn.addEventListener("click", () => toggleMenu(elShipPickerMenu, elShipPickerBtn));
@@ -737,9 +920,7 @@ oreDataRoc = await res.json();
     if (elSession) elSession.addEventListener("input", () => compute());
     if (elTarget) elTarget.addEventListener("input", () => compute());
     if (elCargo) elCargo.addEventListener("input", () => compute());
-    if (elOreQty) elOreQty.addEventListener("input", () => compute());
-
-    presetButtons.forEach((btn) => btn.addEventListener("click", () => setPreset(String(btn.textContent || "").trim())));
+presetButtons.forEach((btn) => btn.addEventListener("click", () => setPreset(String(btn.textContent || "").trim())));
     if (btnReset) btnReset.addEventListener("click", resetAll);
 
     document.addEventListener("click", (e) => {
@@ -1254,8 +1435,8 @@ function miningInitVersionFooter(){
   const closedLabel = document.getElementById("miningVersionClosedLabel");
   if(!bar || !details || !cta || !closedLabel) return;
 
-  const jsV = "V1.4.8";
-  const cssV = "V1.3.10";
+  const jsV = "V1.4.25";
+  const cssV = "V1.3.29";
   const coreV = miningGetCssVar("--core-css-version") || "—";
   const dataV = (window.MINING_DATA_VERSION) ? String(window.MINING_DATA_VERSION) : "assets/data/*";
 
