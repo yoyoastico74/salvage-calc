@@ -1,0 +1,57 @@
+{
+  "status": "ok",
+  "updated_at": "2026-01-11",
+  "refineries": [
+    {
+      "id_terminal": "auto",
+      "label": "Auto (meilleure)",
+      "yield_bonus_pct": 0,
+      "time_mult": 1.0,
+      "cost_mult": 1.0
+    },
+    {
+      "id_terminal": "lorville_refinery",
+      "label": "Lorville (exemple)",
+      "yield_bonus_pct": 2.0,
+      "time_mult": 1.0,
+      "cost_mult": 1.0
+    },
+    {
+      "id_terminal": "area18_refinery",
+      "label": "Area18 (exemple)",
+      "yield_bonus_pct": 1.0,
+      "time_mult": 0.95,
+      "cost_mult": 1.05
+    }
+  ],
+  "methods": [
+    {
+      "code": "auto",
+      "label": "Auto",
+      "yield_mult": 1.0,
+      "time_mult": 1.0,
+      "cost_mult": 1.0
+    },
+    {
+      "code": "yield_high",
+      "label": "Rendement ↑ (exemple)",
+      "yield_mult": 1.1,
+      "time_mult": 1.5,
+      "cost_mult": 1.25
+    },
+    {
+      "code": "speed_high",
+      "label": "Vitesse ↑ (exemple)",
+      "yield_mult": 0.95,
+      "time_mult": 0.7,
+      "cost_mult": 1.1
+    }
+  ],
+  "defaults": {
+    "yield_window": "30d",
+    "objective": "value_total",
+    "base_time_per_scu_h": 0.05,
+    "base_cost_per_scu_auec": 350
+  },
+  "note": "Template local. Remplace ces valeurs par les données réelles (UEX/Worker) dès que l'API live est dispo."
+}

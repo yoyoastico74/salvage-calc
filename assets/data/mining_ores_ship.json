@@ -1,7 +1,7 @@
 {
-  "version": "V1.2.0",
+  "version": "V1.2.1",
   "unit": "SCU",
-  "source": "Beginner dataset. Legacy ore prices approximated; newer ores may not have prices. Includes UI colors inspired by Regolith.",
+  "source": "Beginner dataset. Legacy ore prices approximated; newer ores may not have prices. Includes UI colors inspired by Regolith. | +Torite/+Savrilium placeholders (4.4+)",
   "ores": [
     {
       "key": "quantanium",
@@ -122,6 +122,27 @@
         }
       ],
       "color": "#f97316"
+    },
+    {
+      "key": "lindinium",
+      "name": "Lindinium",
+      "price_auEc_per_scu": null,
+      "sellers": [],
+      "color": "#60a5fa"
+    },
+    {
+      "key": "savrilium",
+      "name": "Savrilium",
+      "price_auEc_per_scu": null,
+      "sellers": [],
+      "color": "#f97316"
+    },
+    {
+      "key": "torite",
+      "name": "Torite",
+      "price_auEc_per_scu": null,
+      "sellers": [],
+      "color": "#22c55e"
     },
     {
       "key": "hephaestanite",
@@ -324,6 +345,13 @@
       "color": "#d1d5db"
     },
     {
+      "key": "iron",
+      "name": "Iron",
+      "price_auEc_per_scu": null,
+      "sellers": [],
+      "color": "#9ca3af"
+    },
+    {
       "key": "inert",
       "name": "Inert Materials",
       "price_auEc_per_scu": 2,
@@ -334,13 +362,6 @@
         }
       ],
       "color": "#475569"
-    },
-    {
-      "key": "lindinium",
-      "name": "Lindinium",
-      "price_auEc_per_scu": null,
-      "sellers": [],
-      "color": "#60a5fa"
     },
     {
       "key": "riccite",
@@ -383,13 +404,6 @@
       "price_auEc_per_scu": null,
       "sellers": [],
       "color": "#fb923c"
-    },
-    {
-      "key": "iron",
-      "name": "Iron",
-      "price_auEc_per_scu": null,
-      "sellers": [],
-      "color": "#9ca3af"
     },
     {
       "key": "cobalt",

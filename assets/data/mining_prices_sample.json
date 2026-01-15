@@ -1,0 +1,21 @@
+{
+  "updated_at": "2026-01-11",
+  "prices": [
+    {
+      "product": "quantanium",
+      "terminal_name": "Lorville - CBD (exemple)",
+      "price_sell": 65000
+    },
+    {
+      "product": "bexalite",
+      "terminal_name": "Area18 - TDD (exemple)",
+      "price_sell": 15000
+    },
+    {
+      "product": "taranite",
+      "terminal_name": "New Babbage - TDD (exemple)",
+      "price_sell": 12000
+    }
+  ],
+  "note": "Template local. 'price_sell' = aUEC/SCU (ou unité équivalente). Remplace par les prix live."
+}

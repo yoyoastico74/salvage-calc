@@ -1,0 +1,31 @@
+{
+  "status": "ok",
+  "updated_at": "2026-01-11",
+  "ores": [
+    {
+      "key": "quantanium",
+      "name": "Quantanium",
+      "refined_product": "quantanium",
+      "refined_name": "Quantanium (raffiné)",
+      "output_ratio": 0.92,
+      "inert_ratio": 0.02
+    },
+    {
+      "key": "bexalite",
+      "name": "Bexalite",
+      "refined_product": "bexalite",
+      "refined_name": "Bexalite (raffiné)",
+      "output_ratio": 0.9,
+      "inert_ratio": 0.03
+    },
+    {
+      "key": "tarantite",
+      "name": "Taranite",
+      "refined_product": "taranite",
+      "refined_name": "Taranite (raffiné)",
+      "output_ratio": 0.91,
+      "inert_ratio": 0.03
+    }
+  ],
+  "note": "Template local. 'output_ratio' = sortie SCU / entrée SCU avant bonus; ajuste par minerai selon tes sources."
+}
